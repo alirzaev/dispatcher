@@ -268,6 +268,43 @@ const lest::test test_memory_strategies[] = {
         }
     },
     {
+        CASE("Process CreateProcess request")
+        {
+            auto strategy = Strategies::FirstAppropriateStrategy::create();
+            auto request = *Requests::CreateProcess::create(3, 16384, 4);
+
+            std::vector<Types::MemoryBlock> blocks = {
+                MemoryBlock{0, 0, 12},
+                MemoryBlock{2, 12, 3},
+                MemoryBlock{-1, 15, 20}, //*
+                MemoryBlock{2, 35, 1},
+                MemoryBlock{-1, 36, 7}
+            };
+            std::vector<Types::MemoryBlock> freeBlocks = {
+                MemoryBlock{-1, 15, 20},
+                MemoryBlock{-1, 36, 7}
+            };
+            Types::MemoryState state(blocks, freeBlocks);
+
+            std::vector<Types::MemoryBlock> expectedBlocks = {
+                MemoryBlock{0, 0, 12},
+                MemoryBlock{2, 12, 3},
+                MemoryBlock{3, 15, 4},
+                MemoryBlock{-1, 19, 16},
+                MemoryBlock{2, 35, 1},
+                MemoryBlock{-1, 36, 7}
+            };
+            std::vector<Types::MemoryBlock> expectedFreeBlocks = {
+                MemoryBlock{-1, 36, 7},
+                MemoryBlock{-1, 19, 16}
+            };
+            Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+
+            auto actualState = strategy->createProcess(request, state);
+            EXPECT(actualState == expectedState);
+        }
+    },
+    {
         CASE("Create instance of MostAppropriateStrategy")
         {
             auto strategy = Strategies::MostAppropriateStrategy::create();

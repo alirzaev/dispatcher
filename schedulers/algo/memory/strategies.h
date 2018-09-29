@@ -6,6 +6,9 @@
 #include "types.h"
 
 #include <memory>
+#include <algorithm>
+#include <exception>
+#include <cstdint>
 
 namespace MemoryManagement {
 namespace Strategies {
@@ -46,7 +49,45 @@ namespace Strategies {
                 const Types::MemoryState state
         ) const
         {
-            return state;
+            if (request->type == Requests::RequestType::CREATE_PROCESS) {
+                auto obj = *dynamic_cast<Requests::CreateProcess*>(request.get());
+                return createProcess(obj, state);
+            } else {
+                throw std::exception();
+            }
+        }
+
+        Types::MemoryState createProcess(
+                const Requests::CreateProcess request,
+                const Types::MemoryState state
+        ) const
+        {
+            std::vector<Types::MemoryBlock> blocks, freeBlocks;
+            std::tie(blocks, freeBlocks) = state;
+
+            auto processExists = std::find_if(
+                        blocks.begin(),
+                        blocks.end(),
+                        [&request](const Types::MemoryBlock& block) {
+                return request.pid == block.pid();
+            }) != blocks.end();
+            if (processExists) {
+                return state;
+            }
+
+            auto freePos = std::find_if(
+                        freeBlocks.begin(),
+                        freeBlocks.end(),
+                        [&request](const Types::MemoryBlock& block) {
+                return block.size() > request.pages;
+            });
+            if (freePos == freeBlocks.end()) {
+                return state;
+            }
+            auto pos = std::find(blocks.begin(), blocks.end(), *freePos);
+            uint32_t index = pos - blocks.begin();
+
+            return Operations::allocateMemory(state, index, request.pid, request.pages);
         }
     private:
         FirstAppropriateStrategy() :

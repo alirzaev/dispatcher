@@ -258,7 +258,7 @@ const lest::test test_memory_operations[] = {
     }
 };
 
-const lest::test test_memory_strategies[] = {
+const lest::test test_memory_first_appropriate_strategy[] = {
     {
         CASE("Create instance of FirstAppropriateStrategy")
         {
@@ -336,7 +336,10 @@ const lest::test test_memory_strategies[] = {
             auto actualState = strategy->terminateProcess(request, state);
             EXPECT(actualState == expectedState);
         }
-    },
+    }
+};
+
+const lest::test test_memory_most_appropriate_strategy[] = {
     {
         CASE("Create instance of MostAppropriateStrategy")
         {
@@ -344,7 +347,10 @@ const lest::test test_memory_strategies[] = {
 
             EXPECT(strategy->type == Strategies::StrategyType::MOST_APPROPRIATE);
         }
-    },
+    }
+};
+
+const lest::test test_memory_least_appropriate_strategy[] = {
     {
         CASE("Create instance of LeastAppropriateStrategy")
         {

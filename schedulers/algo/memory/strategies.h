@@ -89,6 +89,54 @@ namespace Strategies {
 
             return Operations::allocateMemory(state, index, request.pid, request.pages);
         }
+
+        Types::MemoryState terminateProcess(
+                const Requests::TerminateProcess request,
+                const Types::MemoryState state
+        ) const
+        {
+            std::vector<Types::MemoryBlock> blocks, freeBlocks;
+            MemoryState currentState = state;
+            std::tie(blocks, freeBlocks) = currentState;
+
+            while (true) {
+                // ищем очередной блок памяти, выделенный процессу
+                auto pos = std::find_if(
+                            blocks.begin(),
+                            blocks.end(),
+                            [&request](const Types::MemoryBlock& block) {
+                    return request.pid == block.pid();
+                });
+                if (pos == blocks.end()) {
+                    break;
+                }
+
+                // освобождаем блок
+                uint32_t index = pos - blocks.begin();
+                currentState = Operations::freeMemory(currentState, request.pid, index);
+                std::tie(blocks, freeBlocks) = currentState;
+            }
+
+            // сжатие памяти
+            while (true) {
+                // ищем первый свободный блок памяти
+                // проверяем, есть ли за ним хотя бы один свободный блок
+                uint32_t index = 0;
+                for (; index < blocks.size() - 1 &&
+                     !(blocks[index].pid() == -1 &&
+                      blocks[index + 1].pid() == -1); ++index) {}
+
+                // если есть, то выполняем сжатие
+                if (index < blocks.size() - 1) {
+                    currentState = Operations::compressMemory(currentState, index);
+                    std::tie(blocks, freeBlocks) = currentState;
+                } else {
+                    break;
+                }
+            }
+
+            return currentState;
+        }
     private:
         FirstAppropriateStrategy() :
             AbstractStrategy(StrategyType::FIRST_APPROPRIATE)

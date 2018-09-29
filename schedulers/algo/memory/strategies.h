@@ -59,31 +59,40 @@ namespace Strategies {
 
         Types::MemoryState createProcess(
                 const Requests::CreateProcess request,
-                const Types::MemoryState state
+                const Types::MemoryState& state
         ) const
         {
             std::vector<Types::MemoryBlock> blocks, freeBlocks;
             std::tie(blocks, freeBlocks) = state;
 
+            // проверить, выделены ли процессу какие-либо блоки памяти
             auto processExists = std::find_if(
                         blocks.begin(),
                         blocks.end(),
                         [&request](const Types::MemoryBlock& block) {
                 return request.pid == block.pid();
             }) != blocks.end();
+            // если процессу уже выделены блоки памяти, значит он уже создан,
+            // заявку проигнорировать
             if (processExists) {
                 return state;
             }
 
+            // найти первый подходящий блок памяти, т. е. тот, размер которого
+            // больше запрашиваемой процессом памяти
             auto freePos = std::find_if(
                         freeBlocks.begin(),
                         freeBlocks.end(),
                         [&request](const Types::MemoryBlock& block) {
                 return block.size() > request.pages;
             });
+
+            // если нет подходящего блока - игнорируем заявку
             if (freePos == freeBlocks.end()) {
                 return state;
             }
+
+            // выделить процессу памяти
             auto pos = std::find(blocks.begin(), blocks.end(), *freePos);
             uint32_t index = pos - blocks.begin();
 
@@ -92,7 +101,7 @@ namespace Strategies {
 
         Types::MemoryState terminateProcess(
                 const Requests::TerminateProcess request,
-                const Types::MemoryState state
+                const Types::MemoryState& state
         ) const
         {
             std::vector<Types::MemoryBlock> blocks, freeBlocks;

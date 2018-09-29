@@ -5,6 +5,7 @@
 #include "../schedulers/algo/memory/requests.h"
 #include "../schedulers/algo/memory/types.h"
 #include "../schedulers/algo/memory/operations.h"
+#include "../schedulers/algo/memory/strategies.h"
 
 using namespace MemoryManagement;
 
@@ -257,4 +258,29 @@ const lest::test test_memory_operations[] = {
     }
 };
 
+const lest::test test_memory_strategies[] = {
+    {
+        CASE("Create instance of FirstAppropriateStrategy")
+        {
+            auto strategy = Strategies::FirstAppropriateStrategy::create();
 
+            EXPECT(strategy->type == Strategies::StrategyType::FIRST_APPROPRIATE);
+        }
+    },
+    {
+        CASE("Create instance of MostAppropriateStrategy")
+        {
+            auto strategy = Strategies::MostAppropriateStrategy::create();
+
+            EXPECT(strategy->type == Strategies::StrategyType::MOST_APPROPRIATE);
+        }
+    },
+    {
+        CASE("Create instance of LeastAppropriateStrategy")
+        {
+            auto strategy = Strategies::LeastAppropriateStrategy::create();
+
+            EXPECT(strategy->type == Strategies::StrategyType::LEAST_APPROPRIATE);
+        }
+    }
+};

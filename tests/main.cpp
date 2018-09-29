@@ -8,9 +8,13 @@ int main() {
         std::cout << "test_memory_operations passed" << std::endl;
     }
     result = lest::run(test_memory_requests);
-        if (result == 0) {
-            std::cout << "test_memory_requests passed" << std::endl;
-        }
+    if (result == 0) {
+        std::cout << "test_memory_requests passed" << std::endl;
+    }
+    result = lest::run(test_memory_strategies);
+    if (result == 0) {
+        std::cout << "test_memory_strategies passed" << std::endl;
+    }
     return 0;
 }
 

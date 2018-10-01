@@ -58,6 +58,9 @@ namespace Strategies {
             } else if (request->type == Requests::RequestType::ALLOCATE_MEMORY) {
                 auto obj = *dynamic_cast<Requests::AllocateMemory*>(request.get());
                 return allocateMemory(obj, state);
+            } else if (request->type == Requests::RequestType::FREE_MEMORY) {
+                auto obj = *dynamic_cast<Requests::FreeMemory*>(request.get());
+                return freeMemory(obj, state);
             } else {
                 throw std::exception();
             }
@@ -103,24 +106,7 @@ namespace Strategies {
             }
 
             // сжатие памяти
-            while (true) {
-                // ищем первый свободный блок памяти
-                // проверяем, есть ли за ним хотя бы один свободный блок
-                uint32_t index = 0;
-                for (; index < blocks.size() - 1 &&
-                     !(blocks[index].pid() == -1 &&
-                      blocks[index + 1].pid() == -1); ++index) {}
-
-                // если есть, то выполняем сжатие
-                if (index < blocks.size() - 1) {
-                    currentState = Operations::compressMemory(currentState, index);
-                    std::tie(blocks, freeBlocks) = currentState;
-                } else {
-                    break;
-                }
-            }
-
-            return currentState;
+            return compressAllMemory(currentState);
         }
 
         Types::MemoryState allocateMemory(
@@ -130,6 +116,40 @@ namespace Strategies {
         {
             return allocateMemoryGeneral(request, state, false);
         }
+
+        Types::MemoryState freeMemory(
+                const Requests::FreeMemory request,
+                const Types::MemoryState& state
+        ) const
+        {
+            std::vector<Types::MemoryBlock> blocks, freeBlocks;
+            MemoryState currentState = state;
+            std::tie(blocks, freeBlocks) = currentState;
+
+            // ищем блок, начинающийся с заданного адреса
+            auto pos = std::find_if(
+                        blocks.begin(),
+                        blocks.end(),
+                        [&request](const Types::MemoryBlock& block) {
+                return block.address() == request.address;
+            });
+            // если такого блока нет, игнорируем заявку
+            if (pos == blocks.end()) {
+                return state;
+            }
+            // если блок выделен другому процессу, игнорируем заявку
+            if (pos->pid() != request.pid) {
+                return state;
+            }
+
+            // освобождаем блок
+            uint32_t index = pos - blocks.begin();
+            currentState = Operations::freeMemory(state, request.pid, index);
+
+            // сжатие памяти
+            return compressAllMemory(currentState);
+        }
+
     private:
         FirstAppropriateStrategy() :
             AbstractStrategy(StrategyType::FIRST_APPROPRIATE)
@@ -194,6 +214,34 @@ namespace Strategies {
             } else { // недостаточно свободной памяти, проигнорировать заявку
                 return state;
             }
+        }
+
+        Types::MemoryState compressAllMemory(
+                const MemoryState& state
+        ) const
+        {
+            std::vector<Types::MemoryBlock> blocks, freeBlocks;
+            MemoryState currentState = state;
+            std::tie(blocks, freeBlocks) = currentState;
+
+            while (true) {
+                // ищем первый свободный блок памяти
+                // проверяем, есть ли за ним хотя бы один свободный блок
+                uint32_t index = 0;
+                for (; index < blocks.size() - 1 &&
+                     !(blocks[index].pid() == -1 &&
+                      blocks[index + 1].pid() == -1); ++index) {}
+
+                // если есть, то выполняем сжатие
+                if (index < blocks.size() - 1) {
+                    currentState = Operations::compressMemory(currentState, index);
+                    std::tie(blocks, freeBlocks) = currentState;
+                } else {
+                    break;
+                }
+            }
+
+            return currentState;
         }
     };
 

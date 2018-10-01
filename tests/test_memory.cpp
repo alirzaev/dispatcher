@@ -492,6 +492,39 @@ const lest::test test_memory_first_appropriate_strategy[] = {
             auto actualState = strategy->allocateMemory(request, state);
             EXPECT(actualState == expectedState);
         }
+    },
+    {
+        CASE("Process FreeMemory request")
+        {
+            auto strategy = Strategies::FirstAppropriateStrategy::create();
+            auto request = *Requests::FreeMemory::create(1, 35);
+
+            std::vector<Types::MemoryBlock> blocks = {
+                MemoryBlock{2, 0, 12},
+                MemoryBlock{2, 12, 3},
+                MemoryBlock{2, 15, 20},
+                MemoryBlock{1, 35, 1}, //*
+                MemoryBlock{-1, 36, 7} //*
+            };
+            std::vector<Types::MemoryBlock> freeBlocks = {
+                MemoryBlock{-1, 36, 7}
+            };
+            Types::MemoryState state(blocks, freeBlocks);
+
+            std::vector<Types::MemoryBlock> expectedBlocks = {
+                MemoryBlock{2, 0, 12},
+                MemoryBlock{2, 12, 3},
+                MemoryBlock{2, 15, 20},
+                MemoryBlock{-1, 35, 8}
+            };
+            std::vector<Types::MemoryBlock> expectedFreeBlocks = {
+                MemoryBlock{-1, 35, 8}
+            };
+            Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+
+            auto actualState = strategy->freeMemory(request, state);
+            EXPECT(actualState == expectedState);
+        }
     }
 };
 

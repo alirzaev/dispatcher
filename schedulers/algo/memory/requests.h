@@ -58,7 +58,7 @@ namespace MemoryManagement {
             if (pages < 1 || pages > 256) {
                 throw Exceptions::RequestException("INVALID_PAGES");
             }
-            if (bytes < (pages - 1) * 4096 || bytes > (pages + 1) * 4096) {
+            if (bytes <= (pages - 1) * 4096 || bytes > pages * 4096) {
                 throw Exceptions::RequestException("INVALID_BYTES");
             }
 
@@ -122,7 +122,7 @@ namespace MemoryManagement {
             if (pages < 1 || pages > 256) {
                 throw Exceptions::RequestException("INVALID_PAGES");
             }
-            if (bytes < (pages - 1) * 4096 || bytes > (pages + 1) * 4096) {
+            if (bytes <= (pages - 1) * 4096 || bytes > pages * 4096) {
                 throw Exceptions::RequestException("INVALID_BYTES");
             }
 

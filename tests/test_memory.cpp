@@ -343,8 +343,8 @@ const lest::test test_memory_first_appropriate_strategy[] = {
                 MemoryBlock{-1, 36, 7}
             };
             std::vector<Types::MemoryBlock> expectedFreeBlocks = {
-                MemoryBlock{-1, 36, 7},
-                MemoryBlock{-1, 19, 16}
+                MemoryBlock{-1, 19, 16},
+                MemoryBlock{-1, 36, 7}
             };
             Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
 
@@ -376,8 +376,8 @@ const lest::test test_memory_first_appropriate_strategy[] = {
                 MemoryBlock{-1, 36, 7}
             };
             std::vector<Types::MemoryBlock> expectedFreeBlocks = {
-                MemoryBlock{-1, 36, 7},
-                MemoryBlock{-1, 0, 35}
+                MemoryBlock{-1, 0, 35},
+                MemoryBlock{-1, 36, 7}
             };
             Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
 
@@ -399,22 +399,22 @@ const lest::test test_memory_first_appropriate_strategy[] = {
                 MemoryBlock{-1, 36, 7}
             };
             std::vector<Types::MemoryBlock> freeBlocks = {
-                MemoryBlock{-1, 36, 7}, //*
-                MemoryBlock{-1, 15, 20}
+                MemoryBlock{-1, 15, 20}, //*
+                MemoryBlock{-1, 36, 7}
             };
             Types::MemoryState state(blocks, freeBlocks);
 
             std::vector<Types::MemoryBlock> expectedBlocks = {
                 MemoryBlock{2, 0, 12},
                 MemoryBlock{2, 12, 3},
-                MemoryBlock{-1, 15, 20},
+                MemoryBlock{1, 15, 2},
+                MemoryBlock{-1, 17, 18},
                 MemoryBlock{1, 35, 1},
-                MemoryBlock{1, 36, 2},
-                MemoryBlock{-1, 38, 5}
+                MemoryBlock{-1, 36, 7}
             };
             std::vector<Types::MemoryBlock> expectedFreeBlocks = {
-                MemoryBlock{-1, 15, 20},
-                MemoryBlock{-1, 38, 5}
+                MemoryBlock{-1, 17, 18},
+                MemoryBlock{-1, 36, 7}
             };
             Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
 
@@ -436,8 +436,8 @@ const lest::test test_memory_first_appropriate_strategy[] = {
                 MemoryBlock{-1, 36, 7}
             };
             std::vector<Types::MemoryBlock> freeBlocks = {
-                MemoryBlock{-1, 36, 7}, //*
-                MemoryBlock{-1, 15, 20} //*
+                MemoryBlock{-1, 15, 20}, //*
+                MemoryBlock{-1, 36, 7} //*
             };
             Types::MemoryState state(blocks, freeBlocks);
 
@@ -471,8 +471,8 @@ const lest::test test_memory_first_appropriate_strategy[] = {
                 MemoryBlock{-1, 36, 7}
             };
             std::vector<Types::MemoryBlock> freeBlocks = {
-                MemoryBlock{-1, 36, 7},
-                MemoryBlock{-1, 15, 20}
+                MemoryBlock{-1, 15, 20},
+                MemoryBlock{-1, 36, 7}
             };
             Types::MemoryState state(blocks, freeBlocks);
 
@@ -484,8 +484,8 @@ const lest::test test_memory_first_appropriate_strategy[] = {
                 MemoryBlock{-1, 36, 7}
             };
             std::vector<Types::MemoryBlock> expectedFreeBlocks = {
-                MemoryBlock{-1, 36, 7},
-                MemoryBlock{-1, 15, 20}
+                MemoryBlock{-1, 15, 20},
+                MemoryBlock{-1, 36, 7}
             };
             Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
 

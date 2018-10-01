@@ -6,6 +6,7 @@
 #include "../schedulers/algo/memory/types.h"
 #include "../schedulers/algo/memory/operations.h"
 #include "../schedulers/algo/memory/strategies.h"
+#include "../schedulers/algo/memory/exceptions.h"
 
 using namespace MemoryManagement;
 
@@ -19,6 +20,21 @@ const lest::test test_memory_requests[] = {
             EXPECT(request->bytes == 4096);
             EXPECT(request->pages == 1);
             EXPECT(request->type == Requests::RequestType::CREATE_PROCESS);
+        }
+    },
+    {
+        CASE("Check preconditions for CreateProcess")
+        {
+            EXPECT_THROWS_AS(Requests::CreateProcess::create(-2, 4096, 1), Exceptions::RequestException);
+            EXPECT_THROWS_AS(Requests::CreateProcess::create(256, 4096, 1), Exceptions::RequestException);
+
+            EXPECT_THROWS_AS(Requests::CreateProcess::create(0, -1, 1), Exceptions::RequestException);
+            EXPECT_THROWS_AS(Requests::CreateProcess::create(0, 257 * 4096, 1), Exceptions::RequestException);
+            EXPECT_THROWS_AS(Requests::CreateProcess::create(0, 4097, 1), Exceptions::RequestException);
+            EXPECT_THROWS_AS(Requests::CreateProcess::create(0, 4096, 2), Exceptions::RequestException);
+
+            EXPECT_THROWS_AS(Requests::CreateProcess::create(0, 4096, 0), Exceptions::RequestException);
+            EXPECT_THROWS_AS(Requests::CreateProcess::create(0, 4096, 257), Exceptions::RequestException);
         }
     },
     {
@@ -42,6 +58,13 @@ const lest::test test_memory_requests[] = {
         }
     },
     {
+        CASE("Check preconditions for TerminateProcess")
+        {
+            EXPECT_THROWS_AS(Requests::TerminateProcess::create(-2), Exceptions::RequestException);
+            EXPECT_THROWS_AS(Requests::TerminateProcess::create(256), Exceptions::RequestException);
+        }
+    },
+    {
         CASE("Copy instance of TerminateProcess")
         {
             auto request = Requests::TerminateProcess::create(0);
@@ -59,6 +82,21 @@ const lest::test test_memory_requests[] = {
             EXPECT(request->bytes == 4096);
             EXPECT(request->pages == 1);
             EXPECT(request->type == Requests::RequestType::ALLOCATE_MEMORY);
+        }
+    },
+    {
+        CASE("Check preconditions for AllocateMemory")
+        {
+            EXPECT_THROWS_AS(Requests::AllocateMemory::create(-2, 4096, 1), Exceptions::RequestException);
+            EXPECT_THROWS_AS(Requests::AllocateMemory::create(256, 4096, 1), Exceptions::RequestException);
+
+            EXPECT_THROWS_AS(Requests::AllocateMemory::create(0, -1, 1), Exceptions::RequestException);
+            EXPECT_THROWS_AS(Requests::AllocateMemory::create(0, 257 * 4096, 1), Exceptions::RequestException);
+            EXPECT_THROWS_AS(Requests::AllocateMemory::create(0, 4097, 1), Exceptions::RequestException);
+            EXPECT_THROWS_AS(Requests::AllocateMemory::create(0, 4096, 2), Exceptions::RequestException);
+
+            EXPECT_THROWS_AS(Requests::AllocateMemory::create(0, 4096, 0), Exceptions::RequestException);
+            EXPECT_THROWS_AS(Requests::AllocateMemory::create(0, 4096, 257), Exceptions::RequestException);
         }
     },
     {
@@ -80,6 +118,16 @@ const lest::test test_memory_requests[] = {
             EXPECT(request->pid == 0);
             EXPECT(request->address == 12);
             EXPECT(request->type == Requests::RequestType::FREE_MEMORY);
+        }
+    },
+    {
+        CASE("Check preconditions for FreeMemory")
+        {
+            EXPECT_THROWS_AS(Requests::FreeMemory::create(-2, 0), Exceptions::RequestException);
+            EXPECT_THROWS_AS(Requests::FreeMemory::create(256, 0), Exceptions::RequestException);
+
+            EXPECT_THROWS_AS(Requests::FreeMemory::create(0, -1), Exceptions::RequestException);
+            EXPECT_THROWS_AS(Requests::FreeMemory::create(0, 256), Exceptions::RequestException);
         }
     },
     {

@@ -20,5 +20,6 @@ SOURCES += \
     test_memory.cpp
 
 HEADERS += \
-    lest/lest.hpp \
-    lest/lest_basic.hpp
+    ../libs/lest/lest.hpp \
+    ../libs/lest/lest_basic.hpp \
+    ../libs/nlohmann/json.hpp

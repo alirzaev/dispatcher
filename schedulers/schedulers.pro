@@ -33,7 +33,8 @@ HEADERS += \
     algo/memory/requests.h \
     algo/memory/types.h \
     algo/memory/operations.h \
-    algo/memory/strategies.h
+    algo/memory/strategies.h \
+    algo/memory/exceptions.h
 
 FORMS += \
         mainwindow.ui

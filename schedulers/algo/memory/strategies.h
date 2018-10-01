@@ -52,6 +52,12 @@ namespace Strategies {
             if (request->type == Requests::RequestType::CREATE_PROCESS) {
                 auto obj = *dynamic_cast<Requests::CreateProcess*>(request.get());
                 return createProcess(obj, state);
+            } else if (request->type == Requests::RequestType::TERMINATE_PROCESS) {
+                auto obj = *dynamic_cast<Requests::TerminateProcess*>(request.get());
+                return terminateProcess(obj, state);
+            } else if (request->type == Requests::RequestType::ALLOCATE_MEMORY) {
+                auto obj = *dynamic_cast<Requests::AllocateMemory*>(request.get());
+                return allocateMemory(obj, state);
             } else {
                 throw std::exception();
             }
@@ -146,10 +152,75 @@ namespace Strategies {
 
             return currentState;
         }
+
+        Types::MemoryState allocateMemory(
+                const Requests::AllocateMemory request,
+                const Types::MemoryState& state
+        ) const
+        {
+            std::vector<Types::MemoryBlock> blocks, freeBlocks;
+            std::tie(blocks, freeBlocks) = state;
+
+            // проверить, выделены ли процессу какие-либо блоки памяти
+            auto processPos = std::find_if(
+                        blocks.begin(),
+                        blocks.end(),
+                        [&request](const Types::MemoryBlock& block) {
+                return block.pid() == request.pid;
+            });
+            // если не выделены, то заявку проигнорировать
+            if (processPos == blocks.end()) {
+                return state;
+            }
+
+            int32_t totalFree = 0;
+            for (const auto& block : freeBlocks) {
+                totalFree += block.size();
+            }
+            std::vector<Types::MemoryBlock>::const_iterator pos;
+            // проверить, если свободный блок подходящего размера
+            auto freeBlockPos = std::find_if(
+                        freeBlocks.begin(),
+                        freeBlocks.end(),
+                        [&request](const Types::MemoryBlock& block) {
+                return request.pages < block.size();
+            });
+            // если есть, то выделить процессу память в этом блоке
+            if ((pos = findFreeBlock(blocks, freeBlocks, request.pages)) != blocks.end()) {
+                uint32_t index = pos - blocks.cbegin();
+                return Operations::allocateMemory(state, index, request.pid, request.pages);
+            } else if (totalFree > request.pages) { // если суммарно свободной памяти достаточно, то выполнить дефрагментацию
+                auto newState = Operations::defragmentMemory(state);
+                std::tie(blocks, freeBlocks) = newState;
+                pos = findFreeBlock(blocks, freeBlocks, request.pages);
+                uint32_t index = pos - blocks.cbegin();
+                return Operations::allocateMemory(newState, index, request.pid, request.pages);
+            } else { // недостаточно свободной памяти, проигнорировать заявку
+                return state;
+            }
+        }
     private:
         FirstAppropriateStrategy() :
             AbstractStrategy(StrategyType::FIRST_APPROPRIATE)
         {}
+        std::vector<Types::MemoryBlock>::const_iterator findFreeBlock(
+                const std::vector<Types::MemoryBlock>& blocks,
+                const std::vector<Types::MemoryBlock>& freeBlocks,
+                int32_t size
+        ) const
+        {
+            auto freeBlockPos = std::find_if(
+                        freeBlocks.cbegin(),
+                        freeBlocks.cend(),
+                        [&size](const Types::MemoryBlock& block) {
+                return size < block.size();
+            });
+            if (freeBlockPos != freeBlocks.cend()) {
+                return std::find(blocks.cbegin(), blocks.cend(), *freeBlockPos);
+            } else {
+                return blocks.cend();
+            }
+        }
     };
 
     class MostAppropriateStrategy final : public AbstractStrategy {

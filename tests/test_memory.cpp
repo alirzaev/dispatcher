@@ -384,6 +384,114 @@ const lest::test test_memory_first_appropriate_strategy[] = {
             auto actualState = strategy->terminateProcess(request, state);
             EXPECT(actualState == expectedState);
         }
+    },
+    {
+        CASE("Process AllocateMemory request")
+        {
+            auto strategy = Strategies::FirstAppropriateStrategy::create();
+            auto request = *Requests::AllocateMemory::create(1, 8192, 2);
+
+            std::vector<Types::MemoryBlock> blocks = {
+                MemoryBlock{2, 0, 12},
+                MemoryBlock{2, 12, 3},
+                MemoryBlock{-1, 15, 20},
+                MemoryBlock{1, 35, 1},
+                MemoryBlock{-1, 36, 7}
+            };
+            std::vector<Types::MemoryBlock> freeBlocks = {
+                MemoryBlock{-1, 36, 7}, //*
+                MemoryBlock{-1, 15, 20}
+            };
+            Types::MemoryState state(blocks, freeBlocks);
+
+            std::vector<Types::MemoryBlock> expectedBlocks = {
+                MemoryBlock{2, 0, 12},
+                MemoryBlock{2, 12, 3},
+                MemoryBlock{-1, 15, 20},
+                MemoryBlock{1, 35, 1},
+                MemoryBlock{1, 36, 2},
+                MemoryBlock{-1, 38, 5}
+            };
+            std::vector<Types::MemoryBlock> expectedFreeBlocks = {
+                MemoryBlock{-1, 15, 20},
+                MemoryBlock{-1, 38, 5}
+            };
+            Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+
+            auto actualState = strategy->allocateMemory(request, state);
+            EXPECT(actualState == expectedState);
+        }
+    },
+    {
+        CASE("Process AllocateMemory request (with defragmentation)")
+        {
+            auto strategy = Strategies::FirstAppropriateStrategy::create();
+            auto request = *Requests::AllocateMemory::create(1, 90112, 22);
+
+            std::vector<Types::MemoryBlock> blocks = {
+                MemoryBlock{2, 0, 12},
+                MemoryBlock{2, 12, 3},
+                MemoryBlock{-1, 15, 20},
+                MemoryBlock{1, 35, 1},
+                MemoryBlock{-1, 36, 7}
+            };
+            std::vector<Types::MemoryBlock> freeBlocks = {
+                MemoryBlock{-1, 36, 7}, //*
+                MemoryBlock{-1, 15, 20} //*
+            };
+            Types::MemoryState state(blocks, freeBlocks);
+
+            std::vector<Types::MemoryBlock> expectedBlocks = {
+                MemoryBlock{2, 0, 12},
+                MemoryBlock{2, 12, 3},
+                MemoryBlock{1, 15, 1},
+                MemoryBlock{1, 16, 22},
+                MemoryBlock{-1, 38, 5}
+            };
+            std::vector<Types::MemoryBlock> expectedFreeBlocks = {
+                MemoryBlock{-1, 38, 5}
+            };
+            Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+
+            auto actualState = strategy->allocateMemory(request, state);
+            EXPECT(actualState == expectedState);
+        }
+    },
+    {
+        CASE("Process AllocateMemory request (out of memory)")
+        {
+            auto strategy = Strategies::FirstAppropriateStrategy::create();
+            auto request = *Requests::AllocateMemory::create(1, 122800, 30);
+
+            std::vector<Types::MemoryBlock> blocks = {
+                MemoryBlock{2, 0, 12},
+                MemoryBlock{2, 12, 3},
+                MemoryBlock{-1, 15, 20},
+                MemoryBlock{1, 35, 1},
+                MemoryBlock{-1, 36, 7}
+            };
+            std::vector<Types::MemoryBlock> freeBlocks = {
+                MemoryBlock{-1, 36, 7},
+                MemoryBlock{-1, 15, 20}
+            };
+            Types::MemoryState state(blocks, freeBlocks);
+
+            std::vector<Types::MemoryBlock> expectedBlocks = {
+                MemoryBlock{2, 0, 12},
+                MemoryBlock{2, 12, 3},
+                MemoryBlock{-1, 15, 20},
+                MemoryBlock{1, 35, 1},
+                MemoryBlock{-1, 36, 7}
+            };
+            std::vector<Types::MemoryBlock> expectedFreeBlocks = {
+                MemoryBlock{-1, 36, 7},
+                MemoryBlock{-1, 15, 20}
+            };
+            Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+
+            auto actualState = strategy->allocateMemory(request, state);
+            EXPECT(actualState == expectedState);
+        }
     }
 };
 

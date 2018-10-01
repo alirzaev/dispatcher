@@ -68,41 +68,11 @@ namespace Strategies {
                 const Types::MemoryState& state
         ) const
         {
-            std::vector<Types::MemoryBlock> blocks, freeBlocks;
-            std::tie(blocks, freeBlocks) = state;
-
-            // проверить, выделены ли процессу какие-либо блоки памяти
-            auto processExists = std::find_if(
-                        blocks.begin(),
-                        blocks.end(),
-                        [&request](const Types::MemoryBlock& block) {
-                return request.pid == block.pid();
-            }) != blocks.end();
-            // если процессу уже выделены блоки памяти, значит он уже создан,
-            // заявку проигнорировать
-            if (processExists) {
-                return state;
-            }
-
-            // найти первый подходящий блок памяти, т. е. тот, размер которого
-            // больше запрашиваемой процессом памяти
-            auto freePos = std::find_if(
-                        freeBlocks.begin(),
-                        freeBlocks.end(),
-                        [&request](const Types::MemoryBlock& block) {
-                return block.size() > request.pages;
-            });
-
-            // если нет подходящего блока - игнорируем заявку
-            if (freePos == freeBlocks.end()) {
-                return state;
-            }
-
-            // выделить процессу памяти
-            auto pos = std::find(blocks.begin(), blocks.end(), *freePos);
-            uint32_t index = pos - blocks.begin();
-
-            return Operations::allocateMemory(state, index, request.pid, request.pages);
+            return allocateMemoryGeneral(
+                *Requests::AllocateMemory::create(request.pid, request.bytes, request.pages),
+                state,
+                true
+            );
         }
 
         Types::MemoryState terminateProcess(
@@ -158,46 +128,7 @@ namespace Strategies {
                 const Types::MemoryState& state
         ) const
         {
-            std::vector<Types::MemoryBlock> blocks, freeBlocks;
-            std::tie(blocks, freeBlocks) = state;
-
-            // проверить, выделены ли процессу какие-либо блоки памяти
-            auto processPos = std::find_if(
-                        blocks.begin(),
-                        blocks.end(),
-                        [&request](const Types::MemoryBlock& block) {
-                return block.pid() == request.pid;
-            });
-            // если не выделены, то заявку проигнорировать
-            if (processPos == blocks.end()) {
-                return state;
-            }
-
-            int32_t totalFree = 0;
-            for (const auto& block : freeBlocks) {
-                totalFree += block.size();
-            }
-            std::vector<Types::MemoryBlock>::const_iterator pos;
-            // проверить, если свободный блок подходящего размера
-            auto freeBlockPos = std::find_if(
-                        freeBlocks.begin(),
-                        freeBlocks.end(),
-                        [&request](const Types::MemoryBlock& block) {
-                return request.pages < block.size();
-            });
-            // если есть, то выделить процессу память в этом блоке
-            if ((pos = findFreeBlock(blocks, freeBlocks, request.pages)) != blocks.end()) {
-                uint32_t index = pos - blocks.cbegin();
-                return Operations::allocateMemory(state, index, request.pid, request.pages);
-            } else if (totalFree > request.pages) { // если суммарно свободной памяти достаточно, то выполнить дефрагментацию
-                auto newState = Operations::defragmentMemory(state);
-                std::tie(blocks, freeBlocks) = newState;
-                pos = findFreeBlock(blocks, freeBlocks, request.pages);
-                uint32_t index = pos - blocks.cbegin();
-                return Operations::allocateMemory(newState, index, request.pid, request.pages);
-            } else { // недостаточно свободной памяти, проигнорировать заявку
-                return state;
-            }
+            return allocateMemoryGeneral(request, state, false);
         }
     private:
         FirstAppropriateStrategy() :
@@ -219,6 +150,49 @@ namespace Strategies {
                 return std::find(blocks.cbegin(), blocks.cend(), *freeBlockPos);
             } else {
                 return blocks.cend();
+            }
+        }
+
+        Types::MemoryState allocateMemoryGeneral(
+                const Requests::AllocateMemory request,
+                const Types::MemoryState& state,
+                const bool createProcess = false
+        ) const
+        {
+            std::vector<Types::MemoryBlock> blocks, freeBlocks;
+            std::tie(blocks, freeBlocks) = state;
+
+            // проверить, выделены ли процессу какие-либо блоки памяти
+            auto processPos = std::find_if(
+                        blocks.begin(),
+                        blocks.end(),
+                        [&request](const Types::MemoryBlock& block) {
+                return block.pid() == request.pid;
+            });
+            // если процесс должен существовать, а выделенных для него блоков нет,
+            // то заявку проигнорировать
+            if (processPos == blocks.end() && !createProcess) {
+                return state;
+            }
+
+            int32_t totalFree = 0;
+            for (const auto& block : freeBlocks) {
+                totalFree += block.size();
+            }
+            std::vector<Types::MemoryBlock>::const_iterator pos;
+            // проверить, если свободный блок подходящего размера
+            // если есть, то выделить процессу память в этом блоке
+            if ((pos = findFreeBlock(blocks, freeBlocks, request.pages)) != blocks.end()) {
+                uint32_t index = pos - blocks.cbegin();
+                return Operations::allocateMemory(state, index, request.pid, request.pages);
+            } else if (totalFree > request.pages) { // если суммарно свободной памяти достаточно, то выполнить дефрагментацию
+                auto newState = Operations::defragmentMemory(state);
+                std::tie(blocks, freeBlocks) = newState;
+                pos = findFreeBlock(blocks, freeBlocks, request.pages);
+                uint32_t index = pos - blocks.cbegin();
+                return Operations::allocateMemory(newState, index, request.pid, request.pages);
+            } else { // недостаточно свободной памяти, проигнорировать заявку
+                return state;
             }
         }
     };

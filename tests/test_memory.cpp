@@ -5,6 +5,7 @@
 #include "../schedulers/algo/memory/requests.h"
 #include "../schedulers/algo/memory/types.h"
 #include "../schedulers/algo/memory/operations.h"
+#include "../schedulers/algo/memory/strategies.h"
 
 using namespace MemoryManagement;
 
@@ -257,4 +258,105 @@ const lest::test test_memory_operations[] = {
     }
 };
 
+const lest::test test_memory_first_appropriate_strategy[] = {
+    {
+        CASE("Create instance of FirstAppropriateStrategy")
+        {
+            auto strategy = Strategies::FirstAppropriateStrategy::create();
 
+            EXPECT(strategy->type == Strategies::StrategyType::FIRST_APPROPRIATE);
+        }
+    },
+    {
+        CASE("Process CreateProcess request")
+        {
+            auto strategy = Strategies::FirstAppropriateStrategy::create();
+            auto request = *Requests::CreateProcess::create(3, 16384, 4);
+
+            std::vector<Types::MemoryBlock> blocks = {
+                MemoryBlock{0, 0, 12},
+                MemoryBlock{2, 12, 3},
+                MemoryBlock{-1, 15, 20}, //*
+                MemoryBlock{2, 35, 1},
+                MemoryBlock{-1, 36, 7}
+            };
+            std::vector<Types::MemoryBlock> freeBlocks = {
+                MemoryBlock{-1, 15, 20},
+                MemoryBlock{-1, 36, 7}
+            };
+            Types::MemoryState state(blocks, freeBlocks);
+
+            std::vector<Types::MemoryBlock> expectedBlocks = {
+                MemoryBlock{0, 0, 12},
+                MemoryBlock{2, 12, 3},
+                MemoryBlock{3, 15, 4},
+                MemoryBlock{-1, 19, 16},
+                MemoryBlock{2, 35, 1},
+                MemoryBlock{-1, 36, 7}
+            };
+            std::vector<Types::MemoryBlock> expectedFreeBlocks = {
+                MemoryBlock{-1, 36, 7},
+                MemoryBlock{-1, 19, 16}
+            };
+            Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+
+            auto actualState = strategy->createProcess(request, state);
+            EXPECT(actualState == expectedState);
+        }
+    },
+    {
+        CASE("Process TerminateProcess request")
+        {
+            auto strategy = Strategies::FirstAppropriateStrategy::create();
+            auto request = *Requests::TerminateProcess::create(2);
+
+            std::vector<Types::MemoryBlock> blocks = {
+                MemoryBlock{2, 0, 12},  //*
+                MemoryBlock{2, 12, 3},  //*
+                MemoryBlock{2, 15, 20}, //*
+                MemoryBlock{1, 35, 1},
+                MemoryBlock{-1, 36, 7}
+            };
+            std::vector<Types::MemoryBlock> freeBlocks = {
+                MemoryBlock{-1, 36, 7}
+            };
+            Types::MemoryState state(blocks, freeBlocks);
+
+            std::vector<Types::MemoryBlock> expectedBlocks = {
+                MemoryBlock{-1, 0, 35},
+                MemoryBlock{1, 35, 1},
+                MemoryBlock{-1, 36, 7}
+            };
+            std::vector<Types::MemoryBlock> expectedFreeBlocks = {
+                MemoryBlock{-1, 36, 7},
+                MemoryBlock{-1, 0, 35}
+            };
+            Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+
+            auto actualState = strategy->terminateProcess(request, state);
+            EXPECT(actualState == expectedState);
+        }
+    }
+};
+
+const lest::test test_memory_most_appropriate_strategy[] = {
+    {
+        CASE("Create instance of MostAppropriateStrategy")
+        {
+            auto strategy = Strategies::MostAppropriateStrategy::create();
+
+            EXPECT(strategy->type == Strategies::StrategyType::MOST_APPROPRIATE);
+        }
+    }
+};
+
+const lest::test test_memory_least_appropriate_strategy[] = {
+    {
+        CASE("Create instance of LeastAppropriateStrategy")
+        {
+            auto strategy = Strategies::LeastAppropriateStrategy::create();
+
+            EXPECT(strategy->type == Strategies::StrategyType::LEAST_APPROPRIATE);
+        }
+    }
+};

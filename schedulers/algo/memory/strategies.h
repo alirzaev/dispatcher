@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <exception>
 #include <cstdint>
+#include <string>
 
 namespace MemoryManagement {
 namespace Strategies {
@@ -25,6 +26,8 @@ namespace Strategies {
         {}
 
         const StrategyType type;
+
+        virtual std::string toString() const = 0;
 
         Types::MemoryState processRequest(
                 Requests::RequestPtr request,
@@ -238,6 +241,11 @@ namespace Strategies {
 
     class FirstAppropriateStrategy final : public AbstractStrategy {
     public:
+        std::string toString() const override
+        {
+            return "FIRST_APPROPRIATE";
+        }
+
         static std::shared_ptr<FirstAppropriateStrategy> create()
         {
             return std::shared_ptr<FirstAppropriateStrategy>(new FirstAppropriateStrategy());
@@ -269,6 +277,11 @@ namespace Strategies {
 
     class MostAppropriateStrategy final : public AbstractStrategy {
     public:
+        std::string toString() const override
+        {
+            return "MOST_APPROPRIATE";
+        }
+
         static std::shared_ptr<MostAppropriateStrategy> create()
         {
             return std::shared_ptr<MostAppropriateStrategy>(new MostAppropriateStrategy());
@@ -305,6 +318,11 @@ namespace Strategies {
 
     class LeastAppropriateStrategy final : public AbstractStrategy {
     public:
+        std::string toString() const override
+        {
+            return "LEAST_APPROPRIATE";
+        }
+
         static std::shared_ptr<LeastAppropriateStrategy> create()
         {
             return std::shared_ptr<LeastAppropriateStrategy>(new LeastAppropriateStrategy());

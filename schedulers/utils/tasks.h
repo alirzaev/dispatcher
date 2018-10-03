@@ -5,6 +5,8 @@
 #include <cstdint>
 #include <vector>
 
+#include "../libs/nlohmann/json.hpp"
+
 #include "../algo/memory/requests.h"
 #include "../algo/memory/strategies.h"
 
@@ -26,6 +28,8 @@ namespace Tasks {
         {}
 
         const TaskType type;
+
+        virtual nlohmann::json dump() const = 0;
 
         virtual ~AbstractTask()
         {}
@@ -55,6 +59,15 @@ namespace Tasks {
             _state(state),
             _requests(requests)
         {}
+
+        nlohmann::json dump(const MemoryBlock& block) const
+        {
+            return nlohmann::json{
+                {"pid", block.pid()},
+                {"address", block.address()},
+                {"size", block.size()}
+            };
+        }
     public:
         static std::shared_ptr<MemoryTask> create(
                 StrategyPtr strategy,
@@ -86,6 +99,41 @@ namespace Tasks {
         const std::vector<RequestPtr>& requests() const
         {
             return _requests;
+        }
+
+        nlohmann::json dump() const override
+        {
+            nlohmann::json obj;
+
+            obj["strategy"] = strategy()->toString();
+
+            obj["completed"] = completed();
+
+            std::vector<MemoryBlock> blocks, freeBlocks;
+            std::tie(blocks, freeBlocks) = state();
+            auto jsonBlocks = nlohmann::json::array();
+            auto jsonFreeBlocks = nlohmann::json::array();
+
+            for (const auto& block : blocks) {
+                jsonBlocks.push_back(dump(block));
+            }
+            for (const auto& block : freeBlocks) {
+                jsonFreeBlocks.push_back(dump(block));
+            }
+            obj["state"] = {
+                {"blocks", jsonBlocks},
+                {"free_blocks", jsonFreeBlocks}
+            };
+
+            auto jsonRequests = nlohmann::json::array();
+
+            for (auto request : requests()) {
+                jsonRequests.push_back(request->dump());
+            }
+
+            obj["requests"] = jsonRequests;
+
+            return obj;
         }
     };
 }

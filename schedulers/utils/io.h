@@ -15,7 +15,16 @@ namespace Utils {
 namespace IO {
     std::vector<Tasks::TaskPtr> loadTasks(std::istream& is);
 
-    void saveTasks(const std::vector<Tasks::TaskPtr>& tasks, std::ostream& os);
+    void saveTasks(const std::vector<Tasks::TaskPtr>& tasks, std::ostream& os)
+    {
+        auto obj = nlohmann::json::array();
+
+        for (auto task : tasks) {
+            obj.push_back(task->dump());
+        }
+
+        os << obj;
+    }
 }
 }
 

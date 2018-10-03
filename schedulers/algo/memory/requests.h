@@ -6,6 +6,8 @@
 #include <memory>
 #include "exceptions.h"
 
+#include "../libs/nlohmann/json.hpp"
+
 
 namespace MemoryManagement {
     namespace Requests {
@@ -26,6 +28,8 @@ namespace MemoryManagement {
 
         virtual std::string toString() const = 0;
 
+        virtual nlohmann::json dump() const = 0;
+
         virtual ~AbstractRequest()
         {}
     };
@@ -40,7 +44,7 @@ namespace MemoryManagement {
 
         const int32_t pages;
 
-        std::string toString() const
+        std::string toString() const override
         {
             return "CreateProcess";
         }
@@ -64,6 +68,16 @@ namespace MemoryManagement {
 
             return std::shared_ptr<CreateProcess>(new CreateProcess(pid, bytes, pages));
         }
+
+        nlohmann::json dump() const override
+        {
+            return nlohmann::json{
+                {"type", "CREATE_PROCESS"},
+                {"pid", pid},
+                {"bytes", bytes},
+                {"pages", pages}
+            };
+        }
     private:
         CreateProcess(int32_t pid, int32_t bytes, int32_t pages) :
             AbstractRequest(RequestType::CREATE_PROCESS),
@@ -76,7 +90,8 @@ namespace MemoryManagement {
         const int32_t pid;
 
 
-        std::string toString() const {
+        std::string toString() const override
+        {
             return "TerminateProcess";
         }
 
@@ -89,6 +104,14 @@ namespace MemoryManagement {
             }
 
             return std::shared_ptr<TerminateProcess>(new TerminateProcess(pid));
+        }
+
+        nlohmann::json dump() const override
+        {
+            return nlohmann::json{
+                {"type", "TERMINATE_PROCESS"},
+                {"pid", pid}
+            };
         }
     private:
         TerminateProcess(int32_t pid) :
@@ -105,7 +128,8 @@ namespace MemoryManagement {
 
         const int32_t pages;
 
-        std::string toString() const {
+        std::string toString() const override
+        {
             return "AllocateMemory";
         }
 
@@ -128,6 +152,16 @@ namespace MemoryManagement {
 
             return std::shared_ptr<AllocateMemory>(new AllocateMemory(pid, bytes, pages));
         }
+
+        nlohmann::json dump() const override
+        {
+            return nlohmann::json{
+                {"type", "ALLOCATE_MEMORY"},
+                {"pid", pid},
+                {"bytes", bytes},
+                {"pages", pages}
+            };
+        }
     private:
         AllocateMemory(int32_t pid, int32_t bytes, int32_t pages) :
             AbstractRequest(RequestType::ALLOCATE_MEMORY),
@@ -141,7 +175,8 @@ namespace MemoryManagement {
 
         const int32_t address;
 
-        std::string toString() const {
+        std::string toString() const override
+        {
             return "FreeMemory";
         }
 
@@ -157,6 +192,15 @@ namespace MemoryManagement {
             }
 
             return std::shared_ptr<FreeMemory>(new FreeMemory(pid, address));
+        }
+
+        nlohmann::json dump() const override
+        {
+            return nlohmann::json{
+                {"type", "FREE_MEMORY"},
+                {"pid", pid},
+                {"address", address}
+            };
         }
     private:
         FreeMemory(int32_t pid, int32_t address) :

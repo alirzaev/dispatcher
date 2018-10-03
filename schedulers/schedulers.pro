@@ -26,7 +26,8 @@ CONFIG += c++11
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    utils/io.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -34,7 +35,9 @@ HEADERS += \
     algo/memory/types.h \
     algo/memory/operations.h \
     algo/memory/strategies.h \
-    algo/memory/exceptions.h
+    algo/memory/exceptions.h \
+    utils/io.h \
+    utils/tasks.h
 
 FORMS += \
         mainwindow.ui

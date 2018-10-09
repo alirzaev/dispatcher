@@ -71,7 +71,7 @@ namespace MemoryManagement {
 
         nlohmann::json dump() const override
         {
-            return nlohmann::json{
+            return {
                 {"type", "CREATE_PROCESS"},
                 {"pid", pid},
                 {"bytes", bytes},
@@ -88,7 +88,6 @@ namespace MemoryManagement {
     class TerminateProcess final : public AbstractRequest {
     public:
         const int32_t pid;
-
 
         std::string toString() const override
         {
@@ -108,7 +107,7 @@ namespace MemoryManagement {
 
         nlohmann::json dump() const override
         {
-            return nlohmann::json{
+            return {
                 {"type", "TERMINATE_PROCESS"},
                 {"pid", pid}
             };
@@ -155,7 +154,7 @@ namespace MemoryManagement {
 
         nlohmann::json dump() const override
         {
-            return nlohmann::json{
+            return {
                 {"type", "ALLOCATE_MEMORY"},
                 {"pid", pid},
                 {"bytes", bytes},
@@ -196,7 +195,7 @@ namespace MemoryManagement {
 
         nlohmann::json dump() const override
         {
-            return nlohmann::json{
+            return {
                 {"type", "FREE_MEMORY"},
                 {"pid", pid},
                 {"address", address}

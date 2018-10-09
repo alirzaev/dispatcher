@@ -68,16 +68,15 @@ namespace Strategies {
                 const Types::MemoryState& state
         ) const
         {
-            std::vector<Types::MemoryBlock> blocks, freeBlocks;
-            MemoryState currentState = state;
-            std::tie(blocks, freeBlocks) = currentState;
+            auto currentState = state;
 
             while (true) {
+                auto [blocks, freeBlocks] = currentState;
                 // ищем очередной блок памяти, выделенный процессу
                 auto pos = std::find_if(
                             blocks.begin(),
                             blocks.end(),
-                            [&request](const Types::MemoryBlock& block) {
+                            [&request](const auto& block) {
                     return request.pid == block.pid();
                 });
                 if (pos == blocks.end()) {
@@ -85,9 +84,8 @@ namespace Strategies {
                 }
 
                 // освобождаем блок
-                uint32_t index = pos - blocks.begin();
+                uint32_t index = static_cast<uint32_t>(pos - blocks.begin());
                 currentState = Operations::freeMemory(currentState, request.pid, index);
-                std::tie(blocks, freeBlocks) = currentState;
             }
 
             // сжатие памяти
@@ -108,15 +106,14 @@ namespace Strategies {
                 const Types::MemoryState& state
         ) const
         {
-            std::vector<Types::MemoryBlock> blocks, freeBlocks;
-            MemoryState currentState = state;
-            std::tie(blocks, freeBlocks) = currentState;
+            auto currentState = state;
+            auto [blocks, freeBlocks] = currentState;
 
             // ищем блок, начинающийся с заданного адреса
             auto pos = std::find_if(
                         blocks.begin(),
                         blocks.end(),
-                        [&request](const Types::MemoryBlock& block) {
+                        [&request](const auto& block) {
                 return block.address() == request.address;
             });
             // если такого блока нет, игнорируем заявку
@@ -129,7 +126,7 @@ namespace Strategies {
             }
 
             // освобождаем блок
-            uint32_t index = pos - blocks.begin();
+            uint32_t index = static_cast<uint32_t>(pos - blocks.begin());
             currentState = Operations::freeMemory(state, request.pid, index);
 
             // сжатие памяти
@@ -153,7 +150,7 @@ namespace Strategies {
             auto freeBlockPos = std::find_if(
                         freeBlocks.cbegin(),
                         freeBlocks.cend(),
-                        [&size](const Types::MemoryBlock& block) {
+                        [&size](const auto& block) {
                 return size < block.size();
             });
             if (freeBlockPos != freeBlocks.cend()) {
@@ -167,11 +164,10 @@ namespace Strategies {
                 const Types::MemoryState& state
         ) const
         {
-            std::vector<Types::MemoryBlock> blocks, freeBlocks;
-            MemoryState currentState = state;
-            std::tie(blocks, freeBlocks) = currentState;
+            auto currentState = state;
 
             while (true) {
+                auto [blocks, freeBlocks] = currentState;
                 // ищем первый свободный блок памяти
                 // проверяем, есть ли за ним хотя бы один свободный блок
                 uint32_t index = 0;
@@ -182,7 +178,6 @@ namespace Strategies {
                 // если есть, то выполняем сжатие
                 if (index < blocks.size() - 1) {
                     currentState = Operations::compressMemory(currentState, index);
-                    std::tie(blocks, freeBlocks) = currentState;
                 } else {
                     break;
                 }
@@ -197,14 +192,13 @@ namespace Strategies {
                 const bool createProcess = false
         ) const
         {
-            std::vector<Types::MemoryBlock> blocks, freeBlocks;
-            std::tie(blocks, freeBlocks) = state;
+            auto [blocks, freeBlocks] = state;
 
             // проверить, выделены ли процессу какие-либо блоки памяти
             auto processPos = std::find_if(
                         blocks.begin(),
                         blocks.end(),
-                        [&request](const Types::MemoryBlock& block) {
+                        [&request](const auto& block) {
                 return block.pid() == request.pid;
             });
             // если процесс должен существовать, а выделенных для него блоков нет,
@@ -217,18 +211,18 @@ namespace Strategies {
             for (const auto& block : freeBlocks) {
                 totalFree += block.size();
             }
-            std::vector<Types::MemoryBlock>::const_iterator pos;
+
             // проверить, если свободный блок подходящего размера
             // если есть, то выделить процессу память в этом блоке
-            if ((pos = findFreeBlock(blocks, freeBlocks, request.pages)) != blocks.end()) {
-                uint32_t index = pos - blocks.cbegin();
+            if (auto pos = findFreeBlock(blocks, freeBlocks, request.pages); pos != blocks.end()) {
+                uint32_t index = static_cast<uint32_t>(pos - blocks.cbegin());
 
                 return Operations::allocateMemory(state, index, request.pid, request.pages);
             } else if (totalFree > request.pages) { // если суммарно свободной памяти достаточно, то выполнить дефрагментацию
                 auto newState = Operations::defragmentMemory(state);
-                std::tie(blocks, freeBlocks) = newState;
-                pos = findFreeBlock(blocks, freeBlocks, request.pages);
-                uint32_t index = pos - blocks.cbegin();
+                auto [blocks, freeBlocks] = newState;
+                auto pos = findFreeBlock(blocks, freeBlocks, request.pages);
+                uint32_t index = static_cast<uint32_t>(pos - blocks.cbegin());
 
                 return Operations::allocateMemory(newState, index, request.pid, request.pages);
             } else { // недостаточно свободной памяти, проигнорировать заявку
@@ -255,19 +249,19 @@ namespace Strategies {
                 const Types::MemoryState& state
         ) const override
         {
-            std::vector<Types::MemoryBlock> blocks, freeBlocks;
-            std::tie(blocks, freeBlocks) = state;
+            auto currentState = state;
+            auto [blocks, freeBlocks] = currentState;
 
             // упорядочиваем блоки:
             // - по начальному адресу в порядке возрастания
             std::stable_sort(
                         freeBlocks.begin(),
                         freeBlocks.end(),
-                        [](const Types::MemoryBlock& left, const Types::MemoryBlock& right) {
+                        [](const auto& left, const auto& right) {
                 return left.address() < right.address();
             });
 
-            return Types::MemoryState(blocks, freeBlocks);
+            return {blocks, freeBlocks};
         }
     private:
         FirstAppropriateStrategy() :
@@ -295,8 +289,8 @@ namespace Strategies {
                 const Types::MemoryState& state
         ) const override
         {
-            std::vector<Types::MemoryBlock> blocks, freeBlocks;
-            std::tie(blocks, freeBlocks) = state;
+            auto currentState = state;
+            auto [blocks, freeBlocks] = currentState;
 
             // упорядочиваем блоки:
             // - по размеру в порядке возрастания
@@ -304,7 +298,7 @@ namespace Strategies {
             std::stable_sort(
                         freeBlocks.begin(),
                         freeBlocks.end(),
-                        [](const Types::MemoryBlock& left, const Types::MemoryBlock& right) {
+                        [](const auto& left, const auto& right) {
                 if (left.size() == right.size()) {
                     return left.address() < right.address();
                 } else {
@@ -312,7 +306,7 @@ namespace Strategies {
                 }
             });
 
-            return Types::MemoryState(blocks, freeBlocks);
+            return {blocks, freeBlocks};
         }
     };
 
@@ -336,8 +330,8 @@ namespace Strategies {
                 const Types::MemoryState& state
         ) const override
         {
-            std::vector<Types::MemoryBlock> blocks, freeBlocks;
-            std::tie(blocks, freeBlocks) = state;
+            auto currentState = state;
+            auto [blocks, freeBlocks] = currentState;
 
             // упорядочиваем блоки:
             // - по размеру в порядке убывания
@@ -345,7 +339,7 @@ namespace Strategies {
             std::stable_sort(
                         freeBlocks.begin(),
                         freeBlocks.end(),
-                        [](const Types::MemoryBlock& left, const Types::MemoryBlock& right) {
+                        [](const auto& left, const auto& right) {
                 if (left.size() == right.size()) {
                     return left.address() < right.address();
                 } else {
@@ -353,7 +347,7 @@ namespace Strategies {
                 }
             });
 
-            return Types::MemoryState(blocks, freeBlocks);
+            return {blocks, freeBlocks};
         }
     };
 }

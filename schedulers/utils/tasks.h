@@ -64,7 +64,7 @@ namespace Tasks {
 
         nlohmann::json dump(const MemoryBlock& block) const
         {
-            return nlohmann::json{
+            return {
                 {"pid", block.pid()},
                 {"address", block.address()},
                 {"size", block.size()}
@@ -142,8 +142,7 @@ namespace Tasks {
 
             obj["completed"] = completed();
 
-            std::vector<MemoryBlock> blocks, freeBlocks;
-            std::tie(blocks, freeBlocks) = state();
+            auto [blocks, freeBlocks] = state();
             auto jsonBlocks = nlohmann::json::array();
             auto jsonFreeBlocks = nlohmann::json::array();
 

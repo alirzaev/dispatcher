@@ -4,11 +4,13 @@
 #include <memory>
 #include <cstdint>
 #include <vector>
+#include <stdexcept>
 
 #include "../libs/nlohmann/json.hpp"
 
 #include "../algo/memory/requests.h"
 #include "../algo/memory/strategies.h"
+#include "../algo/memory/exceptions.h"
 
 namespace Utils {
 namespace Tasks {
@@ -81,11 +83,42 @@ namespace Tasks {
             );
         }
 
+        static void validate(
+                StrategyPtr strategy,
+                uint32_t completed,
+                const MemoryState& state,
+                const std::vector<RequestPtr> requests
+        )
+        {
+            if (requests.size() < completed) {
+                throw std::logic_error("COMPLETED_OOR");
+            }
+            auto currentState = MemoryState{
+                {MemoryBlock{-1, 0, 256}},
+                {MemoryBlock{-1, 0, 256}}
+            };
+            try {
+                for (
+                     auto req = requests.begin();
+                     req != requests.begin() + completed;
+                     ++req
+                ) {
+                    currentState = strategy->processRequest(*req, currentState);
+                }
+                if (currentState != state) {
+                    throw std::logic_error("STATE_MISMATCH");
+                }
+            } catch (MemoryManagement::Exceptions::BaseException& ex) {
+                throw std::logic_error(ex.what());
+            }
+        }
+
         StrategyPtr strategy() const
         {
             return _strategy;
         }
 
+        // кол-во выполненных заданий
         uint32_t completed() const
         {
             return _completed;

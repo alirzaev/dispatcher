@@ -1,6 +1,6 @@
 # QT -= gui
 
-CONFIG += c++17 console
+CONFIG += c++1z console
 CONFIG -= app_bundle
 CONFIG -= qt
 

@@ -1,4 +1,5 @@
 #include "../libs/lest/lest_basic.hpp"
+#include "../libs/nlohmann/json.hpp"
 
 #include <vector>
 
@@ -20,6 +21,22 @@ const lest::test test_memory_requests[] = {
             EXPECT(request->bytes == 4096);
             EXPECT(request->pages == 1);
             EXPECT(request->type == Requests::RequestType::CREATE_PROCESS);
+        }
+    },
+    {
+        CASE("Convert to JSON instance of CreateProcess")
+        {
+            auto request = Requests::CreateProcess::create(0, 4096, 1);
+
+            auto expected = nlohmann::json{
+                {"type", "CREATE_PROCESS"},
+                {"pid", 0},
+                {"bytes", 4096},
+                {"pages", 1}
+            };
+            auto actual = request->dump();
+
+            EXPECT(actual == expected);
         }
     },
     {
@@ -58,6 +75,20 @@ const lest::test test_memory_requests[] = {
         }
     },
     {
+        CASE("Convert to JSON instance of TerminateProcess")
+        {
+            auto request = Requests::TerminateProcess::create(0);
+
+            auto expected = nlohmann::json{
+                {"type", "TERMINATE_PROCESS"},
+                {"pid", 0}
+            };
+            auto actual = request->dump();
+
+            EXPECT(actual == expected);
+        }
+    },
+    {
         CASE("Check preconditions for TerminateProcess")
         {
             EXPECT_THROWS_AS(Requests::TerminateProcess::create(-2), Exceptions::RequestException);
@@ -82,6 +113,22 @@ const lest::test test_memory_requests[] = {
             EXPECT(request->bytes == 4096);
             EXPECT(request->pages == 1);
             EXPECT(request->type == Requests::RequestType::ALLOCATE_MEMORY);
+        }
+    },
+    {
+        CASE("Convert to JSON instance of AllocateMemory")
+        {
+            auto request = Requests::AllocateMemory::create(0, 4096, 1);
+
+            auto expected = nlohmann::json{
+                {"type", "ALLOCATE_MEMORY"},
+                {"pid", 0},
+                {"bytes", 4096},
+                {"pages", 1}
+            };
+            auto actual = request->dump();
+
+            EXPECT(actual == expected);
         }
     },
     {
@@ -118,6 +165,21 @@ const lest::test test_memory_requests[] = {
             EXPECT(request->pid == 0);
             EXPECT(request->address == 12);
             EXPECT(request->type == Requests::RequestType::FREE_MEMORY);
+        }
+    },
+    {
+        CASE("Convert to JSON instance of FreeMemory")
+        {
+            auto request = Requests::FreeMemory::create(0, 12);
+
+            auto expected = nlohmann::json{
+                {"type", "FREE_MEMORY"},
+                {"pid", 0},
+                {"address", 12}
+            };
+            auto actual = request->dump();
+
+            EXPECT(actual == expected);
         }
     },
     {

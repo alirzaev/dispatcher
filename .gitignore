@@ -1,3 +1,7 @@
-build*
-tests/tests.pro.user
-schedulers/schedulers.pro.user
+.vs
+Debug
+Release
+schedulers/Debug
+schedulers/Release
+schedulers/schedulers.vcxproj.user
+schedulers/schedulers.vcxproj.filters

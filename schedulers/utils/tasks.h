@@ -95,10 +95,7 @@ namespace Tasks {
             if (requests.size() < completed) {
                 throw TaskException("COMPLETED_OOR");
             }
-            auto currentState = MemoryState{
-                {MemoryBlock{-1, 0, 256}},
-                {MemoryBlock{-1, 0, 256}}
-            };
+			auto currentState = INITIAL_MEMORY_STATE;
             try {
                 for (
                      auto req = requests.begin();

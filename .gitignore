@@ -5,3 +5,5 @@ schedulers/Debug
 schedulers/Release
 schedulers/schedulers.vcxproj.user
 schedulers/schedulers.vcxproj.filters
+gui/gui.vcxproj.filters
+gui/gui.vcxproj.user

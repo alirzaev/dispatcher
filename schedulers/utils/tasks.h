@@ -6,7 +6,7 @@
 #include <vector>
 #include <stdexcept>
 
-#include "../libs/nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 #include "../algo/memory/requests.h"
 #include "../algo/memory/strategies.h"

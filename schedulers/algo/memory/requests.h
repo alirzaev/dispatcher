@@ -6,7 +6,7 @@
 #include <memory>
 #include "exceptions.h"
 
-#include "../libs/nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 
 namespace MemoryManagement {

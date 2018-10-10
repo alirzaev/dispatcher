@@ -137,6 +137,8 @@ namespace Tasks {
         {
             nlohmann::json obj;
 
+			obj["type"] = "MEMORY_TASK";
+
             obj["strategy"] = strategy()->toString();
 
             obj["completed"] = completed();

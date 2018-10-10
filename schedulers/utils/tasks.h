@@ -11,12 +11,14 @@
 #include "../algo/memory/requests.h"
 #include "../algo/memory/strategies.h"
 #include "../algo/memory/exceptions.h"
+#include "exceptions.h"
 
 namespace Utils {
 namespace Tasks {
     using namespace MemoryManagement::Strategies;
     using namespace MemoryManagement::Types;
     using namespace MemoryManagement::Requests;
+	using namespace Exceptions;
 
     enum class TaskType {
         MEMORY_TASK,
@@ -91,7 +93,7 @@ namespace Tasks {
         )
         {
             if (requests.size() < completed) {
-                throw std::logic_error("COMPLETED_OOR");
+                throw TaskException("COMPLETED_OOR");
             }
             auto currentState = MemoryState{
                 {MemoryBlock{-1, 0, 256}},
@@ -106,10 +108,10 @@ namespace Tasks {
                     currentState = strategy->processRequest(*req, currentState);
                 }
                 if (currentState != state) {
-                    throw std::logic_error("STATE_MISMATCH");
+                    throw TaskException("STATE_MISMATCH");
                 }
             } catch (MemoryManagement::Exceptions::BaseException& ex) {
-                throw std::logic_error(ex.what());
+                throw TaskException(ex.what());
             }
         }
 

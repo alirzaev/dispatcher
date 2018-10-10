@@ -150,6 +150,7 @@
     <ClInclude Include="algo\memory\requests.h" />
     <ClInclude Include="algo\memory\strategies.h" />
     <ClInclude Include="algo\memory\types.h" />
+    <ClInclude Include="utils\exceptions.h" />
     <ClInclude Include="utils\io.h" />
     <ClInclude Include="utils\tasks.h" />
   </ItemGroup>

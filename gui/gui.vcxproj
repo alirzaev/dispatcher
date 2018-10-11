@@ -148,6 +148,7 @@
   <ItemGroup>
     <ClInclude Include="presenters.h" />
     <ClInclude Include="views.h" />
+    <ClInclude Include="widgets.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

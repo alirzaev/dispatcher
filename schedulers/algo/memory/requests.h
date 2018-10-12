@@ -9,8 +9,7 @@
 #include <nlohmann/json.hpp>
 
 
-namespace MemoryManagement {
-    namespace Requests {
+namespace MemoryManagement::Requests {
     enum class RequestType {
         CREATE_PROCESS,
         TERMINATE_PROCESS,
@@ -30,12 +29,14 @@ namespace MemoryManagement {
 
         virtual nlohmann::json dump() const = 0;
 
-        virtual ~AbstractRequest()
-        {}
+		virtual ~AbstractRequest() = default;
     };
 
     using RequestPtr = std::shared_ptr<AbstractRequest>;
 
+	/*
+	 * Класс заявки на создание нового процесса
+	 */
     class CreateProcess final : public AbstractRequest {
     public:
         const int32_t pid;
@@ -51,6 +52,15 @@ namespace MemoryManagement {
 
         CreateProcess& operator=(const CreateProcess& rhs) = default;
 
+		/*
+		 * Создание заявки на создание нового процесса
+		 *
+		 * @param pid идентификатор процесса
+		 * @param bytes количество байт для выделения процессу в памяти
+		 * @param pages количества страниц для выделения процессу в памяти
+		 *
+		 * @return экземпляр заявки
+		 */
         static std::shared_ptr<CreateProcess> create(int32_t pid, int32_t bytes, int32_t pages)
         {
             if (pid < -1 || pid > 255) {
@@ -85,6 +95,9 @@ namespace MemoryManagement {
         {}
     };
 
+	/*
+	 * Класс заявки на завершение существующего процесса
+	 */
     class TerminateProcess final : public AbstractRequest {
     public:
         const int32_t pid;
@@ -96,6 +109,13 @@ namespace MemoryManagement {
 
         TerminateProcess& operator=(const TerminateProcess& rhs) = default;
 
+		/*
+		 * Создание заявки на завершение существующего процесса
+		 *
+		 * @param pid идентификатор процесса
+		 *
+		 * @return экземпляр заявки
+		 */
         static std::shared_ptr<TerminateProcess> create(int32_t pid)
         {
             if (pid < -1 || pid > 255) {
@@ -119,6 +139,9 @@ namespace MemoryManagement {
         {}
     };
 
+	/*
+	 * Класс заявки на выделение существующему процессу памяти
+	 */
     class AllocateMemory final : public AbstractRequest {
     public:
         const int32_t pid;
@@ -134,6 +157,15 @@ namespace MemoryManagement {
 
         AllocateMemory& operator=(const AllocateMemory& rhs) = default;
 
+		/*
+		 * Создание заявки на выделение существующему процессу памяти
+		 *
+		 * @param pid идентификатор процесса
+		 * @param bytes количество байт для выделения процессу в памяти
+		 * @param pages количества страниц для выделения процессу в памяти
+		 *
+		 * @return экземпляр заявки
+		 */
         static std::shared_ptr<AllocateMemory> create(int32_t pid, int32_t bytes, int32_t pages)
         {
             if (pid < -1 || pid > 255) {
@@ -168,6 +200,9 @@ namespace MemoryManagement {
         {}
     };
 
+	/*
+	 * Класс заявки на освобождение памяти
+	 */
     class FreeMemory final : public AbstractRequest {
     public:
         const int32_t pid;
@@ -181,6 +216,14 @@ namespace MemoryManagement {
 
         FreeMemory& operator=(const FreeMemory& rhs) = default;
 
+		/*
+		 * Создание заявки на освобождение памяти
+		 *
+		 * @param pid идентификатор процесса
+		 * @param address адрес начала блока памяти, который нужно освободить
+		 *
+		 * @return экземпляр заявки
+		 */
         static std::shared_ptr<FreeMemory> create(int32_t pid, int32_t address)
         {
             if (pid < -1 || pid > 255) {
@@ -207,7 +250,6 @@ namespace MemoryManagement {
             pid(pid), address(address)
         {}
     };
-    }
 }
 
 #endif // MEMORY_REQUESTS_H

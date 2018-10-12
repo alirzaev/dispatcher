@@ -20,8 +20,8 @@ namespace MemoryManagement::Operations {
      * блок свободной памяти добавляется в конец списка свободных
      * блоков памяти.
      *
-     * @param state состояние памяти (список всех блоков и свободных)
-     * @param blockIndex индекс блока памяти, в котором необходимо выделить память
+     * @param state состояние памяти (список всех занятых и свободных блоков)
+     * @param blockIndex индекс блока, в котором необходимо выделить память
      * @param pid идентификатор процесса
      * @param pages размер выделяемой памяти в параграфах
      *
@@ -63,7 +63,7 @@ namespace MemoryManagement::Operations {
      * Особожденный блок памяти помещается в конец списка свободных
      * блоков памяти.
      *
-     * @param state состояние памяти (список всех блоков и свободных)
+     * @param state состояние памяти (список всех занятых и свободных блоков)
      * @param pid идентификатор процесса
      * @param blockIndex индекс блока памяти, который необходимо освободить
      *
@@ -86,15 +86,15 @@ namespace MemoryManagement::Operations {
         blocks[blockIndex] = MemoryBlock(-1, block.address(), block.size());
         freeBlocks.push_back(blocks[blockIndex]);
 
-        return MemoryState(blocks, freeBlocks);
+		return { blocks, freeBlocks };
     }
 
     /*
      * Операция дефрагментации памяти. Занятые блоки памяти перемещаются
      * в начало адресного пространства. Освободившаяся память собирается
-     * в один блок свободной памяти.
+     * в один блок.
      *
-     * @param state состояние памяти (список всех блоков и свободных)
+     * @param state состояние памяти (список всех занятых и свободных блоков)
      *
      * @return новое состояние памяти
      */
@@ -111,17 +111,17 @@ namespace MemoryManagement::Operations {
 
         for (const auto& block : blocks) {
             if (block.pid() != -1) {
-                newBlocks.push_back(MemoryBlock(block.pid(), address, block.size()));
+                newBlocks.emplace_back(block.pid(), address, block.size());
                 address += block.size();
             } else {
                 freeMemory += block.size();
             }
         }
 
-        newBlocks.push_back(MemoryBlock(-1, address, freeMemory));
+        newBlocks.emplace_back(-1, address, freeMemory);
         freeBlocks = { MemoryBlock(-1, address, freeMemory) };
 
-        return MemoryState(newBlocks, freeBlocks);
+		return { newBlocks, freeBlocks };
     }
 
     /*
@@ -161,11 +161,11 @@ namespace MemoryManagement::Operations {
 			throw OperationException("SINGLE_BLOCK");
 		}
 
-        newBlocks.push_back(MemoryBlock(-1, address, freeMemory));
+        newBlocks.emplace_back(-1, address, freeMemory);
         newBlocks.insert(newBlocks.end(), blocks.begin() + currentBlock, blocks.end());
-        freeBlocks.push_back(MemoryBlock(-1, address, freeMemory));
+        freeBlocks.emplace_back(-1, address, freeMemory);
 
-        return MemoryState(newBlocks, freeBlocks);
+		return { newBlocks, freeBlocks };
     }
 }
 

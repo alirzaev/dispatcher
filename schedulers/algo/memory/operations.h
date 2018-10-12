@@ -8,12 +8,12 @@
 #include <algorithm>
 
 #include "types.h"
+#include "exceptions.h"
 
 using namespace MemoryManagement::Types;
+using namespace MemoryManagement::Exceptions;
 
-namespace MemoryManagement {
-    namespace Operations {
-
+namespace MemoryManagement::Operations {
     /*
      * Операция выделения памяти процессу в заданном блоке памяти.
      * Выделенная память размещается в начале блока памяти. Новый
@@ -39,9 +39,9 @@ namespace MemoryManagement {
 
         auto block = blocks.at(blockIndex);
         if (block.pid() != -1) {
-            throw std::exception();
+            throw OperationException("BLOCK_IS_USED");
         } else if (block.size() <= pages) {
-            throw std::exception();
+            throw OperationException("TOO_SMALL");
         }
 
         auto allocatedBlock = MemoryBlock(pid, block.address(), pages);
@@ -80,7 +80,7 @@ namespace MemoryManagement {
 
         auto block = blocks.at(blockIndex);
         if (block.pid() != pid) {
-            throw std::exception();
+            throw OperationException("PID_MISMATCH");
         }
 
         blocks[blockIndex] = MemoryBlock(-1, block.address(), block.size());
@@ -146,6 +146,7 @@ namespace MemoryManagement {
         std::vector<MemoryBlock> newBlocks(blocks.begin(), blocks.begin() + startBlockIndex);
 
         uint32_t currentBlock = startBlockIndex;
+		uint32_t compressingBlocks = 0;
         int32_t address = blocks[startBlockIndex].address();
         int32_t freeMemory = 0;
         while (currentBlock < blocks.size() && blocks[currentBlock].pid() == -1) {
@@ -153,14 +154,18 @@ namespace MemoryManagement {
             auto pos = std::find(freeBlocks.begin(), freeBlocks.end(), blocks[currentBlock]);
             freeBlocks.erase(pos);
             currentBlock += 1;
+			compressingBlocks += 1;
         }
+
+		if (compressingBlocks < 2) {
+			throw OperationException("SINGLE_BLOCK");
+		}
 
         newBlocks.push_back(MemoryBlock(-1, address, freeMemory));
         newBlocks.insert(newBlocks.end(), blocks.begin() + currentBlock, blocks.end());
         freeBlocks.push_back(MemoryBlock(-1, address, freeMemory));
 
         return MemoryState(newBlocks, freeBlocks);
-    }
     }
 }
 

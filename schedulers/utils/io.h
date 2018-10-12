@@ -4,6 +4,7 @@
 #include <vector>
 #include <istream>
 #include <ostream>
+#include <variant>
 
 #include "../algo/memory/requests.h"
 #include "../algo/memory/types.h"
@@ -15,7 +16,7 @@ using namespace MemoryManagement::Strategies;
 using namespace MemoryManagement::Types;
 using namespace MemoryManagement::Requests;
 
-Utils::Tasks::TaskPtr loadMemoryTask(const nlohmann::json& obj) {
+Utils::Tasks::MemoryTask loadMemoryTask(const nlohmann::json& obj) {
 	StrategyPtr strategy;
 	
 	auto strategyType = obj["strategy"];
@@ -73,11 +74,11 @@ Utils::Tasks::TaskPtr loadMemoryTask(const nlohmann::json& obj) {
 }
 
 namespace Utils::IO {
-	std::vector<Tasks::TaskPtr> loadTasks(std::istream& is)
+	std::vector<Tasks::Task> loadTasks(std::istream& is)
 	{
 		nlohmann::json obj;
 		is >> obj;
-		std::vector<Tasks::TaskPtr> tasks;
+		std::vector<Tasks::Task> tasks;
 
 		for (auto taskObj : obj) {
 			if (taskObj["type"] == "MEMORY_TASK") {
@@ -91,12 +92,14 @@ namespace Utils::IO {
 		return tasks;
 	}
 
-    void saveTasks(const std::vector<Tasks::TaskPtr>& tasks, std::ostream& os)
+    void saveTasks(const std::vector<Tasks::Task>& tasks, std::ostream& os)
     {
         auto obj = nlohmann::json::array();
 
         for (auto task : tasks) {
-            obj.push_back(task->dump());
+			if (auto* p = std::get_if<Tasks::MemoryTask>(&task)) {
+				obj.push_back(p->dump());
+			}
         }
 
         os << obj;

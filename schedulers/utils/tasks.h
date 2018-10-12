@@ -4,6 +4,7 @@
 #include <memory>
 #include <cstdint>
 #include <vector>
+#include <variant>
 #include <stdexcept>
 
 #include <nlohmann/json.hpp>
@@ -13,35 +14,13 @@
 #include "../algo/memory/exceptions.h"
 #include "exceptions.h"
 
-namespace Utils {
-namespace Tasks {
+namespace Utils::Tasks {
     using namespace MemoryManagement::Strategies;
     using namespace MemoryManagement::Types;
     using namespace MemoryManagement::Requests;
 	using namespace Exceptions;
-
-    enum class TaskType {
-        MEMORY_TASK,
-        PROCESS_TASK
-    };
-
-    class AbstractTask {
-    public:
-        AbstractTask(TaskType type) :
-            type(type)
-        {}
-
-        const TaskType type;
-
-        virtual nlohmann::json dump() const = 0;
-
-        virtual ~AbstractTask()
-        {}
-    };
-
-    using TaskPtr = std::shared_ptr<AbstractTask>;
-
-    class MemoryTask : public AbstractTask {
+	
+    class MemoryTask {
     private:
         StrategyPtr _strategy;
 
@@ -57,7 +36,6 @@ namespace Tasks {
                 const MemoryState& state,
                 const std::vector<RequestPtr> requests
         ) :
-            AbstractTask(TaskType::MEMORY_TASK),
             _strategy(strategy),
             _completed(completed),
             _state(state),
@@ -73,16 +51,14 @@ namespace Tasks {
             };
         }
     public:
-        static std::shared_ptr<MemoryTask> create(
+        static MemoryTask create(
                 StrategyPtr strategy,
                 uint32_t completed,
                 const MemoryState& state,
                 const std::vector<RequestPtr> requests
         )
         {
-            return std::shared_ptr<MemoryTask>(
-                new MemoryTask(strategy, completed, state, requests)
-            );
+			return { strategy, completed, state, requests };
         }
 
         static void validate(
@@ -133,7 +109,7 @@ namespace Tasks {
             return _requests;
         }
 
-        nlohmann::json dump() const override
+        nlohmann::json dump() const
         {
             nlohmann::json obj;
 
@@ -169,7 +145,12 @@ namespace Tasks {
             return obj;
         }
     };
-}
+
+	class ProcessesTask {
+
+	};
+
+	using Task = std::variant<MemoryTask, ProcessesTask>;
 }
 
 #endif // TASKS_H

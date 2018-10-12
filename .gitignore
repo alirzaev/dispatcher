@@ -3,5 +3,3 @@ Debug
 Release
 schedulers/Debug
 schedulers/Release
-schedulers/schedulers.vcxproj.user
-schedulers/schedulers.vcxproj.filters

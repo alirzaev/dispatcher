@@ -8,20 +8,20 @@
 #include <algorithm>
 
 #include "types.h"
+#include "exceptions.h"
 
 using namespace MemoryManagement::Types;
+using namespace MemoryManagement::Exceptions;
 
-namespace MemoryManagement {
-    namespace Operations {
-
+namespace MemoryManagement::Operations {
     /*
      * Операция выделения памяти процессу в заданном блоке памяти.
      * Выделенная память размещается в начале блока памяти. Новый
      * блок свободной памяти добавляется в конец списка свободных
      * блоков памяти.
      *
-     * @param state состояние памяти (список всех блоков и свободных)
-     * @param blockIndex индекс блока памяти, в котором необходимо выделить память
+     * @param state состояние памяти (список всех занятых и свободных блоков)
+     * @param blockIndex индекс блока, в котором необходимо выделить память
      * @param pid идентификатор процесса
      * @param pages размер выделяемой памяти в параграфах
      *
@@ -39,9 +39,9 @@ namespace MemoryManagement {
 
         auto block = blocks.at(blockIndex);
         if (block.pid() != -1) {
-            throw std::exception();
+            throw OperationException("BLOCK_IS_USED");
         } else if (block.size() <= pages) {
-            throw std::exception();
+            throw OperationException("TOO_SMALL");
         }
 
         auto allocatedBlock = MemoryBlock(pid, block.address(), pages);
@@ -63,7 +63,7 @@ namespace MemoryManagement {
      * Особожденный блок памяти помещается в конец списка свободных
      * блоков памяти.
      *
-     * @param state состояние памяти (список всех блоков и свободных)
+     * @param state состояние памяти (список всех занятых и свободных блоков)
      * @param pid идентификатор процесса
      * @param blockIndex индекс блока памяти, который необходимо освободить
      *
@@ -80,21 +80,21 @@ namespace MemoryManagement {
 
         auto block = blocks.at(blockIndex);
         if (block.pid() != pid) {
-            throw std::exception();
+            throw OperationException("PID_MISMATCH");
         }
 
         blocks[blockIndex] = MemoryBlock(-1, block.address(), block.size());
         freeBlocks.push_back(blocks[blockIndex]);
 
-        return MemoryState(blocks, freeBlocks);
+		return { blocks, freeBlocks };
     }
 
     /*
      * Операция дефрагментации памяти. Занятые блоки памяти перемещаются
      * в начало адресного пространства. Освободившаяся память собирается
-     * в один блок свободной памяти.
+     * в один блок.
      *
-     * @param state состояние памяти (список всех блоков и свободных)
+     * @param state состояние памяти (список всех занятых и свободных блоков)
      *
      * @return новое состояние памяти
      */
@@ -111,17 +111,17 @@ namespace MemoryManagement {
 
         for (const auto& block : blocks) {
             if (block.pid() != -1) {
-                newBlocks.push_back(MemoryBlock(block.pid(), address, block.size()));
+                newBlocks.emplace_back(block.pid(), address, block.size());
                 address += block.size();
             } else {
                 freeMemory += block.size();
             }
         }
 
-        newBlocks.push_back(MemoryBlock(-1, address, freeMemory));
+        newBlocks.emplace_back(-1, address, freeMemory);
         freeBlocks = { MemoryBlock(-1, address, freeMemory) };
 
-        return MemoryState(newBlocks, freeBlocks);
+		return { newBlocks, freeBlocks };
     }
 
     /*
@@ -146,6 +146,7 @@ namespace MemoryManagement {
         std::vector<MemoryBlock> newBlocks(blocks.begin(), blocks.begin() + startBlockIndex);
 
         uint32_t currentBlock = startBlockIndex;
+		uint32_t compressingBlocks = 0;
         int32_t address = blocks[startBlockIndex].address();
         int32_t freeMemory = 0;
         while (currentBlock < blocks.size() && blocks[currentBlock].pid() == -1) {
@@ -153,14 +154,18 @@ namespace MemoryManagement {
             auto pos = std::find(freeBlocks.begin(), freeBlocks.end(), blocks[currentBlock]);
             freeBlocks.erase(pos);
             currentBlock += 1;
+			compressingBlocks += 1;
         }
 
-        newBlocks.push_back(MemoryBlock(-1, address, freeMemory));
-        newBlocks.insert(newBlocks.end(), blocks.begin() + currentBlock, blocks.end());
-        freeBlocks.push_back(MemoryBlock(-1, address, freeMemory));
+		if (compressingBlocks < 2) {
+			throw OperationException("SINGLE_BLOCK");
+		}
 
-        return MemoryState(newBlocks, freeBlocks);
-    }
+        newBlocks.emplace_back(-1, address, freeMemory);
+        newBlocks.insert(newBlocks.end(), blocks.begin() + currentBlock, blocks.end());
+        freeBlocks.emplace_back(-1, address, freeMemory);
+
+		return { newBlocks, freeBlocks };
     }
 }
 

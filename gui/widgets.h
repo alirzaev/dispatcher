@@ -48,7 +48,7 @@ namespace Ui::Widgets {
 		{
 			auto* notebook = new wxNotebook(this, wxID_ANY);
 
-			auto* page = new wxTextCtrl(notebook, wxID_ANY);
+			auto* page = new wxControl(notebook, wxID_ANY);
 			notebook->AddPage(page, "Задание №1");
 		}
 

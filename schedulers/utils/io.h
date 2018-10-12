@@ -58,7 +58,7 @@ Utils::Tasks::MemoryTask loadMemoryTask(const nlohmann::json& obj) {
 			));
 		}
 		else {
-			throw Utils::Exceptions::TaskException("UNKNOWN_STRATEGY");
+			throw Utils::Exceptions::TaskException("UNKNOWN_REQUEST");
 		}
 	}
 

@@ -1,8 +1,3 @@
 .vs
-Debug
-Release
-gui/Debug
-gui/Release
-gui/Release static
-schedulers/Debug
-schedulers/Release
+include
+build*

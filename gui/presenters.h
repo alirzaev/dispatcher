@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <wx/log.h>
 
 #include "views.h"
 
@@ -22,12 +21,10 @@ namespace Ui::Presenters {
 		MainWindowPresenter(Views::MainWindowView* view) :
 			_view(view)
 		{
-			view->onOpenTaskListener([](const std::string& path) {
-				wxLogDebug(path.c_str());
+            view->onOpenTaskListener([](const std::string& path) {
 			});
 
-			view->onSaveTaskListener([](const std::string& path) {
-				wxLogDebug(path.c_str());
+            view->onSaveTaskListener([](const std::string& path) {
 			});
 		}
 	};

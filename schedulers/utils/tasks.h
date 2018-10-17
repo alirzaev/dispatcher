@@ -4,6 +4,7 @@
 #include <memory>
 #include <cstdint>
 #include <vector>
+#include <variant>
 #include <stdexcept>
 
 #include <nlohmann/json.hpp>
@@ -11,35 +12,15 @@
 #include "../algo/memory/requests.h"
 #include "../algo/memory/strategies.h"
 #include "../algo/memory/exceptions.h"
+#include "exceptions.h"
 
-namespace Utils {
-namespace Tasks {
+namespace Utils::Tasks {
     using namespace MemoryManagement::Strategies;
     using namespace MemoryManagement::Types;
     using namespace MemoryManagement::Requests;
-
-    enum class TaskType {
-        MEMORY_TASK,
-        PROCESS_TASK
-    };
-
-    class AbstractTask {
-    public:
-        AbstractTask(TaskType type) :
-            type(type)
-        {}
-
-        const TaskType type;
-
-        virtual nlohmann::json dump() const = 0;
-
-        virtual ~AbstractTask()
-        {}
-    };
-
-    using TaskPtr = std::shared_ptr<AbstractTask>;
-
-    class MemoryTask : public AbstractTask {
+	using namespace Exceptions;
+	
+    class MemoryTask {
     private:
         StrategyPtr _strategy;
 
@@ -55,7 +36,6 @@ namespace Tasks {
                 const MemoryState& state,
                 const std::vector<RequestPtr> requests
         ) :
-            AbstractTask(TaskType::MEMORY_TASK),
             _strategy(strategy),
             _completed(completed),
             _state(state),
@@ -71,16 +51,14 @@ namespace Tasks {
             };
         }
     public:
-        static std::shared_ptr<MemoryTask> create(
+        static MemoryTask create(
                 StrategyPtr strategy,
                 uint32_t completed,
                 const MemoryState& state,
                 const std::vector<RequestPtr> requests
         )
         {
-            return std::shared_ptr<MemoryTask>(
-                new MemoryTask(strategy, completed, state, requests)
-            );
+			return { strategy, completed, state, requests };
         }
 
         static void validate(
@@ -91,12 +69,9 @@ namespace Tasks {
         )
         {
             if (requests.size() < completed) {
-                throw std::logic_error("COMPLETED_OOR");
+                throw TaskException("COMPLETED_OOR");
             }
-            auto currentState = MemoryState{
-                {MemoryBlock{-1, 0, 256}},
-                {MemoryBlock{-1, 0, 256}}
-            };
+			auto currentState = INITIAL_MEMORY_STATE;
             try {
                 for (
                      auto req = requests.begin();
@@ -106,10 +81,10 @@ namespace Tasks {
                     currentState = strategy->processRequest(*req, currentState);
                 }
                 if (currentState != state) {
-                    throw std::logic_error("STATE_MISMATCH");
+                    throw TaskException("STATE_MISMATCH");
                 }
             } catch (MemoryManagement::Exceptions::BaseException& ex) {
-                throw std::logic_error(ex.what());
+                throw TaskException(ex.what());
             }
         }
 
@@ -134,9 +109,11 @@ namespace Tasks {
             return _requests;
         }
 
-        nlohmann::json dump() const override
+        nlohmann::json dump() const
         {
             nlohmann::json obj;
+
+			obj["type"] = "MEMORY_TASK";
 
             obj["strategy"] = strategy()->toString();
 
@@ -168,7 +145,12 @@ namespace Tasks {
             return obj;
         }
     };
-}
+
+	class ProcessesTask {
+
+	};
+
+	using Task = std::variant<MemoryTask, ProcessesTask>;
 }
 
 #endif // TASKS_H

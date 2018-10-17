@@ -54,6 +54,11 @@ namespace MemoryManagement {
         std::vector<MemoryBlock>,
         std::vector<MemoryBlock>
     >;
+
+	MemoryState INITIAL_MEMORY_STATE{
+		{MemoryBlock{-1, 0, 256}},
+		{MemoryBlock{-1, 0, 256}}
+	};
     }
 }
 #endif // TYPES_H

@@ -1,3 +1,5 @@
 .vs
 include
 build*
+schedulers/schedulers.pro.user
+gui/gui.pro.user

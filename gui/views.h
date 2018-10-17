@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 namespace Ui::Views {
 	class MemoryTaskView {
 
@@ -10,6 +12,15 @@ namespace Ui::Views {
 	};
 
 	class MainWindowView {
+	public:
+		using OnOpenListener = std::function<void(const std::string&)>;
 
+		using OnSaveListener = std::function<void(const std::string&)>;
+
+		MainWindowView() = default;
+
+		virtual void onOpenTaskListener(OnOpenListener listener) = 0;
+
+		virtual void onSaveTaskListener(OnSaveListener listener) = 0;
 	};
 }

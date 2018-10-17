@@ -26,5 +26,8 @@
     <ClInclude Include="presenters.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="widgets.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

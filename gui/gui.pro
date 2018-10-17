@@ -28,15 +28,18 @@ INCLUDEPATH += "..\include"
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    memorytask.cpp
 
 HEADERS += \
         mainwindow.h \
     presenters.h \
-    views.h
+    views.h \
+    memorytask.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    memorytask.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <QDebug>
 
 #include "views.h"
 
@@ -22,9 +23,11 @@ namespace Ui::Presenters {
 			_view(view)
 		{
             view->onOpenTaskListener([](const std::string& path) {
+                qDebug() << "open: " << QString::fromStdString(path);
 			});
 
             view->onSaveTaskListener([](const std::string& path) {
+                qDebug() << "save: " << QString::fromStdString(path);
 			});
 		}
 	};

@@ -4,7 +4,9 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-    main.cpp
+    main.cpp \
+    utils/io.cpp \
+    algo/memory/types.cpp
 
 INCLUDEPATH += "..\include"
 

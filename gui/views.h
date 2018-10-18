@@ -2,7 +2,7 @@
 
 #include <functional>
 
-namespace Ui::Views {
+namespace Views {
 	class MemoryTaskView {
 
 	};

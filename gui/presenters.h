@@ -5,7 +5,7 @@
 
 #include "views.h"
 
-namespace Ui::Presenters {
+namespace Presenters {
 	class MemoryTaskPresenter {
 
 	};

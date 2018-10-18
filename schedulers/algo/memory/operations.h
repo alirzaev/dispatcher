@@ -27,7 +27,7 @@ namespace MemoryManagement::Operations {
      *
      * @return новое состояние памяти
      */
-    MemoryState allocateMemory(
+    inline MemoryState allocateMemory(
             const MemoryState& state,
             uint32_t blockIndex,
             int32_t pid,
@@ -69,7 +69,7 @@ namespace MemoryManagement::Operations {
      *
      * @return новое состояние памяти
      */
-    MemoryState freeMemory(
+    inline MemoryState freeMemory(
             const MemoryState& state,
             int32_t pid,
             uint32_t blockIndex
@@ -98,7 +98,7 @@ namespace MemoryManagement::Operations {
      *
      * @return новое состояние памяти
      */
-    MemoryState defragmentMemory(
+    inline MemoryState defragmentMemory(
             const MemoryState& state
     )
     {
@@ -135,7 +135,7 @@ namespace MemoryManagement::Operations {
      *
      * @return новое состояние памяти
      */
-    MemoryState compressMemory(
+    inline MemoryState compressMemory(
             const MemoryState& state,
             uint32_t startBlockIndex
     )

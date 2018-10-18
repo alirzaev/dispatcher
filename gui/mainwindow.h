@@ -20,6 +20,9 @@ public:
 
     void onSaveTaskListener(OnSaveListener listener) override;
 
+    std::vector<Views::TaskView>
+    createTaskViews(const std::vector<Utils::Tasks::Task>& tasks) override;
+
     ~MainWindow();
 
 private:

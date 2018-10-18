@@ -14,12 +14,41 @@
 
 namespace Presenters {
 	class MemoryTaskPresenter {
+    private:
+        Views::MemoryTaskView* _view;
 
+        Models::MemoryModel* _model;
+
+    public:
+        MemoryTaskPresenter(Views::MemoryTaskView* view, Models::MemoryModel* model) :
+            _view(view), _model(model)
+        {
+            refreshView();
+        }
+
+        void refreshView()
+        {
+            auto [blocks, freeBlocks] = _model->state;
+            _view->setMemoryBlocks(blocks);
+            _view->setFreeMemoryBlocks(freeBlocks);
+            auto index = _model->task.completed();
+            _view->setRequest(_model->task.requests()[index]);
+        }
 	};
 
 	class ProcessTaskPresenter {
+    private:
+        Views::ProcessTaskView* _view;
 
+        Models::ProcessesModel* _model;
+
+    public:
+        ProcessTaskPresenter(Views::ProcessTaskView* view, Models::ProcessesModel* model) :
+            _view(view), _model(model)
+        {}
 	};
+
+    using TaskPresenter = std::variant<MemoryTaskPresenter, ProcessTaskPresenter>;
 
 	class MainWindowPresenter {
 	private:
@@ -27,12 +56,13 @@ namespace Presenters {
 
         std::vector<Models::TaskModel> _taskModels;
 
+        std::vector<TaskPresenter> _taskPresenters;
+
         void loadTasks(const std::string& path)
         {
             std::ifstream file(path);
 
             auto tasks = Utils::IO::loadTasks(file);
-
             std::vector<Models::TaskModel> newTaskModels;
             for (const auto& task : tasks)
             {
@@ -41,7 +71,19 @@ namespace Presenters {
                     newTaskModels.push_back(Models::MemoryModel{p->state(), *p});
                 }
             }
-            _taskModels = std::move(newTaskModels);
+
+            auto views = _view->createTaskViews(tasks);
+            std::vector<TaskPresenter> newTaskPresenters;
+            for (size_t i = 0; i < views.size(); ++i)
+            {
+                if (auto* view = std::get_if<Views::MemoryTaskView*>(&views[i]))
+                {
+                    auto* model = std::get_if<Models::MemoryModel>(&newTaskModels[i]);
+                    newTaskPresenters.push_back(MemoryTaskPresenter(*view, model));
+                }
+            }
+            _taskModels.swap(newTaskModels);
+            _taskPresenters.swap(newTaskPresenters);
         }
 
         void saveTasks(const std::string& path)
@@ -65,11 +107,11 @@ namespace Presenters {
 		MainWindowPresenter(Views::MainWindowView* view) :
 			_view(view)
 		{
-            view->onOpenTaskListener([=](const std::string& path) {
+            _view->onOpenTaskListener([=](const std::string& path) {
                 this->loadTasks(path);
             });
 
-            view->onSaveTaskListener([=](const std::string& path) {
+            _view->onSaveTaskListener([=](const std::string& path) {
                 this->saveTasks(path);
 			});
 		}

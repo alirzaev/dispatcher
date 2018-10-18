@@ -2,7 +2,7 @@
 #include "presenters.h"
 #include <QApplication>
 
-using namespace Ui::Presenters;
+using namespace Presenters;
 
 int main(int argc, char *argv[])
 {

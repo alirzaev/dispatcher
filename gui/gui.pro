@@ -29,13 +29,16 @@ INCLUDEPATH += "..\include"
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    memorytask.cpp
+    memorytask.cpp \
+    ../schedulers/utils/io.cpp \
+    ../schedulers/algo/memory/types.cpp
 
 HEADERS += \
         mainwindow.h \
     presenters.h \
     views.h \
-    memorytask.h
+    memorytask.h \
+    models.h
 
 FORMS += \
         mainwindow.ui \

@@ -9,7 +9,7 @@ namespace Ui {
 class MainWindow;
 }
 
-class MainWindow : public QMainWindow, public Ui::Views::MainWindowView
+class MainWindow : public QMainWindow, public Views::MainWindowView
 {
     Q_OBJECT
 
@@ -19,6 +19,9 @@ public:
     void onOpenTaskListener(OnOpenListener listener) override;
 
     void onSaveTaskListener(OnSaveListener listener) override;
+
+    std::vector<Views::TaskView>
+    createTaskViews(const std::vector<Utils::Tasks::Task>& tasks) override;
 
     ~MainWindow();
 

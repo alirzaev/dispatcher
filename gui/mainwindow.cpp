@@ -6,16 +6,16 @@
 
 #include "memorytask.h"
 
+using namespace Views;
+using namespace Utils;
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    Ui::Views::MainWindowView(),
+    Views::MainWindowView(),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     ui->tabWidget->clear();
-    ui->tabWidget->addTab(new MemoryTask(this), "Менеджер памяти");
-    ui->tabWidget->addTab(new MemoryTask(this), "Менеджер памяти");
-    ui->tabWidget->addTab(new MemoryTask(this), "Менеджер памяти");
 
     connect(ui->actionOpenTask, &QAction::triggered, this, &MainWindow::openTaskDialog);
     connect(ui->actionSaveTask, &QAction::triggered, this, &MainWindow::saveTaskDialog);
@@ -53,4 +53,24 @@ void MainWindow::saveTaskDialog()
     {
         saveTaskListener(fileName.toStdString());
     }
+}
+
+std::vector<Views::TaskView>
+MainWindow::createTaskViews(const std::vector<Tasks::Task>& tasks)
+{
+    std::vector<Views::TaskView> views;
+
+    auto* tabs = ui->tabWidget;
+    tabs->clear();
+    for (const auto& task : tasks)
+    {
+        if (auto* p = std::get_if<Tasks::MemoryTask>(&task))
+        {
+            auto* taskView = new MemoryTask(this);
+            tabs->addTab(taskView, "Диспетчеризация памяти");
+            views.push_back(taskView);
+        }
+    }
+
+    return views;
 }

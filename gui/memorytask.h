@@ -2,6 +2,7 @@
 #define MEMORYTASK_H
 
 #include <QWidget>
+#include <QPoint>
 
 #include "views.h"
 
@@ -26,6 +27,8 @@ public:
 
 private:
     Ui::MemoryTask *ui;
+
+    void provideContextMenu(const QPoint& pos);
 };
 
 #endif // MEMORYTASK_H

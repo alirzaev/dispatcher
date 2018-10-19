@@ -1,9 +1,40 @@
 #include <QString>
+#include <QMenu>
+#include <QDebug>
 
 #include "memorytask.h"
 #include "ui_memorytask.h"
 
 using namespace MemoryManagement;
+
+class ContextMenu : public QMenu
+{
+public:
+    static QString ACTION_ALLOCATE;
+
+    static QString ACTION_FREE;
+
+    static QString ACTION_COMPRESS;
+
+    static QString ACTION_DEFRAGMENT;
+
+    ContextMenu() :
+        QMenu(nullptr)
+    {
+        addAction(ACTION_ALLOCATE);
+        addAction(ACTION_FREE);
+        addAction(ACTION_COMPRESS);
+        addAction(ACTION_DEFRAGMENT);
+    }
+};
+
+QString ContextMenu::ACTION_ALLOCATE = "Выделить приложению";
+
+QString ContextMenu::ACTION_FREE = "Освободить";
+
+QString ContextMenu::ACTION_COMPRESS = "Объединить со следующим";
+
+QString ContextMenu::ACTION_DEFRAGMENT = "Уплотнение памяти";
 
 QString createProcessDescr =
         "Создан новый процесс PID = %1. "
@@ -26,6 +57,10 @@ MemoryTask::MemoryTask(QWidget *parent) :
     ui(new Ui::MemoryTask)
 {
     ui->setupUi(this);
+
+    ui->listMemBlocks->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->listMemBlocks, &QListWidget::customContextMenuRequested,
+            this, &MemoryTask::provideContextMenu);
 }
 
 MemoryTask::~MemoryTask()
@@ -76,5 +111,34 @@ void MemoryTask::setRequest(MemoryManagement::Requests::RequestPtr request)
     } else if (request->type == Requests::RequestType::FREE_MEMORY) {
         auto obj = *dynamic_cast<Requests::FreeMemory*>(request.get());
         label->setText(freeMemoryDescr.arg(obj.pid).arg(obj.address));
+    }
+}
+
+void MemoryTask::provideContextMenu(const QPoint& pos)
+{
+    auto globalPos = ui->listMemBlocks->mapToGlobal(pos);
+    auto selectedBlock = ui->listMemBlocks->itemAt(pos);
+
+    qDebug() << selectedBlock->text();
+
+    ContextMenu menu;
+
+    auto action = menu.exec(globalPos);
+
+    if (action->text() == ContextMenu::ACTION_ALLOCATE)
+    {
+        qDebug() << "allocate";
+    }
+    else if (action->text() == ContextMenu::ACTION_FREE)
+    {
+        qDebug() << "free";
+    }
+    else if (action->text() == ContextMenu::ACTION_COMPRESS)
+    {
+        qDebug() << "compress";
+    }
+    else if (action->text() == ContextMenu::ACTION_DEFRAGMENT)
+    {
+        qDebug() << "defragment";
     }
 }

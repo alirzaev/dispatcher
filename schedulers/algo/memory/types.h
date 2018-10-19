@@ -4,6 +4,7 @@
 #include <vector>
 #include <cstdint>
 #include <tuple>
+#include <nlohmann/json.hpp>
 
 namespace MemoryManagement {
     namespace Types {
@@ -48,12 +49,75 @@ namespace MemoryManagement {
                     _address == rhs._address &&
                     _size == rhs._size;
         }
+
+        nlohmann::json dump() const
+        {
+            return {
+                {"pid", _pid},
+                {"address", _address},
+                {"size", _size}
+            };
+        }
     };
 
-    using MemoryState = std::tuple<
-        std::vector<MemoryBlock>,
-        std::vector<MemoryBlock>
-    >;
+    class MemoryState
+    {
+    public:
+        std::vector<MemoryBlock> blocks;
+
+        std::vector<MemoryBlock> freeBlocks;
+
+        MemoryState(const std::vector<MemoryBlock>& blocks,
+                    const std::vector<MemoryBlock>& freeBlocks) :
+            blocks(blocks), freeBlocks(freeBlocks)
+        {}
+
+        MemoryState() = default;
+
+        MemoryState(const MemoryState& state) = default;
+
+        MemoryState(MemoryState&& state) = default;
+
+        MemoryState& operator=(const MemoryState& state) = default;
+
+        MemoryState& operator=(MemoryState&& state) = default;
+
+        bool operator==(const MemoryState& state) const
+        {
+            return blocks == state.blocks && freeBlocks == state.freeBlocks;
+        }
+
+        bool operator!=(const MemoryState& state) const
+        {
+            return !(*this == state);
+        }
+
+        nlohmann::json dump() const
+        {
+            auto jsonBlocks = nlohmann::json::array();
+            auto jsonFreeBlocks = nlohmann::json::array();
+
+            for (const auto& block : blocks) {
+                jsonBlocks.push_back(block.dump());
+            }
+            for (const auto& block : freeBlocks) {
+                jsonFreeBlocks.push_back(block.dump());
+            }
+
+            return {
+                {"blocks", jsonBlocks},
+                {"free_blocks", jsonFreeBlocks}
+            };
+        }
+
+        static MemoryState initial()
+        {
+            return {
+                {MemoryBlock{-1, 0, 256}},
+                {MemoryBlock{-1, 0, 256}}
+            };
+        }
+    };
 
     extern MemoryState INITIAL_MEMORY_STATE;
     }

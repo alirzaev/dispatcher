@@ -42,14 +42,6 @@ namespace Utils::Tasks {
             _requests(requests)
         {}
 
-        nlohmann::json dump(const MemoryBlock& block) const
-        {
-            return {
-                {"pid", block.pid()},
-                {"address", block.address()},
-                {"size", block.size()}
-            };
-        }
     public:
         static MemoryTask create(
                 StrategyPtr strategy,
@@ -71,7 +63,7 @@ namespace Utils::Tasks {
             if (requests.size() < completed) {
                 throw TaskException("COMPLETED_OOR");
             }
-			auto currentState = INITIAL_MEMORY_STATE;
+            auto currentState = MemoryState::initial();
             try {
                 for (
                      auto req = requests.begin();
@@ -119,20 +111,7 @@ namespace Utils::Tasks {
 
             obj["completed"] = completed();
 
-            auto [blocks, freeBlocks] = state();
-            auto jsonBlocks = nlohmann::json::array();
-            auto jsonFreeBlocks = nlohmann::json::array();
-
-            for (const auto& block : blocks) {
-                jsonBlocks.push_back(dump(block));
-            }
-            for (const auto& block : freeBlocks) {
-                jsonFreeBlocks.push_back(dump(block));
-            }
-            obj["state"] = {
-                {"blocks", jsonBlocks},
-                {"free_blocks", jsonFreeBlocks}
-            };
+            obj["state"] = state().dump();
 
             auto jsonRequests = nlohmann::json::array();
 

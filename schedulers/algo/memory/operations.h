@@ -34,8 +34,8 @@ namespace MemoryManagement::Operations {
             int32_t pages
     )
     {
-        std::vector<MemoryBlock> blocks, freeBlocks;
-        std::tie(blocks, freeBlocks) = state;
+        //std::vector<MemoryBlock> blocks, freeBlocks;
+        auto [blocks, freeBlocks] = state;
 
         auto block = blocks.at(blockIndex);
         if (block.pid() != -1) {
@@ -75,8 +75,8 @@ namespace MemoryManagement::Operations {
             uint32_t blockIndex
     )
     {
-        std::vector<MemoryBlock> blocks, freeBlocks;
-        std::tie(blocks, freeBlocks) = state;
+        //std::vector<MemoryBlock> blocks, freeBlocks;
+        auto [blocks, freeBlocks] = state;
 
         auto block = blocks.at(blockIndex);
         if (block.pid() != pid) {
@@ -102,8 +102,8 @@ namespace MemoryManagement::Operations {
             const MemoryState& state
     )
     {
-        std::vector<MemoryBlock> blocks, freeBlocks;
-        std::tie(blocks, freeBlocks) = state;
+        //std::vector<MemoryBlock> blocks, freeBlocks;
+        auto [blocks, freeBlocks] = state;
 
         int32_t address = 0;
         int32_t freeMemory = 0;
@@ -140,8 +140,8 @@ namespace MemoryManagement::Operations {
             uint32_t startBlockIndex
     )
     {
-        std::vector<MemoryBlock> blocks, freeBlocks;
-        std::tie(blocks, freeBlocks) = state;
+        //std::vector<MemoryBlock> blocks, freeBlocks;
+        auto [blocks, freeBlocks] = state;
 
         std::vector<MemoryBlock> newBlocks(blocks.begin(), blocks.begin() + startBlockIndex);
 

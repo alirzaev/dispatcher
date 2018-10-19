@@ -24,25 +24,25 @@
 				"type": "CREATE_PROCESS",
                 "pid": 0,
                 "bytes": 995328,
-                "pages": 244
+                "pages": 243
 			},
 			{
 				"type": "CREATE_PROCESS",
                 "pid": 1,
                 "bytes": 12288,
-                "pages": 4
+                "pages": 3
 			},
 			{
 				"type": "CREATE_PROCESS",
                 "pid": 2,
                 "bytes": 16384,
-                "pages": 5
+                "pages": 4
 			},
 			{
 				"type": "CREATE_PROCESS",
                 "pid": 1,
                 "bytes": 847872,
-                "pages": 208
+                "pages": 207
 			},
 			{
 				"type": "TERMINATE_PROCESS",
@@ -52,7 +52,7 @@
 				"type": "CREATE_PROCESS",
                 "pid": 2,
                 "bytes": 8192,
-                "pages": 3
+                "pages": 2
 			},
 			{
 				"type": "FREE_MEMORY",
@@ -63,13 +63,13 @@
 				"type": "CREATE_PROCESS",
                 "pid": 3,
                 "bytes": 970752,
-                "pages": 238
+                "pages": 237
 			},
 			{
 				"type": "CREATE_PROCESS",
                 "pid": 4,
                 "bytes": 28672,
-                "pages": 8
+                "pages": 7
 			},
 			{
 				"type": "TERMINATE_PROCESS",
@@ -83,7 +83,7 @@
 				"type": "CREATE_PROCESS",
                 "pid": 5,
                 "bytes": 32768,
-                "pages": 9
+                "pages": 8
 			},
 			{
 				"type": "TERMINATE_PROCESS",
@@ -93,19 +93,19 @@
 				"type": "CREATE_PROCESS",
                 "pid": 1,
                 "bytes": 610304,
-                "pages": 150
+                "pages": 149
 			},
 			{
 				"type": "CREATE_PROCESS",
                 "pid": 2,
                 "bytes": 45056,
-                "pages": 12
+                "pages": 11
 			},
 			{
 				"type": "CREATE_PROCESS",
                 "pid": 3,
                 "bytes": 94208,
-                "pages": 24
+                "pages": 23
 			},
 			{
 				"type": "FREE_MEMORY",
@@ -116,19 +116,19 @@
 				"type": "CREATE_PROCESS",
                 "pid": 4,
                 "bytes": 36864,
-                "pages": 10
+                "pages": 9
 			},
 			{
 				"type": "CREATE_PROCESS",
                 "pid": 12,
                 "bytes": 139264,
-                "pages": 35
+                "pages": 34
 			},
 			{
 				"type": "ALLOCATE_MEMORY",
                 "pid": 2,
                 "bytes": 8192,
-                "pages": 3
+                "pages": 2
 			},
 			{
 				"type": "TERMINATE_PROCESS",
@@ -138,13 +138,13 @@
 				"type": "ALLOCATE_MEMORY",
                 "pid": 3,
                 "bytes": 45056,
-                "pages": 12
+                "pages": 11
 			},
 			{
 				"type": "CREATE_PROCESS",
                 "pid": 6,
                 "bytes": 20480,
-                "pages": 6
+                "pages": 5
 			},
 			{
 				"type": "ALLOCATE_MEMORY",

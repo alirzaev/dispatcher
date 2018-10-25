@@ -1,6 +1,7 @@
 #include <QString>
 #include <QMenu>
 #include <QDebug>
+#include <QRegExp>
 
 #include "memorytask.h"
 #include "ui_memorytask.h"
@@ -50,6 +51,22 @@ QString freeMemoryDescr =
 QString allocateMemoryDescr =
         "Процесс PID = %1 выдал запрос на выделение ему "
         "%2 байт (%3 параграфов) оперативной памяти";
+
+MemoryManagement::Types::MemoryBlock parseMemoryBlock(const QString& str)
+{
+    QRegExp re("address:\\s+(\\d+); size:\\s+(\\d+); pid:\\s+(-?\\d+)");
+    if (re.exactMatch(str))
+    {
+        int32_t address = re.cap(1).toInt(),
+                size = re.cap(2).toInt(),
+                pid = re.cap(3).toInt();
+        return {pid, size, address};
+    }
+    else
+    {
+        throw std::exception{};
+    }
+}
 
 MemoryTask::MemoryTask(QWidget *parent) :
     QWidget(parent),
@@ -124,6 +141,12 @@ void MemoryTask::provideContextMenu(const QPoint& pos)
     ContextMenu menu;
 
     auto action = menu.exec(globalPos);
+    if (!action)
+    {
+        return;
+    }
+
+    auto block = parseMemoryBlock(selectedBlock->text());
 
     if (action->text() == ContextMenu::ACTION_ALLOCATE)
     {

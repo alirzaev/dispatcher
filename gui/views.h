@@ -12,6 +12,10 @@
 namespace Views {
 	class MemoryTaskView {
     public:
+        using OnAllocateActionListener = std::function<void(int32_t, int32_t, int32_t)>; // pid, size, blockIndex
+
+        virtual void onAllocateAction(OnAllocateActionListener listener) = 0;
+
         virtual void setMemoryBlocks(const std::vector<MemoryManagement::Types::MemoryBlock>& blocks) = 0;
 
         virtual void setFreeMemoryBlocks(const std::vector<MemoryManagement::Types::MemoryBlock>& blocks) = 0;

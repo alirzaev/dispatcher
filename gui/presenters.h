@@ -5,15 +5,20 @@
 #include <vector>
 #include <variant>
 #include <utility>
+#include <memory>
 #include <QDebug>
 
 #include "views.h"
 #include "models.h"
 #include "../schedulers/utils/io.h"
 #include "../schedulers/utils/tasks.h"
+#include "../schedulers/algo/memory/operations.h"
 
 namespace Presenters {
-	class MemoryTaskPresenter {
+    class AbstractTaskPresenter
+    { };
+
+    class MemoryTaskPresenter : public AbstractTaskPresenter {
     private:
         Views::MemoryTaskView* _view;
 
@@ -21,8 +26,13 @@ namespace Presenters {
 
     public:
         MemoryTaskPresenter(Views::MemoryTaskView* view, Models::MemoryModel* model) :
+            AbstractTaskPresenter (),
             _view(view), _model(model)
         {
+            _view->onAllocateAction([=](int32_t pid, int32_t size, int32_t blockIndex) {
+                this->allocateMemory(pid, size, blockIndex);
+            });
+
             refreshView();
         }
 
@@ -34,9 +44,16 @@ namespace Presenters {
             auto index = _model->task.completed();
             _view->setRequest(_model->task.requests()[index]);
         }
+
+        void allocateMemory(int32_t pid, int32_t size, int32_t blockIndex)
+        {
+            using namespace MemoryManagement;
+            _model->state = Operations::allocateMemory(_model->state, blockIndex, pid, size);
+            refreshView();
+        }
 	};
 
-	class ProcessTaskPresenter {
+    class ProcessTaskPresenter : public AbstractTaskPresenter {
     private:
         Views::ProcessTaskView* _view;
 
@@ -44,11 +61,12 @@ namespace Presenters {
 
     public:
         ProcessTaskPresenter(Views::ProcessTaskView* view, Models::ProcessesModel* model) :
+            AbstractTaskPresenter (),
             _view(view), _model(model)
         {}
 	};
 
-    using TaskPresenter = std::variant<MemoryTaskPresenter, ProcessTaskPresenter>;
+    using TaskPresenter = std::shared_ptr<AbstractTaskPresenter>;
 
 	class MainWindowPresenter {
 	private:
@@ -79,7 +97,7 @@ namespace Presenters {
                 if (auto* view = std::get_if<Views::MemoryTaskView*>(&views[i]))
                 {
                     auto* model = std::get_if<Models::MemoryModel>(&newTaskModels[i]);
-                    newTaskPresenters.push_back(MemoryTaskPresenter(*view, model));
+                    newTaskPresenters.emplace_back(new MemoryTaskPresenter(*view, model));
                 }
             }
             _taskModels.swap(newTaskModels);

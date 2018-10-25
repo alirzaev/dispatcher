@@ -2,9 +2,11 @@
 #include <QMenu>
 #include <QDebug>
 #include <QRegExp>
+#include <QMessageBox>
 
 #include "memorytask.h"
 #include "ui_memorytask.h"
+#include "dialogs/allocatememorydialog.h"
 
 using namespace MemoryManagement;
 
@@ -60,7 +62,7 @@ MemoryManagement::Types::MemoryBlock parseMemoryBlock(const QString& str)
         int32_t address = re.cap(1).toInt(),
                 size = re.cap(2).toInt(),
                 pid = re.cap(3).toInt();
-        return {pid, size, address};
+        return {pid, address, size};
     }
     else
     {
@@ -135,8 +137,9 @@ void MemoryTask::provideContextMenu(const QPoint& pos)
 {
     auto globalPos = ui->listMemBlocks->mapToGlobal(pos);
     auto selectedBlock = ui->listMemBlocks->itemAt(pos);
+    auto row = ui->listMemBlocks->indexAt(pos).row();
 
-    qDebug() << selectedBlock->text();
+    qDebug() << selectedBlock->text() << row;
 
     ContextMenu menu;
 
@@ -151,6 +154,7 @@ void MemoryTask::provideContextMenu(const QPoint& pos)
     if (action->text() == ContextMenu::ACTION_ALLOCATE)
     {
         qDebug() << "allocate";
+        processActionAllocate(block, row);
     }
     else if (action->text() == ContextMenu::ACTION_FREE)
     {
@@ -164,4 +168,22 @@ void MemoryTask::provideContextMenu(const QPoint& pos)
     {
         qDebug() << "defragment";
     }
+}
+
+void MemoryTask::processActionAllocate(const MemoryBlock &block, int row)
+{
+    auto dialog = AllocateMemoryDialog(this, block.size());
+    auto res = dialog.exec();
+    if (res == QDialog::Accepted) {
+        auto pid = dialog.data.first;
+        auto size = dialog.data.second;
+
+        allocateActionListener(pid, size, row);
+    }
+}
+
+
+void MemoryTask::onAllocateAction(OnAllocateActionListener listener)
+{
+    allocateActionListener = listener;
 }

@@ -24,7 +24,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++1z
 
-INCLUDEPATH += "..\include"
+INCLUDEPATH += "../include"
 
 SOURCES += \
         main.cpp \

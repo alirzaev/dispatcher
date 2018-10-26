@@ -26,7 +26,7 @@ public:
 
     void setRequest(MemoryManagement::Requests::RequestPtr request) override;
 
-    ~MemoryTask();
+    ~MemoryTask() override;
 
 private:
     Ui::MemoryTask *ui;

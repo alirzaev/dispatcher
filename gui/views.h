@@ -21,6 +21,8 @@ namespace Views {
         virtual void setFreeMemoryBlocks(const std::vector<MemoryManagement::Types::MemoryBlock>& blocks) = 0;
 
         virtual void setRequest(MemoryManagement::Requests::RequestPtr request) = 0;
+
+        virtual ~MemoryTaskView() = default;
 	};
 
 	class ProcessTaskView {
@@ -43,5 +45,7 @@ namespace Views {
 
         virtual std::vector<TaskView>
         createTaskViews(const std::vector<Utils::Tasks::Task>& tasks) = 0;
+
+        virtual ~MainWindowView() = default;
 	};
 }

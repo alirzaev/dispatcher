@@ -116,6 +116,10 @@ void MemoryTask::provideContextMenu(const QPoint& pos)
     auto selectedBlock = dynamic_cast<MemoryBlockItem*>(ui->listMemBlocks->itemAt(pos));
     auto row = ui->listMemBlocks->indexAt(pos).row();
 
+    if (row == -1 || !selectedBlock)
+    {
+        return;
+    }
     qDebug() << selectedBlock->text() << row;
 
     ContextMenu menu;
@@ -151,7 +155,7 @@ void MemoryTask::processActionAllocate(const MemoryBlock &block, int row)
 {
     auto dialog = AllocateMemoryDialog(this, block.size());
     auto res = dialog.exec();
-    if (res == QDialog::Accepted) {
+    if (res == QDialog::Accepted && allocateActionListener) {
         auto pid = dialog.data.first;
         auto size = dialog.data.second;
 

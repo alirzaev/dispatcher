@@ -8,7 +8,7 @@ SOURCES += \
     utils/io.cpp \
     algo/memory/types.cpp
 
-INCLUDEPATH += "../include"
+INCLUDEPATH += "../3rdparty"
 
 HEADERS += \
     algo/memory/exceptions.h \

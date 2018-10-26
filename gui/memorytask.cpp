@@ -114,6 +114,7 @@ void MemoryTask::provideContextMenu(const QPoint& pos)
     else if (action->text() == MemoryBlockMenu::ACTION_FREE)
     {
         qDebug() << "free";
+        processActionFree(block, row);
     }
     else if (action->text() == MemoryBlockMenu::ACTION_COMPRESS)
     {
@@ -159,8 +160,23 @@ void MemoryTask::processActionAllocate(const MemoryBlock &block, int row)
     }
 }
 
+void MemoryTask::processActionFree(const MemoryBlock &block, int row)
+{
+    if (freeActionListener)
+    {
+        auto state = collectState();
+        freeActionListener({block.pid(), row}, state);
+    }
+}
+
 
 void MemoryTask::onAllocateAction(OnAllocateActionListener listener)
 {
     allocateActionListener = listener;
+}
+
+
+void MemoryTask::onFreeAction(OnFreeActionListener listener)
+{
+    freeActionListener = listener;
 }

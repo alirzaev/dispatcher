@@ -18,7 +18,14 @@ namespace Views {
                  const MemoryManagement::Types::MemoryState&)
         >;
 
+        using OnFreeActionListener = std::function<
+            void(const std::tuple<int32_t, uint32_t>&, // pid, blockIndex
+                 const MemoryManagement::Types::MemoryState&)
+        >;
+
         virtual void onAllocateAction(OnAllocateActionListener listener) = 0;
+
+        virtual void onFreeAction(OnFreeActionListener listener) = 0;
 
         virtual void setMemoryBlocks(const std::vector<MemoryManagement::Types::MemoryBlock>& blocks) = 0;
 

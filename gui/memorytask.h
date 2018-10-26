@@ -20,6 +20,8 @@ public:
 
     void onAllocateAction(OnAllocateActionListener listener) override;
 
+    void onFreeAction(OnFreeActionListener listener) override;
+
     void setMemoryBlocks(const std::vector<MemoryManagement::Types::MemoryBlock>& blocks) override;
 
     void setFreeMemoryBlocks(const std::vector<MemoryManagement::Types::MemoryBlock>& blocks) override;
@@ -33,11 +35,15 @@ private:
 
     OnAllocateActionListener allocateActionListener;
 
+    OnFreeActionListener freeActionListener;
+
     void provideContextMenu(const QPoint& pos);
 
     MemoryManagement::Types::MemoryState collectState();
 
     void processActionAllocate(const MemoryManagement::Types::MemoryBlock& block, int row);
+
+    void processActionFree(const MemoryManagement::Types::MemoryBlock& block, int row);
 };
 
 #endif // MEMORYTASK_H

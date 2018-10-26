@@ -35,6 +35,10 @@ namespace Presenters {
                 this->allocateMemory(data, state);
             });
 
+            _view->onFreeAction([=](const auto& data, const auto& state) {
+                this->freeMemory(data, state);
+            });
+
             refreshView();
         }
 
@@ -56,6 +60,18 @@ namespace Presenters {
             auto [pid, size, blockIndex] = data;
             _model->state = state;
             _model->state = Operations::allocateMemory(_model->state, blockIndex, pid, size);
+            refreshView();
+        }
+
+        void freeMemory(
+            const std::tuple<int32_t, uint32_t>& data,
+            const MemoryManagement::Types::MemoryState& state
+        )
+        {
+            using namespace MemoryManagement;
+            auto [pid, blockIndex] = data;
+            _model->state = state;
+            _model->state = Operations::freeMemory(_model->state, pid, blockIndex);
             refreshView();
         }
 	};

@@ -35,6 +35,8 @@ private:
 
     void provideContextMenu(const QPoint& pos);
 
+    MemoryManagement::Types::MemoryState collectState();
+
     void processActionAllocate(const MemoryManagement::Types::MemoryBlock& block, int row);
 };
 

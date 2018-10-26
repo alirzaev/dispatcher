@@ -6,6 +6,7 @@
 #include <variant>
 #include <utility>
 #include <memory>
+#include <tuple>
 #include <QDebug>
 
 #include "views.h"
@@ -13,6 +14,7 @@
 #include "../schedulers/utils/io.h"
 #include "../schedulers/utils/tasks.h"
 #include "../schedulers/algo/memory/operations.h"
+#include "../schedulers/algo/memory/types.h"
 
 namespace Presenters {
     class AbstractTaskPresenter
@@ -29,8 +31,8 @@ namespace Presenters {
             AbstractTaskPresenter (),
             _view(view), _model(model)
         {
-            _view->onAllocateAction([=](int32_t pid, int32_t size, int32_t blockIndex) {
-                this->allocateMemory(pid, size, blockIndex);
+            _view->onAllocateAction([=](const auto& data, const auto& state) {
+                this->allocateMemory(data, state);
             });
 
             refreshView();
@@ -45,9 +47,14 @@ namespace Presenters {
             _view->setRequest(_model->task.requests()[index]);
         }
 
-        void allocateMemory(int32_t pid, int32_t size, int32_t blockIndex)
+        void allocateMemory(
+            const std::tuple<int32_t, int32_t, uint32_t>& data,
+            const MemoryManagement::Types::MemoryState& state
+        )
         {
             using namespace MemoryManagement;
+            auto [pid, size, blockIndex] = data;
+            _model->state = state;
             _model->state = Operations::allocateMemory(_model->state, blockIndex, pid, size);
             refreshView();
         }

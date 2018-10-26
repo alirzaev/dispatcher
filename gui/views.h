@@ -4,6 +4,7 @@
 #include <vector>
 #include <variant>
 #include <string>
+#include <tuple>
 
 #include "../schedulers/utils/tasks.h"
 #include "../schedulers/algo/memory/types.h"
@@ -12,7 +13,10 @@
 namespace Views {
 	class MemoryTaskView {
     public:
-        using OnAllocateActionListener = std::function<void(int32_t, int32_t, int32_t)>; // pid, size, blockIndex
+        using OnAllocateActionListener = std::function<
+            void(const std::tuple<int32_t, int32_t, uint32_t>&, // pid, size, blockIndex
+                 const MemoryManagement::Types::MemoryState&)
+        >;
 
         virtual void onAllocateAction(OnAllocateActionListener listener) = 0;
 

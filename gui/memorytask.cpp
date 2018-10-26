@@ -4,6 +4,8 @@
 #include <QRegExp>
 #include <QMessageBox>
 
+#include <vector>
+
 #include "memorytask.h"
 #include "ui_memorytask.h"
 #include "dialogs/allocatememorydialog.h"
@@ -123,15 +125,37 @@ void MemoryTask::provideContextMenu(const QPoint& pos)
     }
 }
 
+MemoryState MemoryTask::collectState()
+{
+    using MemoryManagement::Types::MemoryBlock;
+    using std::vector;
+
+    vector<MemoryBlock> blocks, freeBlocks;
+
+    for (int i = 0; i < ui->listMemBlocks->count(); ++i)
+    {
+        auto* item = dynamic_cast<MemoryBlockItem*>(ui->listMemBlocks->item(i));
+        blocks.push_back(item->block());
+    }
+
+    for (int i = 0; i < ui->listFreeBlocks->count(); ++i)
+    {
+        auto* item = dynamic_cast<MemoryBlockItem*>(ui->listFreeBlocks->item(i));
+        freeBlocks.push_back(item->block());
+    }
+
+    return {blocks, freeBlocks};
+}
+
 void MemoryTask::processActionAllocate(const MemoryBlock &block, int row)
 {
     auto dialog = AllocateMemoryDialog(this, block.size());
     auto res = dialog.exec();
     if (res == QDialog::Accepted && allocateActionListener) {
-        auto pid = dialog.data.first;
-        auto size = dialog.data.second;
+        auto [pid, size] = dialog.data;
+        auto state = collectState();
 
-        allocateActionListener(pid, size, row);
+        allocateActionListener({pid, size, row}, state);
     }
 }
 

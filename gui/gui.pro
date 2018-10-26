@@ -32,7 +32,8 @@ SOURCES += \
     memorytask.cpp \
     ../schedulers/utils/io.cpp \
     ../schedulers/algo/memory/types.cpp \
-    dialogs/allocatememorydialog.cpp
+    dialogs/allocatememorydialog.cpp \
+    listitems/memoryblockitem.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -40,7 +41,8 @@ HEADERS += \
     views.h \
     memorytask.h \
     models.h \
-    dialogs/allocatememorydialog.h
+    dialogs/allocatememorydialog.h \
+    listitems/memoryblockitem.h
 
 FORMS += \
         mainwindow.ui \

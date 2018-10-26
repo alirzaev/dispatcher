@@ -7,6 +7,7 @@
 #include "memorytask.h"
 #include "ui_memorytask.h"
 #include "dialogs/allocatememorydialog.h"
+#include "listitems/memoryblockitem.h"
 
 using namespace MemoryManagement;
 
@@ -54,22 +55,6 @@ QString allocateMemoryDescr =
         "Процесс PID = %1 выдал запрос на выделение ему "
         "%2 байт (%3 параграфов) оперативной памяти";
 
-MemoryManagement::Types::MemoryBlock parseMemoryBlock(const QString& str)
-{
-    QRegExp re("address:\\s+(\\d+); size:\\s+(\\d+); pid:\\s+(-?\\d+)");
-    if (re.exactMatch(str))
-    {
-        int32_t address = re.cap(1).toInt(),
-                size = re.cap(2).toInt(),
-                pid = re.cap(3).toInt();
-        return {pid, address, size};
-    }
-    else
-    {
-        throw std::exception{};
-    }
-}
-
 MemoryTask::MemoryTask(QWidget *parent) :
     QWidget(parent),
     Views::MemoryTaskView(),
@@ -93,11 +78,7 @@ void MemoryTask::setMemoryBlocks(const std::vector<MemoryManagement::Types::Memo
     list->clear();
     for (const auto& block : blocks)
     {
-        auto blockRepr = QString("address: %1; size: %2; pid: %3")
-            .arg(block.address(), 3)
-            .arg(block.size(), 3)
-            .arg(block.pid(), 3);
-        list->addItem(blockRepr);
+        list->addItem(new MemoryBlockItem(block));
     }
 }
 
@@ -107,11 +88,7 @@ void MemoryTask::setFreeMemoryBlocks(const std::vector<MemoryManagement::Types::
     list->clear();
     for (const auto& block : blocks)
     {
-        auto blockRepr = QString("address: %1; size: %2; pid: %3")
-            .arg(block.address(), 3)
-            .arg(block.size(), 3)
-            .arg(block.pid(), 3);
-        list->addItem(blockRepr);
+        list->addItem(new MemoryBlockItem(block));
     }
 }
 
@@ -136,7 +113,7 @@ void MemoryTask::setRequest(MemoryManagement::Requests::RequestPtr request)
 void MemoryTask::provideContextMenu(const QPoint& pos)
 {
     auto globalPos = ui->listMemBlocks->mapToGlobal(pos);
-    auto selectedBlock = ui->listMemBlocks->itemAt(pos);
+    auto selectedBlock = dynamic_cast<MemoryBlockItem*>(ui->listMemBlocks->itemAt(pos));
     auto row = ui->listMemBlocks->indexAt(pos).row();
 
     qDebug() << selectedBlock->text() << row;
@@ -149,7 +126,7 @@ void MemoryTask::provideContextMenu(const QPoint& pos)
         return;
     }
 
-    auto block = parseMemoryBlock(selectedBlock->text());
+    auto block = selectedBlock->block();
 
     if (action->text() == ContextMenu::ACTION_ALLOCATE)
     {

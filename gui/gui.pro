@@ -33,7 +33,8 @@ SOURCES += \
     ../schedulers/utils/io.cpp \
     ../schedulers/algo/memory/types.cpp \
     dialogs/allocatememorydialog.cpp \
-    listitems/memoryblockitem.cpp
+    listitems/memoryblockitem.cpp \
+    menus/memoryblockmenu.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -42,7 +43,8 @@ HEADERS += \
     memorytask.h \
     models.h \
     dialogs/allocatememorydialog.h \
-    listitems/memoryblockitem.h
+    listitems/memoryblockitem.h \
+    menus/memoryblockmenu.h
 
 FORMS += \
         mainwindow.ui \

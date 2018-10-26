@@ -8,37 +8,9 @@
 #include "ui_memorytask.h"
 #include "dialogs/allocatememorydialog.h"
 #include "listitems/memoryblockitem.h"
+#include "menus/memoryblockmenu.h"
 
 using namespace MemoryManagement;
-
-class ContextMenu : public QMenu
-{
-public:
-    static QString ACTION_ALLOCATE;
-
-    static QString ACTION_FREE;
-
-    static QString ACTION_COMPRESS;
-
-    static QString ACTION_DEFRAGMENT;
-
-    ContextMenu() :
-        QMenu(nullptr)
-    {
-        addAction(ACTION_ALLOCATE);
-        addAction(ACTION_FREE);
-        addAction(ACTION_COMPRESS);
-        addAction(ACTION_DEFRAGMENT);
-    }
-};
-
-QString ContextMenu::ACTION_ALLOCATE = "Выделить приложению";
-
-QString ContextMenu::ACTION_FREE = "Освободить";
-
-QString ContextMenu::ACTION_COMPRESS = "Объединить со следующим";
-
-QString ContextMenu::ACTION_DEFRAGMENT = "Уплотнение памяти";
 
 QString createProcessDescr =
         "Создан новый процесс PID = %1. "
@@ -122,7 +94,7 @@ void MemoryTask::provideContextMenu(const QPoint& pos)
     }
     qDebug() << selectedBlock->text() << row;
 
-    ContextMenu menu;
+    MemoryBlockMenu menu(selectedBlock->block());
 
     auto action = menu.exec(globalPos);
     if (!action)
@@ -132,20 +104,20 @@ void MemoryTask::provideContextMenu(const QPoint& pos)
 
     auto block = selectedBlock->block();
 
-    if (action->text() == ContextMenu::ACTION_ALLOCATE)
+    if (action->text() == MemoryBlockMenu::ACTION_ALLOCATE)
     {
         qDebug() << "allocate";
         processActionAllocate(block, row);
     }
-    else if (action->text() == ContextMenu::ACTION_FREE)
+    else if (action->text() == MemoryBlockMenu::ACTION_FREE)
     {
         qDebug() << "free";
     }
-    else if (action->text() == ContextMenu::ACTION_COMPRESS)
+    else if (action->text() == MemoryBlockMenu::ACTION_COMPRESS)
     {
         qDebug() << "compress";
     }
-    else if (action->text() == ContextMenu::ACTION_DEFRAGMENT)
+    else if (action->text() == MemoryBlockMenu::ACTION_DEFRAGMENT)
     {
         qDebug() << "defragment";
     }

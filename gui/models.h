@@ -9,9 +9,7 @@
 namespace Models
 {
 struct ProcessesModel
-{
-
-};
+{ };
 
 struct MemoryModel
 {

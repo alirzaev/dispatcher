@@ -31,18 +31,25 @@ SOURCES += \
         mainwindow.cpp \
     memorytask.cpp \
     ../schedulers/utils/io.cpp \
-    ../schedulers/algo/memory/types.cpp
+    ../schedulers/algo/memory/types.cpp \
+    dialogs/allocatememorydialog.cpp \
+    listitems/memoryblockitem.cpp \
+    menus/memoryblockmenu.cpp
 
 HEADERS += \
         mainwindow.h \
     presenters.h \
     views.h \
     memorytask.h \
-    models.h
+    models.h \
+    dialogs/allocatememorydialog.h \
+    listitems/memoryblockitem.h \
+    menus/memoryblockmenu.h
 
 FORMS += \
         mainwindow.ui \
-    memorytask.ui
+    memorytask.ui \
+    dialogs/allocatememorydialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

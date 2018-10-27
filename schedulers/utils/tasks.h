@@ -127,6 +127,36 @@ public:
 
         return obj;
     }
+
+    bool done() const
+    {
+        return _completed == _requests.size();
+    }
+
+    std::optional<MemoryTask> next(const MemoryState& state) const
+    {
+        if (done())
+        {
+            return *this;
+        }
+        try
+        {
+            auto request = _requests[_completed];
+            auto expected = _strategy->processRequest(request, _state);
+            if (expected == state)
+            {
+                return MemoryTask{_strategy, _completed + 1, expected, _requests};
+            }
+            else
+            {
+                return std::nullopt;
+            }
+        }
+        catch (const std::exception& ex)
+        {
+            return std::nullopt;
+        }
+    }
 };
 
 class ProcessesTask

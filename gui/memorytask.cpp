@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QRegExp>
 #include <QMessageBox>
+#include <QPushButton>
 
 #include <vector>
 
@@ -39,6 +40,12 @@ MemoryTask::MemoryTask(QWidget *parent) :
     ui->listMemBlocks->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->listMemBlocks, &QListWidget::customContextMenuRequested,
             this, &MemoryTask::provideContextMenu);
+    connect(ui->acceptRequest, &QPushButton::clicked, this, [=]() {
+        if (nextRequestListener) nextRequestListener(collectState());
+    });
+    connect(ui->resetState, &QPushButton::clicked, this, [=]() {
+        if (resetStateListener) resetStateListener();
+    });
 }
 
 MemoryTask::~MemoryTask()
@@ -221,6 +228,15 @@ void MemoryTask::onCompressAction(OnCompressActionListener listener)
     compressActionListener = listener;
 }
 
+void MemoryTask::onNextRequestListener(OnNextRequestListener listener)
+{
+    nextRequestListener = listener;
+}
+
+void MemoryTask::onResetStateListener(OnResetStateListener listener)
+{
+    resetStateListener = listener;
+}
 
 void MemoryTask::showErrorMessage(const std::string &message)
 {

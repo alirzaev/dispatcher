@@ -33,11 +33,25 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="acceptRequest">
-       <property name="text">
-        <string>Подтвердить</string>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <property name="leftMargin">
+        <number>0</number>
        </property>
-      </widget>
+       <item>
+        <widget class="QPushButton" name="acceptRequest">
+         <property name="text">
+          <string>Подтвердить</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="resetState">
+         <property name="text">
+          <string>Сбросить</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>

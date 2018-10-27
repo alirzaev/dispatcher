@@ -26,6 +26,10 @@ public:
 
     void onCompressAction(OnCompressActionListener listener) override;
 
+    void onNextRequestListener(OnNextRequestListener listener) override;
+
+    void onResetStateListener(OnResetStateListener listener) override;
+
     void setMemoryBlocks(const std::vector<MemoryManagement::Types::MemoryBlock>& blocks) override;
 
     void setFreeMemoryBlocks(const std::vector<MemoryManagement::Types::MemoryBlock>& blocks) override;
@@ -46,6 +50,10 @@ private:
     OnDefragmentActionListener defragmentActionListener;
 
     OnCompressActionListener compressActionListener;
+
+    OnNextRequestListener nextRequestListener;
+
+    OnResetStateListener resetStateListener;
 
     void provideContextMenu(const QPoint& pos);
 

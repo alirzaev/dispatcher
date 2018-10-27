@@ -33,6 +33,12 @@ public:
              const MemoryManagement::Types::MemoryState&)
     >;
 
+    using OnNextRequestListener = std::function<
+        void(const MemoryManagement::Types::MemoryState&)
+    >;
+
+    using OnResetStateListener = std::function<void()>;
+
     virtual void onAllocateAction(OnAllocateActionListener listener) = 0;
 
     virtual void onFreeAction(OnFreeActionListener listener) = 0;
@@ -40,6 +46,10 @@ public:
     virtual void onDefragmentAction(OnDefragmentActionListener listener) = 0;
 
     virtual void onCompressAction(OnCompressActionListener listener) = 0;
+
+    virtual void onNextRequestListener(OnNextRequestListener listener) = 0;
+
+    virtual void onResetStateListener(OnResetStateListener listener) = 0;
 
     virtual void setMemoryBlocks(const std::vector<MemoryManagement::Types::MemoryBlock>& blocks) = 0;
 

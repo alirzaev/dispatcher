@@ -51,6 +51,14 @@ public:
             this->compressMemory(data, state);
         });
 
+        _view->onNextRequestListener([=](const auto& state) {
+            this->nextRequest(state);
+        });
+
+        _view->onResetStateListener([=]() {
+            this->resetState();
+        });
+
         refreshView();
     }
 
@@ -169,6 +177,28 @@ public:
         {
             _view->showErrorMessage("Неизвестная ошибка: "s + ex.what());
         }
+    }
+
+    void nextRequest(const MemoryManagement::Types::MemoryState& state)
+    {
+        _model->state = state;
+        auto task = _model->task.next(_model->state);
+        if (task)
+        {
+            _model->task = task.value();
+            _model->state = _model->task.state();
+            refreshView();
+        }
+        else
+        {
+            _view->showErrorMessage("Заявка обработана неверно");
+        }
+    }
+
+    void resetState()
+    {
+        _model->state = _model->task.state();
+        refreshView();
     }
 };
 

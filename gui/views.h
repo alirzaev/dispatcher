@@ -28,11 +28,18 @@ public:
         void(const MemoryManagement::Types::MemoryState&)
     >;
 
+    using OnCompressActionListener = std::function<
+        void(uint32_t, // blockIndex
+             const MemoryManagement::Types::MemoryState&)
+    >;
+
     virtual void onAllocateAction(OnAllocateActionListener listener) = 0;
 
     virtual void onFreeAction(OnFreeActionListener listener) = 0;
 
     virtual void onDefragmentAction(OnDefragmentActionListener listener) = 0;
+
+    virtual void onCompressAction(OnCompressActionListener listener) = 0;
 
     virtual void setMemoryBlocks(const std::vector<MemoryManagement::Types::MemoryBlock>& blocks) = 0;
 

@@ -24,6 +24,8 @@ public:
 
     void onDefragmentAction(OnDefragmentActionListener listener) override;
 
+    void onCompressAction(OnCompressActionListener listener) override;
+
     void setMemoryBlocks(const std::vector<MemoryManagement::Types::MemoryBlock>& blocks) override;
 
     void setFreeMemoryBlocks(const std::vector<MemoryManagement::Types::MemoryBlock>& blocks) override;
@@ -41,6 +43,8 @@ private:
 
     OnDefragmentActionListener defragmentActionListener;
 
+    OnCompressActionListener compressActionListener;
+
     void provideContextMenu(const QPoint& pos);
 
     MemoryManagement::Types::MemoryState collectState();
@@ -50,6 +54,8 @@ private:
     void processActionFree(const MemoryManagement::Types::MemoryBlock& block, int row);
 
     void processActionDefragment(const MemoryManagement::Types::MemoryBlock& block, int row);
+
+    void processActionCompress(const MemoryManagement::Types::MemoryBlock& block, int row);
 };
 
 #endif // MEMORYTASK_H

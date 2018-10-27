@@ -45,6 +45,10 @@ public:
             this->defragmentMemory(state);
         });
 
+        _view->onCompressAction([=](const auto& data, const auto& state) {
+            this->compressMemory(data, state);
+        });
+
         refreshView();
     }
 
@@ -86,6 +90,17 @@ public:
         using namespace MemoryManagement;
         _model->state = state;
         _model->state = Operations::defragmentMemory(_model->state);
+        refreshView();
+    }
+
+    void compressMemory(
+        uint32_t blockIndex,
+        const MemoryManagement::Types::MemoryState& state
+    )
+    {
+        using namespace MemoryManagement;
+        _model->state = state;
+        _model->state = Operations::compressMemory(_model->state, blockIndex);
         refreshView();
     }
 };

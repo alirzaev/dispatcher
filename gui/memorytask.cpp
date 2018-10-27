@@ -126,6 +126,7 @@ void MemoryTask::provideContextMenu(const QPoint& pos)
     else if (action->text() == MemoryBlockMenu::ACTION_COMPRESS)
     {
         qDebug() << "compress";
+        processActionCompress(block, row);
     }
     else if (action->text() == MemoryBlockMenu::ACTION_DEFRAGMENT)
     {
@@ -187,6 +188,15 @@ void MemoryTask::processActionDefragment(const MemoryBlock &block, int row)
     }
 }
 
+void MemoryTask::processActionCompress(const MemoryBlock &block, int row)
+{
+    if (compressActionListener)
+    {
+        auto state = collectState();
+        compressActionListener(row, state);
+    }
+}
+
 
 void MemoryTask::onAllocateAction(OnAllocateActionListener listener)
 {
@@ -203,4 +213,10 @@ void MemoryTask::onFreeAction(OnFreeActionListener listener)
 void MemoryTask::onDefragmentAction(OnDefragmentActionListener listener)
 {
     defragmentActionListener = listener;
+}
+
+
+void MemoryTask::onCompressAction(OnCompressActionListener listener)
+{
+    compressActionListener = listener;
 }

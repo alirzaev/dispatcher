@@ -47,6 +47,8 @@ public:
 
     virtual void setRequest(MemoryManagement::Requests::RequestPtr request) = 0;
 
+    virtual void showErrorMessage(const std::string& message) = 0;
+
     virtual ~MemoryTaskView() = default;
 };
 

@@ -220,3 +220,9 @@ void MemoryTask::onCompressAction(OnCompressActionListener listener)
 {
     compressActionListener = listener;
 }
+
+
+void MemoryTask::showErrorMessage(const std::string &message)
+{
+    QMessageBox::critical(this, "Ошибка", QString::fromStdString(message));
+}

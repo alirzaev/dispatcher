@@ -32,6 +32,8 @@ public:
 
     void setRequest(MemoryManagement::Requests::RequestPtr request) override;
 
+    void showErrorMessage(const std::string &message) override;
+
     ~MemoryTask() override;
 
 private:

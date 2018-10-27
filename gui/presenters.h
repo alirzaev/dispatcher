@@ -16,7 +16,8 @@
 #include "../schedulers/algo/memory/operations.h"
 #include "../schedulers/algo/memory/types.h"
 
-namespace Presenters {
+namespace Presenters
+{
 class AbstractTaskPresenter
 { };
 

@@ -11,58 +11,59 @@
 #include "../schedulers/algo/memory/requests.h"
 
 namespace Views {
-	class MemoryTaskView {
-    public:
-        using OnAllocateActionListener = std::function<
-            void(const std::tuple<int32_t, int32_t, uint32_t>&, // pid, size, blockIndex
-                 const MemoryManagement::Types::MemoryState&)
-        >;
+class MemoryTaskView
+{
+public:
+    using OnAllocateActionListener = std::function<
+        void(const std::tuple<int32_t, int32_t, uint32_t>&, // pid, size, blockIndex
+             const MemoryManagement::Types::MemoryState&)
+    >;
 
-        using OnFreeActionListener = std::function<
-            void(const std::tuple<int32_t, uint32_t>&, // pid, blockIndex
-                 const MemoryManagement::Types::MemoryState&)
-        >;
+    using OnFreeActionListener = std::function<
+        void(const std::tuple<int32_t, uint32_t>&, // pid, blockIndex
+             const MemoryManagement::Types::MemoryState&)
+    >;
 
-        using OnDefragmentActionListener = std::function<
-            void(const MemoryManagement::Types::MemoryState&)
-        >;
+    using OnDefragmentActionListener = std::function<
+        void(const MemoryManagement::Types::MemoryState&)
+    >;
 
-        virtual void onAllocateAction(OnAllocateActionListener listener) = 0;
+    virtual void onAllocateAction(OnAllocateActionListener listener) = 0;
 
-        virtual void onFreeAction(OnFreeActionListener listener) = 0;
+    virtual void onFreeAction(OnFreeActionListener listener) = 0;
 
-        virtual void onDefragmentAction(OnDefragmentActionListener listener) = 0;
+    virtual void onDefragmentAction(OnDefragmentActionListener listener) = 0;
 
-        virtual void setMemoryBlocks(const std::vector<MemoryManagement::Types::MemoryBlock>& blocks) = 0;
+    virtual void setMemoryBlocks(const std::vector<MemoryManagement::Types::MemoryBlock>& blocks) = 0;
 
-        virtual void setFreeMemoryBlocks(const std::vector<MemoryManagement::Types::MemoryBlock>& blocks) = 0;
+    virtual void setFreeMemoryBlocks(const std::vector<MemoryManagement::Types::MemoryBlock>& blocks) = 0;
 
-        virtual void setRequest(MemoryManagement::Requests::RequestPtr request) = 0;
+    virtual void setRequest(MemoryManagement::Requests::RequestPtr request) = 0;
 
-        virtual ~MemoryTaskView() = default;
-	};
+    virtual ~MemoryTaskView() = default;
+};
 
-	class ProcessTaskView {
+class ProcessTaskView
+{ };
 
-	};
+using TaskView = std::variant<MemoryTaskView*, ProcessTaskView*>;
 
-    using TaskView = std::variant<MemoryTaskView*, ProcessTaskView*>;
+class MainWindowView
+{
+public:
+    using OnOpenListener = std::function<void(const std::string&)>;
 
-	class MainWindowView {
-	public:
-		using OnOpenListener = std::function<void(const std::string&)>;
+    using OnSaveListener = std::function<void(const std::string&)>;
 
-		using OnSaveListener = std::function<void(const std::string&)>;
+    MainWindowView() = default;
 
-		MainWindowView() = default;
+    virtual void onOpenTaskListener(OnOpenListener listener) = 0;
 
-		virtual void onOpenTaskListener(OnOpenListener listener) = 0;
+    virtual void onSaveTaskListener(OnSaveListener listener) = 0;
 
-		virtual void onSaveTaskListener(OnSaveListener listener) = 0;
+    virtual std::vector<TaskView>
+    createTaskViews(const std::vector<Utils::Tasks::Task>& tasks) = 0;
 
-        virtual std::vector<TaskView>
-        createTaskViews(const std::vector<Utils::Tasks::Task>& tasks) = 0;
-
-        virtual ~MainWindowView() = default;
-	};
+    virtual ~MainWindowView() = default;
+};
 }

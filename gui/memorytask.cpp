@@ -69,16 +69,23 @@ void MemoryTask::setFreeMemoryBlocks(const std::vector<MemoryManagement::Types::
 void MemoryTask::setRequest(MemoryManagement::Requests::RequestPtr request)
 {
     auto* label = ui->labelRequestDescr;
-    if (request->type == Requests::RequestType::CREATE_PROCESS) {
+    if (request->type == Requests::RequestType::CREATE_PROCESS)
+    {
         auto obj = *dynamic_cast<Requests::CreateProcess*>(request.get());
         label->setText(createProcessDescr.arg(obj.pid).arg(obj.bytes).arg(obj.pages));
-    } else if (request->type == Requests::RequestType::TERMINATE_PROCESS) {
+    }
+    else if (request->type == Requests::RequestType::TERMINATE_PROCESS)
+    {
         auto obj = *dynamic_cast<Requests::TerminateProcess*>(request.get());
         label->setText(terminateProcessDescr.arg(obj.pid));
-    } else if (request->type == Requests::RequestType::ALLOCATE_MEMORY) {
+    }
+    else if (request->type == Requests::RequestType::ALLOCATE_MEMORY)
+    {
         auto obj = *dynamic_cast<Requests::AllocateMemory*>(request.get());
         label->setText(allocateMemoryDescr.arg(obj.pid).arg(obj.bytes).arg(obj.pages));
-    } else if (request->type == Requests::RequestType::FREE_MEMORY) {
+    }
+    else if (request->type == Requests::RequestType::FREE_MEMORY)
+    {
         auto obj = *dynamic_cast<Requests::FreeMemory*>(request.get());
         label->setText(freeMemoryDescr.arg(obj.pid).arg(obj.address));
     }
@@ -153,7 +160,8 @@ void MemoryTask::processActionAllocate(const MemoryBlock &block, int row)
 {
     auto dialog = AllocateMemoryDialog(this, block.size());
     auto res = dialog.exec();
-    if (res == QDialog::Accepted && allocateActionListener) {
+    if (res == QDialog::Accepted && allocateActionListener)
+    {
         auto [pid, size] = dialog.data;
         auto state = collectState();
 

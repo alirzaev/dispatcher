@@ -7,6 +7,8 @@
 #include <utility>
 #include <memory>
 #include <tuple>
+#include <exception>
+#include <stdexcept>
 #include <QDebug>
 
 #include "views.h"
@@ -67,10 +69,37 @@ public:
     )
     {
         using namespace MemoryManagement;
+        using namespace std::literals;
+
         auto [pid, size, blockIndex] = data;
         _model->state = state;
-        _model->state = Operations::allocateMemory(_model->state, blockIndex, pid, size);
-        refreshView();
+        try
+        {
+            _model->state = Operations::allocateMemory(_model->state, blockIndex, pid, size);
+            refreshView();
+        }
+        catch (const Exceptions::OperationException& ex)
+        {
+            if (ex.what() == "BLOCK_IS_USED"s)
+            {
+                _view->showErrorMessage("Данный блок памяти уже выделен другому процессу");
+            }
+            else if (ex.what() == "TOO_SMALL"s)
+            {
+                _view->showErrorMessage(
+                    "Процесс нельзя поместить в свободный блок, содержащий столько же "
+                    "парагрфов, сколько требуется данному процессу"
+                );
+            }
+            else
+            {
+                _view->showErrorMessage("Неизвестная ошибка: "s + ex.what());
+            }
+        }
+        catch (const std::exception& ex)
+        {
+            _view->showErrorMessage("Неизвестная ошибка: "s + ex.what());
+        }
     }
 
     void freeMemory(
@@ -79,18 +108,36 @@ public:
     )
     {
         using namespace MemoryManagement;
+        using namespace std::literals;
+
         auto [pid, blockIndex] = data;
         _model->state = state;
-        _model->state = Operations::freeMemory(_model->state, pid, blockIndex);
-        refreshView();
+        try
+        {
+            _model->state = Operations::freeMemory(_model->state, pid, blockIndex);
+            refreshView();
+        }
+        catch (const std::exception& ex)
+        {
+            _view->showErrorMessage("Неизвестная ошибка: "s + ex.what());
+        }
     }
 
     void defragmentMemory(const MemoryManagement::Types::MemoryState& state)
     {
         using namespace MemoryManagement;
+        using namespace std::literals;
+
         _model->state = state;
-        _model->state = Operations::defragmentMemory(_model->state);
-        refreshView();
+        try
+        {
+            _model->state = Operations::defragmentMemory(_model->state);
+            refreshView();
+        }
+        catch (const std::exception& ex)
+        {
+            _view->showErrorMessage("Неизвестная ошибка: "s + ex.what());
+        }
     }
 
     void compressMemory(
@@ -99,9 +146,29 @@ public:
     )
     {
         using namespace MemoryManagement;
+        using namespace std::literals;
+
         _model->state = state;
-        _model->state = Operations::compressMemory(_model->state, blockIndex);
-        refreshView();
+        try
+        {
+            _model->state = Operations::compressMemory(_model->state, blockIndex);
+            refreshView();
+        }
+        catch (const Exceptions::OperationException& ex)
+        {
+            if (ex.what() == "SINGLE_BLOCK"s)
+            {
+                _view->showErrorMessage("Следующий блок свободен или отсутствует");
+            }
+            else
+            {
+                _view->showErrorMessage("Неизвестная ошибка: "s + ex.what());
+            }
+        }
+        catch (const std::exception& ex)
+        {
+            _view->showErrorMessage("Неизвестная ошибка: "s + ex.what());
+        }
     }
 };
 

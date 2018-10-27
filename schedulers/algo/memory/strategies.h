@@ -201,9 +201,11 @@ namespace Strategies {
                         [&request](const auto& block) {
                 return block.pid() == request.pid;
             });
-            // если процесс должен существовать, а выделенных для него блоков нет,
-            // то заявку проигнорировать
-            if (processPos == blocks.end() && !createProcess) {
+            // обработка некорректных ситуаций:
+            // 1. Создание уже существующего процесса
+            // 2. Выделение памяти несуществующему процессу
+            if ((processPos != blocks.end() && createProcess)
+                || (processPos == blocks.end() && !createProcess)) {
                 return state;
             }
 

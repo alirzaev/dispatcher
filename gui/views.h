@@ -23,9 +23,15 @@ namespace Views {
                  const MemoryManagement::Types::MemoryState&)
         >;
 
+        using OnDefragmentActionListener = std::function<
+            void(const MemoryManagement::Types::MemoryState&)
+        >;
+
         virtual void onAllocateAction(OnAllocateActionListener listener) = 0;
 
         virtual void onFreeAction(OnFreeActionListener listener) = 0;
+
+        virtual void onDefragmentAction(OnDefragmentActionListener listener) = 0;
 
         virtual void setMemoryBlocks(const std::vector<MemoryManagement::Types::MemoryBlock>& blocks) = 0;
 

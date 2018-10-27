@@ -123,6 +123,7 @@ void MemoryTask::provideContextMenu(const QPoint& pos)
     else if (action->text() == MemoryBlockMenu::ACTION_DEFRAGMENT)
     {
         qDebug() << "defragment";
+        processActionDefragment(block, row);
     }
 }
 
@@ -169,6 +170,15 @@ void MemoryTask::processActionFree(const MemoryBlock &block, int row)
     }
 }
 
+void MemoryTask::processActionDefragment(const MemoryBlock &block, int row)
+{
+    if (defragmentActionListener)
+    {
+        auto state = collectState();
+        defragmentActionListener(state);
+    }
+}
+
 
 void MemoryTask::onAllocateAction(OnAllocateActionListener listener)
 {
@@ -179,4 +189,10 @@ void MemoryTask::onAllocateAction(OnAllocateActionListener listener)
 void MemoryTask::onFreeAction(OnFreeActionListener listener)
 {
     freeActionListener = listener;
+}
+
+
+void MemoryTask::onDefragmentAction(OnDefragmentActionListener listener)
+{
+    defragmentActionListener = listener;
 }

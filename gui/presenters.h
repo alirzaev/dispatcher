@@ -40,6 +40,10 @@ public:
             this->freeMemory(data, state);
         });
 
+        _view->onDefragmentAction([=](const auto& state) {
+            this->defragmentMemory(state);
+        });
+
         refreshView();
     }
 
@@ -73,6 +77,14 @@ public:
         auto [pid, blockIndex] = data;
         _model->state = state;
         _model->state = Operations::freeMemory(_model->state, pid, blockIndex);
+        refreshView();
+    }
+
+    void defragmentMemory(const MemoryManagement::Types::MemoryState& state)
+    {
+        using namespace MemoryManagement;
+        _model->state = state;
+        _model->state = Operations::defragmentMemory(_model->state);
         refreshView();
     }
 };

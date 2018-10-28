@@ -98,6 +98,27 @@ void MemoryTask::setRequest(MemoryManagement::Requests::RequestPtr request)
     }
 }
 
+void MemoryTask::setStrategy(Strategies::StrategyType type)
+{
+    using Strategies::StrategyType;
+
+    QString s = "Стратегия: %1";
+    auto* label = ui->strategyLabel;
+
+    if (type == StrategyType::FIRST_APPROPRIATE)
+    {
+        label->setText(s.arg("первый подходящий"));
+    }
+    else if (type == StrategyType::MOST_APPROPRIATE)
+    {
+        label->setText(s.arg("наиболее подходящий"));
+    }
+    else if (type == StrategyType::LEAST_APPROPRIATE)
+    {
+        label->setText(s.arg("наименее подходящий"));
+    }
+}
+
 void MemoryTask::provideContextMenu(const QPoint& pos)
 {
     auto globalPos = ui->listMemBlocks->mapToGlobal(pos);

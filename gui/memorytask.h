@@ -36,6 +36,8 @@ public:
 
     void setRequest(MemoryManagement::Requests::RequestPtr request) override;
 
+    void setStrategy(MemoryManagement::Strategies::StrategyType type) override;
+
     void showErrorMessage(const std::string &message) override;
 
     void showInfoMessage(const std::string& message) override;

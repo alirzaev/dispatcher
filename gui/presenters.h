@@ -67,6 +67,7 @@ public:
         auto [blocks, freeBlocks] = _model->state;
         _view->setMemoryBlocks(blocks);
         _view->setFreeMemoryBlocks(freeBlocks);
+        _view->setStrategy(_model->task.strategy()->type);
         if (_model->task.done())
         {
             _view->setRequest(_model->task.requests().back());

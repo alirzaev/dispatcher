@@ -151,7 +151,7 @@ namespace Strategies {
                         freeBlocks.cbegin(),
                         freeBlocks.cend(),
                         [&size](const auto& block) {
-                return size < block.size();
+                return size <= block.size();
             });
             if (freeBlockPos != freeBlocks.cend()) {
                 return std::find(blocks.cbegin(), blocks.cend(), *freeBlockPos);
@@ -220,7 +220,7 @@ namespace Strategies {
                 uint32_t index = static_cast<uint32_t>(pos - blocks.cbegin());
 
                 return Operations::allocateMemory(state, index, request.pid, request.pages);
-            } else if (totalFree > request.pages) { // если суммарно свободной памяти достаточно, то выполнить дефрагментацию
+            } else if (totalFree >= request.pages) { // если суммарно свободной памяти достаточно, то выполнить дефрагментацию
                 auto newState = Operations::defragmentMemory(state);
                 auto [blocks, freeBlocks] = newState;
                 auto pos = findFreeBlock(blocks, freeBlocks, request.pages);

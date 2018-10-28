@@ -67,8 +67,16 @@ public:
         auto [blocks, freeBlocks] = _model->state;
         _view->setMemoryBlocks(blocks);
         _view->setFreeMemoryBlocks(freeBlocks);
-        auto index = _model->task.completed();
-        _view->setRequest(_model->task.requests()[index]);
+        if (_model->task.done())
+        {
+            _view->setRequest(_model->task.requests().back());
+            _view->showInfoMessage("Вы успешно выполнили данное задание");
+        }
+        else
+        {
+            auto index = _model->task.completed();
+            _view->setRequest(_model->task.requests()[index]);
+        }
     }
 
     void allocateMemory(

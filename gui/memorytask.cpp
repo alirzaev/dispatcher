@@ -242,3 +242,8 @@ void MemoryTask::showErrorMessage(const std::string &message)
 {
     QMessageBox::critical(this, "Ошибка", QString::fromStdString(message));
 }
+
+void MemoryTask::showInfoMessage(const std::string &message)
+{
+    QMessageBox::information(this, "Внимание", QString::fromStdString(message));
+}

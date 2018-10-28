@@ -38,6 +38,8 @@ public:
 
     void showErrorMessage(const std::string &message) override;
 
+    void showInfoMessage(const std::string& message) override;
+
     ~MemoryTask() override;
 
 private:

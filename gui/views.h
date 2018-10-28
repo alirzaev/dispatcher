@@ -59,6 +59,8 @@ public:
 
     virtual void showErrorMessage(const std::string& message) = 0;
 
+    virtual void showInfoMessage(const std::string& message) = 0;
+
     virtual ~MemoryTaskView() = default;
 };
 

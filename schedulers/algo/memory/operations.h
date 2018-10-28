@@ -40,7 +40,7 @@ namespace MemoryManagement::Operations {
         auto block = blocks.at(blockIndex);
         if (block.pid() != -1) {
             throw OperationException("BLOCK_IS_USED");
-        } else if (block.size() <= pages) {
+        } else if (block.size() < pages) {
             throw OperationException("TOO_SMALL");
         }
 
@@ -48,12 +48,16 @@ namespace MemoryManagement::Operations {
         auto newFreeBlock = MemoryBlock(-1, block.address() + pages, block.size() - pages);
 
         blocks.erase(blocks.begin() + blockIndex);
-        blocks.insert(blocks.begin() + blockIndex, newFreeBlock);
+        if (newFreeBlock.size() > 0) {
+            blocks.insert(blocks.begin() + blockIndex, newFreeBlock);
+        }
         blocks.insert(blocks.begin() + blockIndex, allocatedBlock);
 
         auto pos = std::find(freeBlocks.begin(), freeBlocks.end(), block);
         freeBlocks.erase(pos);
-        freeBlocks.push_back(newFreeBlock);
+        if (newFreeBlock.size() > 0) {
+            freeBlocks.push_back(newFreeBlock);
+        }
 
         return MemoryState(blocks, freeBlocks);
     }

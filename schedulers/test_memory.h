@@ -240,6 +240,37 @@ TEST_CASE("test_memory_operations") {
         REQUIRE(actualState == expectedState);
     }
 
+    SECTION("Memory allocation (entire block)")
+    {
+        std::vector<Types::MemoryBlock> blocks = {
+            MemoryBlock{0, 0, 12},
+            MemoryBlock{2, 12, 3},
+            MemoryBlock{-1, 15, 20}, //*
+            MemoryBlock{2, 35, 1},
+            MemoryBlock{-1, 36, 7}
+        };
+        std::vector<Types::MemoryBlock> freeBlocks = {
+            MemoryBlock{-1, 15, 20},
+            MemoryBlock{-1, 36, 7}
+        };
+        Types::MemoryState state(blocks, freeBlocks);
+
+        std::vector<Types::MemoryBlock> expectedBlocks = {
+            MemoryBlock{0, 0, 12},
+            MemoryBlock{2, 12, 3},
+            MemoryBlock{3, 15, 20},
+            MemoryBlock{2, 35, 1},
+            MemoryBlock{-1, 36, 7}
+        };
+        std::vector<Types::MemoryBlock> expectedFreeBlocks = {
+            MemoryBlock{-1, 36, 7}
+        };
+        Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+
+        auto actualState = Operations::allocateMemory(state, 2, 3, 20);
+        REQUIRE(actualState == expectedState);
+    }
+
     SECTION("Memory deallocation")
     {
         std::vector<Types::MemoryBlock> blocks = {

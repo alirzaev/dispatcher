@@ -51,6 +51,14 @@ public:
             this->compressMemory(data, state);
         });
 
+        _view->onNextRequestListener([=](const auto& state) {
+            this->nextRequest(state);
+        });
+
+        _view->onResetStateListener([=]() {
+            this->resetState();
+        });
+
         refreshView();
     }
 
@@ -59,8 +67,17 @@ public:
         auto [blocks, freeBlocks] = _model->state;
         _view->setMemoryBlocks(blocks);
         _view->setFreeMemoryBlocks(freeBlocks);
-        auto index = _model->task.completed();
-        _view->setRequest(_model->task.requests()[index]);
+        _view->setStrategy(_model->task.strategy()->type);
+        if (_model->task.done())
+        {
+            _view->setRequest(_model->task.requests().back());
+            _view->showInfoMessage("Вы успешно выполнили данное задание");
+        }
+        else
+        {
+            auto index = _model->task.completed();
+            _view->setRequest(_model->task.requests()[index]);
+        }
     }
 
     void allocateMemory(
@@ -169,6 +186,28 @@ public:
         {
             _view->showErrorMessage("Неизвестная ошибка: "s + ex.what());
         }
+    }
+
+    void nextRequest(const MemoryManagement::Types::MemoryState& state)
+    {
+        _model->state = state;
+        auto task = _model->task.next(_model->state);
+        if (task)
+        {
+            _model->task = task.value();
+            _model->state = _model->task.state();
+            refreshView();
+        }
+        else
+        {
+            _view->showErrorMessage("Заявка обработана неверно");
+        }
+    }
+
+    void resetState()
+    {
+        _model->state = _model->task.state();
+        refreshView();
     }
 };
 

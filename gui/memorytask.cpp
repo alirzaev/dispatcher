@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QRegExp>
 #include <QMessageBox>
+#include <QPushButton>
 
 #include <vector>
 
@@ -39,6 +40,12 @@ MemoryTask::MemoryTask(QWidget *parent) :
     ui->listMemBlocks->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->listMemBlocks, &QListWidget::customContextMenuRequested,
             this, &MemoryTask::provideContextMenu);
+    connect(ui->acceptRequest, &QPushButton::clicked, this, [=]() {
+        if (nextRequestListener) nextRequestListener(collectState());
+    });
+    connect(ui->resetState, &QPushButton::clicked, this, [=]() {
+        if (resetStateListener) resetStateListener();
+    });
 }
 
 MemoryTask::~MemoryTask()
@@ -88,6 +95,27 @@ void MemoryTask::setRequest(MemoryManagement::Requests::RequestPtr request)
     {
         auto obj = *dynamic_cast<Requests::FreeMemory*>(request.get());
         label->setText(freeMemoryDescr.arg(obj.pid).arg(obj.address));
+    }
+}
+
+void MemoryTask::setStrategy(Strategies::StrategyType type)
+{
+    using Strategies::StrategyType;
+
+    QString s = "Стратегия: %1";
+    auto* label = ui->strategyLabel;
+
+    if (type == StrategyType::FIRST_APPROPRIATE)
+    {
+        label->setText(s.arg("первый подходящий"));
+    }
+    else if (type == StrategyType::MOST_APPROPRIATE)
+    {
+        label->setText(s.arg("наиболее подходящий"));
+    }
+    else if (type == StrategyType::LEAST_APPROPRIATE)
+    {
+        label->setText(s.arg("наименее подходящий"));
     }
 }
 
@@ -221,8 +249,22 @@ void MemoryTask::onCompressAction(OnCompressActionListener listener)
     compressActionListener = listener;
 }
 
+void MemoryTask::onNextRequestListener(OnNextRequestListener listener)
+{
+    nextRequestListener = listener;
+}
+
+void MemoryTask::onResetStateListener(OnResetStateListener listener)
+{
+    resetStateListener = listener;
+}
 
 void MemoryTask::showErrorMessage(const std::string &message)
 {
     QMessageBox::critical(this, "Ошибка", QString::fromStdString(message));
+}
+
+void MemoryTask::showInfoMessage(const std::string &message)
+{
+    QMessageBox::information(this, "Внимание", QString::fromStdString(message));
 }

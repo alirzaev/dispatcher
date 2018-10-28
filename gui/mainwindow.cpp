@@ -51,6 +51,10 @@ void MainWindow::saveTaskDialog()
     auto fileName = QFileDialog::getSaveFileName(this, "Сохранить задание в файл", "", "JSON (*.json)");
     if (!fileName.isEmpty() && saveTaskListener)
     {
+        if (!fileName.endsWith(".json"))
+        {
+            fileName.append(".json");
+        }
         saveTaskListener(fileName.toStdString());
     }
 }

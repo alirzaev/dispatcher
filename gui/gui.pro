@@ -30,8 +30,6 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     memorytask.cpp \
-    ../schedulers/utils/io.cpp \
-    ../schedulers/algo/memory/types.cpp \
     dialogs/allocatememorydialog.cpp \
     listitems/memoryblockitem.cpp \
     menus/memoryblockmenu.cpp

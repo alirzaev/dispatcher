@@ -4,9 +4,7 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-    main.cpp \
-    utils/io.cpp \
-    algo/memory/types.cpp
+    main.cpp
 
 INCLUDEPATH += "../3rdparty"
 

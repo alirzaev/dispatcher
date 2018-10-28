@@ -118,8 +118,6 @@ namespace MemoryManagement {
             };
         }
     };
-
-    extern MemoryState INITIAL_MEMORY_STATE;
     }
 }
 #endif // TYPES_H

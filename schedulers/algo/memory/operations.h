@@ -45,18 +45,19 @@ namespace MemoryManagement::Operations {
         }
 
         auto allocatedBlock = MemoryBlock(pid, block.address(), pages);
-        auto newFreeBlock = MemoryBlock(-1, block.address() + pages, block.size() - pages);
+        auto freeBlockSize = block.size() - pages;
+        auto freeBlockAddress = block.address() + pages;
 
         blocks.erase(blocks.begin() + blockIndex);
-        if (newFreeBlock.size() > 0) {
-            blocks.insert(blocks.begin() + blockIndex, newFreeBlock);
+        if (freeBlockSize > 0) {
+            blocks.insert(blocks.begin() + blockIndex, MemoryBlock(-1, freeBlockAddress, freeBlockSize));
         }
         blocks.insert(blocks.begin() + blockIndex, allocatedBlock);
 
         auto pos = std::find(freeBlocks.begin(), freeBlocks.end(), block);
         freeBlocks.erase(pos);
-        if (newFreeBlock.size() > 0) {
-            freeBlocks.push_back(newFreeBlock);
+        if (freeBlockSize > 0) {
+            freeBlocks.push_back(MemoryBlock(-1, freeBlockAddress, freeBlockSize));
         }
 
         return MemoryState(blocks, freeBlocks);

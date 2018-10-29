@@ -6,6 +6,8 @@
 #include <tuple>
 #include <nlohmann/json.hpp>
 
+#include "exceptions.h"
+
 namespace MemoryManagement {
     namespace Types {
     class MemoryBlock {
@@ -34,13 +36,16 @@ namespace MemoryManagement {
 
         MemoryBlock(int32_t pid, int32_t address, int32_t size) :
             _pid(pid), _address(address), _size(size)
-        {}
+        {
+            validate(pid, address, size);
+        }
 
         MemoryBlock(const MemoryBlock& other) = default;
 
-        MemoryBlock() :
-            _pid(-1), _address(0), _size(0)
-        {}
+        MemoryBlock()
+        {
+            MemoryBlock(-1, 0, 1);
+        }
 
         MemoryBlock& operator=(const MemoryBlock& rhs) = default;
 
@@ -57,6 +62,26 @@ namespace MemoryManagement {
                 {"address", _address},
                 {"size", _size}
             };
+        }
+
+        static void validate(int32_t pid, int32_t address, int32_t size)
+        {
+            if (pid < -1 || pid > 255)
+            {
+                throw Exceptions::TypeException("INVALID_PID");
+            }
+            if (address < 0 || address > 255)
+            {
+                throw Exceptions::TypeException("INVALID_ADDRESS");
+            }
+            if (size < 1 || size > 256)
+            {
+                throw Exceptions::TypeException("INVALID_SIZE");
+            }
+            if (address + size > 256)
+            {
+                throw Exceptions::TypeException("OUT_OF_BOUNDS");
+            }
         }
     };
 

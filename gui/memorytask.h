@@ -1,75 +1,78 @@
-#ifndef MEMORYTASK_H
-#define MEMORYTASK_H
+#pragma once
 
-#include <QWidget>
 #include <QPoint>
+#include <QWidget>
 
 #include "views.h"
-#include "../schedulers/algo/memory/types.h"
+#include <algo/memory/types.h>
 
 namespace Ui {
 class MemoryTask;
 }
 
-class MemoryTask : public QWidget, public Views::MemoryTaskView
-{
-    Q_OBJECT
+class MemoryTask : public QWidget, public Views::MemoryTaskView {
+  Q_OBJECT
 
 public:
-    explicit MemoryTask(QWidget *parent = nullptr);
+  explicit MemoryTask(QWidget *parent = nullptr);
 
-    void onAllocateAction(OnAllocateActionListener listener) override;
+  void onAllocateAction(OnAllocateActionListener listener) override;
 
-    void onFreeAction(OnFreeActionListener listener) override;
+  void onFreeAction(OnFreeActionListener listener) override;
 
-    void onDefragmentAction(OnDefragmentActionListener listener) override;
+  void onDefragmentAction(OnDefragmentActionListener listener) override;
 
-    void onCompressAction(OnCompressActionListener listener) override;
+  void onCompressAction(OnCompressActionListener listener) override;
 
-    void onNextRequestListener(OnNextRequestListener listener) override;
+  void onNextRequestListener(OnNextRequestListener listener) override;
 
-    void onResetStateListener(OnResetStateListener listener) override;
+  void onResetStateListener(OnResetStateListener listener) override;
 
-    void setMemoryBlocks(const std::vector<MemoryManagement::Types::MemoryBlock>& blocks) override;
+  void setMemoryBlocks(
+      const std::vector<MemoryManagement::Types::MemoryBlock> &blocks) override;
 
-    void setFreeMemoryBlocks(const std::vector<MemoryManagement::Types::MemoryBlock>& blocks) override;
+  void setFreeMemoryBlocks(
+      const std::vector<MemoryManagement::Types::MemoryBlock> &blocks) override;
 
-    void setRequest(MemoryManagement::Requests::RequestPtr request) override;
+  void setRequest(MemoryManagement::Requests::RequestPtr request) override;
 
-    void setStrategy(MemoryManagement::Strategies::StrategyType type) override;
+  void setStrategy(MemoryManagement::Strategies::StrategyType type) override;
 
-    void showErrorMessage(const std::string &message) override;
+  void showErrorMessage(const std::string &message) override;
 
-    void showInfoMessage(const std::string& message) override;
+  void showInfoMessage(const std::string &message) override;
 
-    ~MemoryTask() override;
+  ~MemoryTask() override;
 
 private:
-    Ui::MemoryTask *ui;
+  Ui::MemoryTask *ui;
 
-    OnAllocateActionListener allocateActionListener;
+  OnAllocateActionListener allocateActionListener;
 
-    OnFreeActionListener freeActionListener;
+  OnFreeActionListener freeActionListener;
 
-    OnDefragmentActionListener defragmentActionListener;
+  OnDefragmentActionListener defragmentActionListener;
 
-    OnCompressActionListener compressActionListener;
+  OnCompressActionListener compressActionListener;
 
-    OnNextRequestListener nextRequestListener;
+  OnNextRequestListener nextRequestListener;
 
-    OnResetStateListener resetStateListener;
+  OnResetStateListener resetStateListener;
 
-    void provideContextMenu(const QPoint& pos);
+  void provideContextMenu(const QPoint &pos);
 
-    MemoryManagement::Types::MemoryState collectState();
+  MemoryManagement::Types::MemoryState collectState();
 
-    void processActionAllocate(const MemoryManagement::Types::MemoryBlock& block, int row);
+  void processActionAllocate(const MemoryManagement::Types::MemoryBlock &block,
+                             int row);
 
-    void processActionFree(const MemoryManagement::Types::MemoryBlock& block, int row);
+  void processActionFree(const MemoryManagement::Types::MemoryBlock &block,
+                         int row);
 
-    void processActionDefragment(const MemoryManagement::Types::MemoryBlock& block, int row);
+  void
+  processActionDefragment(const MemoryManagement::Types::MemoryBlock &block,
+                          int row);
 
-    void processActionCompress(const MemoryManagement::Types::MemoryBlock& block, int row);
+  void processActionCompress(const MemoryManagement::Types::MemoryBlock &block,
+                             int row);
 };
-
-#endif // MEMORYTASK_H

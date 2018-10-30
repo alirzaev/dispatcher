@@ -1,5 +1,4 @@
-#ifndef ALLOCATEMEMORYDIALOG_H
-#define ALLOCATEMEMORYDIALOG_H
+#pragma once
 
 #include <QDialog>
 #include <utility>
@@ -8,23 +7,21 @@ namespace Ui {
 class AllocateMemoryDialog;
 }
 
-class AllocateMemoryDialog : public QDialog
-{
-    Q_OBJECT
+class AllocateMemoryDialog : public QDialog {
+  Q_OBJECT
 
 public:
-    std::pair<int32_t, int32_t> data;
+  std::pair<int32_t, int32_t> data;
 
-    explicit AllocateMemoryDialog(QWidget *parent = nullptr, int32_t maxSize = 256);
+  explicit AllocateMemoryDialog(QWidget *parent = nullptr,
+                                int32_t maxSize = 256);
 
-    ~AllocateMemoryDialog();
+  ~AllocateMemoryDialog();
 
 private:
-    Ui::AllocateMemoryDialog *ui;
+  Ui::AllocateMemoryDialog *ui;
 
-    int32_t maxSize;
+  int32_t maxSize;
 
-    void tryAccept();
+  void tryAccept();
 };
-
-#endif // ALLOCATEMEMORYDIALOG_H

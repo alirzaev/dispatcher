@@ -24,18 +24,20 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++1z
 
-INCLUDEPATH += "../3rdparty"
+INCLUDEPATH += \
+    "../3rdparty" \
+    "../schedulers"
 
 SOURCES += \
-        main.cpp \
-        mainwindow.cpp \
+    main.cpp \
+    mainwindow.cpp \
     memorytask.cpp \
     dialogs/allocatememorydialog.cpp \
     listitems/memoryblockitem.cpp \
     menus/memoryblockmenu.cpp
 
 HEADERS += \
-        mainwindow.h \
+    mainwindow.h \
     presenters.h \
     views.h \
     memorytask.h \
@@ -45,7 +47,7 @@ HEADERS += \
     menus/memoryblockmenu.h
 
 FORMS += \
-        mainwindow.ui \
+    mainwindow.ui \
     memorytask.ui \
     dialogs/allocatememorydialog.ui
 

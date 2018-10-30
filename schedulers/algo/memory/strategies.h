@@ -1,358 +1,304 @@
-#ifndef STRATEGIES_H
-#define STRATEGIES_H
+#pragma once
 
 #include "operations.h"
 #include "requests.h"
 #include "types.h"
 
-#include <memory>
 #include <algorithm>
-#include <exception>
 #include <cstdint>
+#include <exception>
+#include <memory>
 #include <string>
 
-namespace MemoryManagement {
-namespace Strategies {
-    enum class StrategyType {
-        FIRST_APPROPRIATE,
-        MOST_APPROPRIATE,
-        LEAST_APPROPRIATE
-    };
+namespace MemoryManagement::Strategies {
+using std::shared_ptr;
 
-    class AbstractStrategy {
-    public:
-        AbstractStrategy(StrategyType type) :
-            type(type)
-        {}
+enum class StrategyType {
+  FIRST_APPROPRIATE,
+  MOST_APPROPRIATE,
+  LEAST_APPROPRIATE
+};
 
-        const StrategyType type;
+class AbstractStrategy {
+public:
+  AbstractStrategy(StrategyType type) : type(type) {}
 
-        virtual std::string toString() const = 0;
+  const StrategyType type;
 
-        Types::MemoryState processRequest(
-                Requests::RequestPtr request,
-                const Types::MemoryState state
-        ) const
-        {
-            if (request->type == Requests::RequestType::CREATE_PROCESS) {
-                auto obj = *dynamic_cast<Requests::CreateProcess*>(request.get());
-                return createProcess(obj, state);
-            } else if (request->type == Requests::RequestType::TERMINATE_PROCESS) {
-                auto obj = *dynamic_cast<Requests::TerminateProcess*>(request.get());
-                return terminateProcess(obj, state);
-            } else if (request->type == Requests::RequestType::ALLOCATE_MEMORY) {
-                auto obj = *dynamic_cast<Requests::AllocateMemory*>(request.get());
-                return allocateMemory(obj, state);
-            } else if (request->type == Requests::RequestType::FREE_MEMORY) {
-                auto obj = *dynamic_cast<Requests::FreeMemory*>(request.get());
-                return freeMemory(obj, state);
-            } else {
-                throw std::exception();
-            }
-        }
+  virtual std::string toString() const = 0;
 
-        Types::MemoryState createProcess(
-                const Requests::CreateProcess request,
-                const Types::MemoryState& state
-        ) const
-        {
-            return sortFreeBlocks(allocateMemoryGeneral(
-                *Requests::AllocateMemory::create(request.pid, request.bytes, request.pages),
-                state,
-                true
-            ));
-        }
+  Types::MemoryState processRequest(Requests::RequestPtr request,
+                                    const Types::MemoryState state) const {
+    if (request->type == Requests::RequestType::CREATE_PROCESS) {
+      auto obj = *dynamic_cast<Requests::CreateProcess *>(request.get());
+      return createProcess(obj, state);
+    } else if (request->type == Requests::RequestType::TERMINATE_PROCESS) {
+      auto obj = *dynamic_cast<Requests::TerminateProcess *>(request.get());
+      return terminateProcess(obj, state);
+    } else if (request->type == Requests::RequestType::ALLOCATE_MEMORY) {
+      auto obj = *dynamic_cast<Requests::AllocateMemory *>(request.get());
+      return allocateMemory(obj, state);
+    } else if (request->type == Requests::RequestType::FREE_MEMORY) {
+      auto obj = *dynamic_cast<Requests::FreeMemory *>(request.get());
+      return freeMemory(obj, state);
+    } else {
+      throw Exceptions::StrategyException("UNKNOWN_REQUEST");
+    }
+  }
 
-        Types::MemoryState terminateProcess(
-                const Requests::TerminateProcess request,
-                const Types::MemoryState& state
-        ) const
-        {
-            auto currentState = state;
+  Types::MemoryState createProcess(const Requests::CreateProcess request,
+                                   const Types::MemoryState &state) const {
+    return sortFreeBlocks(
+        allocateMemoryGeneral(*Requests::AllocateMemory::create(
+                                  request.pid, request.bytes, request.pages),
+                              state, true));
+  }
 
-            while (true) {
-                auto [blocks, freeBlocks] = currentState;
-                // ищем очередной блок памяти, выделенный процессу
-                auto pos = std::find_if(
-                            blocks.begin(),
-                            blocks.end(),
-                            [&request](const auto& block) {
-                    return request.pid == block.pid();
-                });
-                if (pos == blocks.end()) {
-                    break;
-                }
+  Types::MemoryState terminateProcess(const Requests::TerminateProcess request,
+                                      const Types::MemoryState &state) const {
+    auto currentState = state;
 
-                // освобождаем блок
-                uint32_t index = static_cast<uint32_t>(pos - blocks.begin());
-                currentState = Operations::freeMemory(currentState, request.pid, index);
-            }
+    while (true) {
+      auto [blocks, freeBlocks] = currentState;
+      // ищем очередной блок памяти, выделенный процессу
+      auto pos = std::find_if(
+          blocks.begin(), blocks.end(),
+          [&request](const auto &block) { return request.pid == block.pid(); });
+      if (pos == blocks.end()) {
+        break;
+      }
 
-            // сжатие памяти
-            // переупорядочение свободных блоков памяти
-            return sortFreeBlocks(compressAllMemory(currentState));
-        }
+      // освобождаем блок
+      uint32_t index = static_cast<uint32_t>(pos - blocks.begin());
+      currentState = Operations::freeMemory(currentState, request.pid, index);
+    }
 
-        Types::MemoryState allocateMemory(
-                const Requests::AllocateMemory request,
-                const Types::MemoryState& state
-        ) const
-        {
-            return sortFreeBlocks(allocateMemoryGeneral(request, state, false));
-        }
+    // сжатие памяти
+    // переупорядочение свободных блоков памяти
+    return sortFreeBlocks(compressAllMemory(currentState));
+  }
 
-        Types::MemoryState freeMemory(
-                const Requests::FreeMemory request,
-                const Types::MemoryState& state
-        ) const
-        {
-            auto currentState = state;
-            auto [blocks, freeBlocks] = currentState;
+  Types::MemoryState allocateMemory(const Requests::AllocateMemory request,
+                                    const Types::MemoryState &state) const {
+    return sortFreeBlocks(allocateMemoryGeneral(request, state, false));
+  }
 
-            // ищем блок, начинающийся с заданного адреса
-            auto pos = std::find_if(
-                        blocks.begin(),
-                        blocks.end(),
-                        [&request](const auto& block) {
-                return block.address() == request.address;
-            });
-            // если такого блока нет, игнорируем заявку
-            if (pos == blocks.end()) {
-                return state;
-            }
-            // если блок выделен другому процессу, игнорируем заявку
-            if (pos->pid() != request.pid) {
-                return state;
-            }
+  Types::MemoryState freeMemory(const Requests::FreeMemory request,
+                                const Types::MemoryState &state) const {
+    auto currentState = state;
+    auto [blocks, freeBlocks] = currentState;
 
-            // освобождаем блок
-            uint32_t index = static_cast<uint32_t>(pos - blocks.begin());
-            currentState = Operations::freeMemory(state, request.pid, index);
+    // ищем блок, начинающийся с заданного адреса
+    auto pos = std::find_if(blocks.begin(), blocks.end(),
+                            [&request](const auto &block) {
+                              return block.address() == request.address;
+                            });
+    // если такого блока нет, игнорируем заявку
+    if (pos == blocks.end()) {
+      return state;
+    }
+    // если блок выделен другому процессу, игнорируем заявку
+    if (pos->pid() != request.pid) {
+      return state;
+    }
 
-            // сжатие памяти
-            // переупорядочение свободных блоков памяти
-            return sortFreeBlocks(compressAllMemory(currentState));
-        }
+    // освобождаем блок
+    uint32_t index = static_cast<uint32_t>(pos - blocks.begin());
+    currentState = Operations::freeMemory(state, request.pid, index);
 
-        virtual ~AbstractStrategy()
-        {}
-    protected:
-        virtual Types::MemoryState sortFreeBlocks(
-                const Types::MemoryState& state
-        ) const = 0;
+    // сжатие памяти
+    // переупорядочение свободных блоков памяти
+    return sortFreeBlocks(compressAllMemory(currentState));
+  }
 
-        virtual std::vector<Types::MemoryBlock>::const_iterator findFreeBlock(
-                const std::vector<Types::MemoryBlock>& blocks,
-                const std::vector<Types::MemoryBlock>& freeBlocks,
-                int32_t size
-        ) const
-        {
-            auto freeBlockPos = std::find_if(
-                        freeBlocks.cbegin(),
-                        freeBlocks.cend(),
-                        [&size](const auto& block) {
-                return size <= block.size();
-            });
-            if (freeBlockPos != freeBlocks.cend()) {
-                return std::find(blocks.cbegin(), blocks.cend(), *freeBlockPos);
-            } else {
-                return blocks.cend();
-            }
-        }
+  virtual ~AbstractStrategy() {}
 
-        virtual Types::MemoryState compressAllMemory(
-                const Types::MemoryState& state
-        ) const
-        {
-            auto currentState = state;
+protected:
+  virtual Types::MemoryState
+  sortFreeBlocks(const Types::MemoryState &state) const = 0;
 
-            while (true) {
-                auto [blocks, freeBlocks] = currentState;
-                // ищем первый свободный блок памяти
-                // проверяем, есть ли за ним хотя бы один свободный блок
-                uint32_t index = 0;
-                for (; index < blocks.size() - 1 &&
-                     !(blocks[index].pid() == -1 &&
-                      blocks[index + 1].pid() == -1); ++index) {}
+  virtual std::vector<Types::MemoryBlock>::const_iterator
+  findFreeBlock(const std::vector<Types::MemoryBlock> &blocks,
+                const std::vector<Types::MemoryBlock> &freeBlocks,
+                int32_t size) const final {
+    auto freeBlockPos = std::find_if(
+        freeBlocks.cbegin(), freeBlocks.cend(),
+        [&size](const auto &block) { return size <= block.size(); });
+    if (freeBlockPos != freeBlocks.cend()) {
+      return std::find(blocks.cbegin(), blocks.cend(), *freeBlockPos);
+    } else {
+      return blocks.cend();
+    }
+  }
 
-                // если есть, то выполняем сжатие
-                if (index < blocks.size() - 1) {
-                    currentState = Operations::compressMemory(currentState, index);
-                } else {
-                    break;
-                }
-            }
+  virtual Types::MemoryState
+  compressAllMemory(const Types::MemoryState &state) const final {
+    auto currentState = state;
 
-            return currentState;
-        }
+    while (true) {
+      auto [blocks, freeBlocks] = currentState;
+      // ищем первый свободный блок памяти
+      // проверяем, есть ли за ним хотя бы один свободный блок
+      uint32_t index = 0;
+      for (; index < blocks.size() - 1 &&
+             !(blocks[index].pid() == -1 && blocks[index + 1].pid() == -1);
+           ++index) {
+      }
 
-        virtual Types::MemoryState allocateMemoryGeneral(
-                const Requests::AllocateMemory request,
-                const Types::MemoryState& state,
-                const bool createProcess = false
-        ) const
-        {
-            auto [blocks, freeBlocks] = state;
+      // если есть, то выполняем сжатие
+      if (index < blocks.size() - 1) {
+        currentState = Operations::compressMemory(currentState, index);
+      } else {
+        break;
+      }
+    }
 
-            // проверить, выделены ли процессу какие-либо блоки памяти
-            auto processPos = std::find_if(
-                        blocks.begin(),
-                        blocks.end(),
-                        [&request](const auto& block) {
-                return block.pid() == request.pid;
-            });
-            // обработка некорректных ситуаций:
-            // 1. Создание уже существующего процесса
-            // 2. Выделение памяти несуществующему процессу
-            if ((processPos != blocks.end() && createProcess)
-                || (processPos == blocks.end() && !createProcess)) {
-                return state;
-            }
+    return currentState;
+  }
 
-            int32_t totalFree = 0;
-            for (const auto& block : freeBlocks) {
-                totalFree += block.size();
-            }
+  virtual Types::MemoryState
+  allocateMemoryGeneral(const Requests::AllocateMemory request,
+                        const Types::MemoryState &state,
+                        const bool createProcess = false) const final {
+    auto [blocks, freeBlocks] = state;
 
-            // проверить, если свободный блок подходящего размера
-            // если есть, то выделить процессу память в этом блоке
-            if (auto pos = findFreeBlock(blocks, freeBlocks, request.pages); pos != blocks.end()) {
-                uint32_t index = static_cast<uint32_t>(pos - blocks.cbegin());
+    // проверить, выделены ли процессу какие-либо блоки памяти
+    auto processPos = std::find_if(
+        blocks.begin(), blocks.end(),
+        [&request](const auto &block) { return block.pid() == request.pid; });
+    // обработка некорректных ситуаций:
+    // 1. Создание уже существующего процесса
+    // 2. Выделение памяти несуществующему процессу
+    if ((processPos != blocks.end() && createProcess) ||
+        (processPos == blocks.end() && !createProcess)) {
+      return state;
+    }
 
-                return Operations::allocateMemory(state, index, request.pid, request.pages);
-            } else if (totalFree >= request.pages) { // если суммарно свободной памяти достаточно, то выполнить дефрагментацию
-                auto newState = Operations::defragmentMemory(state);
-                auto [blocks, freeBlocks] = newState;
-                auto pos = findFreeBlock(blocks, freeBlocks, request.pages);
-                uint32_t index = static_cast<uint32_t>(pos - blocks.cbegin());
+    int32_t totalFree = 0;
+    for (const auto &block : freeBlocks) {
+      totalFree += block.size();
+    }
 
-                return Operations::allocateMemory(newState, index, request.pid, request.pages);
-            } else { // недостаточно свободной памяти, проигнорировать заявку
-                return state;
-            }
-        }
-    };
+    // проверить, если свободный блок подходящего размера
+    // если есть, то выделить процессу память в этом блоке
+    if (auto pos = findFreeBlock(blocks, freeBlocks, request.pages);
+        pos != blocks.end()) {
+      uint32_t index = static_cast<uint32_t>(pos - blocks.cbegin());
 
-    using StrategyPtr = std::shared_ptr<AbstractStrategy>;
+      return Operations::allocateMemory(state, index, request.pid,
+                                        request.pages);
+    } else if (totalFree >=
+               request.pages) { // если суммарно свободной памяти достаточно, то
+                                // выполнить дефрагментацию
+      auto newState = Operations::defragmentMemory(state);
+      auto [blocks, freeBlocks] = newState;
+      auto pos = findFreeBlock(blocks, freeBlocks, request.pages);
+      uint32_t index = static_cast<uint32_t>(pos - blocks.cbegin());
 
-    class FirstAppropriateStrategy final : public AbstractStrategy {
-    public:
-        std::string toString() const override
-        {
-            return "FIRST_APPROPRIATE";
-        }
+      return Operations::allocateMemory(newState, index, request.pid,
+                                        request.pages);
+    } else { // недостаточно свободной памяти, проигнорировать заявку
+      return state;
+    }
+  }
+};
 
-        static std::shared_ptr<FirstAppropriateStrategy> create()
-        {
-            return std::shared_ptr<FirstAppropriateStrategy>(new FirstAppropriateStrategy());
-        }
-    protected:
-        Types::MemoryState sortFreeBlocks(
-                const Types::MemoryState& state
-        ) const override
-        {
-            auto currentState = state;
-            auto [blocks, freeBlocks] = currentState;
+using StrategyPtr = shared_ptr<AbstractStrategy>;
 
-            // упорядочиваем блоки:
-            // - по начальному адресу в порядке возрастания
-            std::stable_sort(
-                        freeBlocks.begin(),
-                        freeBlocks.end(),
-                        [](const auto& left, const auto& right) {
-                return left.address() < right.address();
-            });
+class FirstAppropriateStrategy final : public AbstractStrategy {
+public:
+  std::string toString() const override { return "FIRST_APPROPRIATE"; }
 
-            return {blocks, freeBlocks};
-        }
-    private:
-        FirstAppropriateStrategy() :
-            AbstractStrategy(StrategyType::FIRST_APPROPRIATE)
-        {}
-    };
+  static shared_ptr<FirstAppropriateStrategy> create() {
+    return shared_ptr<FirstAppropriateStrategy>(new FirstAppropriateStrategy());
+  }
 
-    class MostAppropriateStrategy final : public AbstractStrategy {
-    public:
-        std::string toString() const override
-        {
-            return "MOST_APPROPRIATE";
-        }
+protected:
+  Types::MemoryState
+  sortFreeBlocks(const Types::MemoryState &state) const override {
+    auto currentState = state;
+    auto [blocks, freeBlocks] = currentState;
 
-        static std::shared_ptr<MostAppropriateStrategy> create()
-        {
-            return std::shared_ptr<MostAppropriateStrategy>(new MostAppropriateStrategy());
-        }
-    private:
-        MostAppropriateStrategy() :
-            AbstractStrategy(StrategyType::MOST_APPROPRIATE)
-        {}
-    protected:
-        Types::MemoryState sortFreeBlocks(
-                const Types::MemoryState& state
-        ) const override
-        {
-            auto currentState = state;
-            auto [blocks, freeBlocks] = currentState;
+    // упорядочиваем блоки:
+    // - по начальному адресу в порядке возрастания
+    std::stable_sort(freeBlocks.begin(), freeBlocks.end(),
+                     [](const auto &left, const auto &right) {
+                       return left.address() < right.address();
+                     });
 
-            // упорядочиваем блоки:
-            // - по размеру в порядке возрастания
-            // - по начальному адресу в порядке возрастания
-            std::stable_sort(
-                        freeBlocks.begin(),
-                        freeBlocks.end(),
-                        [](const auto& left, const auto& right) {
-                if (left.size() == right.size()) {
-                    return left.address() < right.address();
-                } else {
-                    return left.size() < right.size();
-                }
-            });
+    return {blocks, freeBlocks};
+  }
 
-            return {blocks, freeBlocks};
-        }
-    };
+private:
+  FirstAppropriateStrategy()
+      : AbstractStrategy(StrategyType::FIRST_APPROPRIATE) {}
+};
 
-    class LeastAppropriateStrategy final : public AbstractStrategy {
-    public:
-        std::string toString() const override
-        {
-            return "LEAST_APPROPRIATE";
-        }
+class MostAppropriateStrategy final : public AbstractStrategy {
+public:
+  std::string toString() const override { return "MOST_APPROPRIATE"; }
 
-        static std::shared_ptr<LeastAppropriateStrategy> create()
-        {
-            return std::shared_ptr<LeastAppropriateStrategy>(new LeastAppropriateStrategy());
-        }
-    private:
-        LeastAppropriateStrategy() :
-            AbstractStrategy(StrategyType::LEAST_APPROPRIATE)
-        {}
-    protected:
-        Types::MemoryState sortFreeBlocks(
-                const Types::MemoryState& state
-        ) const override
-        {
-            auto currentState = state;
-            auto [blocks, freeBlocks] = currentState;
+  static shared_ptr<MostAppropriateStrategy> create() {
+    return shared_ptr<MostAppropriateStrategy>(new MostAppropriateStrategy());
+  }
 
-            // упорядочиваем блоки:
-            // - по размеру в порядке убывания
-            // - по начальному адресу в порядке возрастания
-            std::stable_sort(
-                        freeBlocks.begin(),
-                        freeBlocks.end(),
-                        [](const auto& left, const auto& right) {
-                if (left.size() == right.size()) {
-                    return left.address() < right.address();
-                } else {
-                    return left.size() > right.size();
-                }
-            });
+private:
+  MostAppropriateStrategy()
+      : AbstractStrategy(StrategyType::MOST_APPROPRIATE) {}
 
-            return {blocks, freeBlocks};
-        }
-    };
-}
-}
+protected:
+  Types::MemoryState
+  sortFreeBlocks(const Types::MemoryState &state) const override {
+    auto currentState = state;
+    auto [blocks, freeBlocks] = currentState;
 
-#endif // STRATEGIES_H
+    // упорядочиваем блоки:
+    // - по размеру в порядке возрастания
+    // - по начальному адресу в порядке возрастания
+    std::stable_sort(freeBlocks.begin(), freeBlocks.end(),
+                     [](const auto &left, const auto &right) {
+                       if (left.size() == right.size()) {
+                         return left.address() < right.address();
+                       } else {
+                         return left.size() < right.size();
+                       }
+                     });
+
+    return {blocks, freeBlocks};
+  }
+};
+
+class LeastAppropriateStrategy final : public AbstractStrategy {
+public:
+  std::string toString() const override { return "LEAST_APPROPRIATE"; }
+
+  static shared_ptr<LeastAppropriateStrategy> create() {
+    return shared_ptr<LeastAppropriateStrategy>(new LeastAppropriateStrategy());
+  }
+
+private:
+  LeastAppropriateStrategy()
+      : AbstractStrategy(StrategyType::LEAST_APPROPRIATE) {}
+
+protected:
+  Types::MemoryState
+  sortFreeBlocks(const Types::MemoryState &state) const override {
+    auto currentState = state;
+    auto [blocks, freeBlocks] = currentState;
+
+    // упорядочиваем блоки:
+    // - по размеру в порядке убывания
+    // - по начальному адресу в порядке возрастания
+    std::stable_sort(freeBlocks.begin(), freeBlocks.end(),
+                     [](const auto &left, const auto &right) {
+                       if (left.size() == right.size()) {
+                         return left.address() < right.address();
+                       } else {
+                         return left.size() > right.size();
+                       }
+                     });
+
+    return {blocks, freeBlocks};
+  }
+};
+} // namespace MemoryManagement::Strategies

@@ -1,24 +1,18 @@
-#ifndef MODELS_H
-#define MODELS_H
+#pragma once
 
 #include <variant>
 
-#include "../schedulers/utils/tasks.h"
-#include "../schedulers/algo/memory/types.h"
+#include <algo/memory/types.h>
+#include <utils/tasks.h>
 
-namespace Models
-{
-struct ProcessesModel
-{ };
+namespace Models {
+struct ProcessesModel {};
 
-struct MemoryModel
-{
-    MemoryManagement::Types::MemoryState state;
+struct MemoryModel {
+  MemoryManagement::Types::MemoryState state;
 
-    Utils::Tasks::MemoryTask task;
+  Utils::Tasks::MemoryTask task;
 };
 
 using TaskModel = std::variant<ProcessesModel, MemoryModel>;
-}
-
-#endif // MODELS_H
+} // namespace Models

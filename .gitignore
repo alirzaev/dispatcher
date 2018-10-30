@@ -1,3 +1,5 @@
+.vs
+include
 build*
-tests/tests.pro.user
 schedulers/schedulers.pro.user
+gui/gui.pro.user

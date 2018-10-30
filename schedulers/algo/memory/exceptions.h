@@ -33,6 +33,13 @@ namespace MemoryManagement {
             BaseException(what_arg)
         {}
     };
+
+    class TypeException : public BaseException {
+    public:
+        TypeException(const std::string& what_arg) :
+            BaseException(what_arg)
+        {}
+    };
     }
 }
 

@@ -1016,3 +1016,32 @@ TEST_CASE("test_memory_least_appropriate_strategy") {
         REQUIRE(actualState == expectedState);
     }
 }
+
+TEST_CASE("test_memory_types_block") {
+    SECTION("Create valid instance of MemoryBlock")
+    {
+        MemoryBlock block{-1, 0, 10};
+
+        REQUIRE(block.pid() == -1);
+        REQUIRE(block.address() == 0);
+        REQUIRE(block.size() == 10);
+    }
+
+    SECTION("Create invalid instance of MemoryBlock")
+    {
+        // Invalid PID
+        REQUIRE_THROWS_AS(MemoryBlock(-2, 0, 10), Exceptions::TypeException);
+        REQUIRE_THROWS_AS(MemoryBlock(256, 0, 10), Exceptions::TypeException);
+
+        // Invalid address
+        REQUIRE_THROWS_AS(MemoryBlock(0, -1, 10), Exceptions::TypeException);
+        REQUIRE_THROWS_AS(MemoryBlock(0, 256, 10), Exceptions::TypeException);
+
+        // Invalid size
+        REQUIRE_THROWS_AS(MemoryBlock(0, 0, 0), Exceptions::TypeException);
+        REQUIRE_THROWS_AS(MemoryBlock(0, 0, 300), Exceptions::TypeException);
+
+        // Memory block is out of bound
+        REQUIRE_THROWS_AS(MemoryBlock(0, 200, 100), Exceptions::TypeException);
+    }
+}

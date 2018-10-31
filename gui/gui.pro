@@ -26,7 +26,8 @@ CONFIG += c++1z
 
 INCLUDEPATH += \
     "../3rdparty" \
-    "../schedulers"
+    "../schedulers" \
+    "../generator"
 
 SOURCES += \
     main.cpp \

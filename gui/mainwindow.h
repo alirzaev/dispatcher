@@ -18,6 +18,8 @@ public:
 
   void onSaveTaskListener(OnSaveListener listener) override;
 
+  void onGenerateTaskListener(OnGenerateListener listener);
+
   std::vector<Views::TaskView>
   createTaskViews(const std::vector<Utils::Tasks::Task> &tasks) override;
 
@@ -30,7 +32,11 @@ private:
 
   OnSaveListener saveTaskListener;
 
+  OnGenerateListener generateTaskListener;
+
   void openTaskDialog();
 
   void saveTaskDialog();
+
+  void generateTaskDialog();
 };

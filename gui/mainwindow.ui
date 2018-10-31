@@ -47,13 +47,14 @@
      <x>0</x>
      <y>0</y>
      <width>640</width>
-     <height>26</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
     <property name="title">
      <string>З&amp;адание</string>
     </property>
+    <addaction name="actionGenerateTask"/>
     <addaction name="actionOpenTask"/>
     <addaction name="actionSaveTask"/>
     <addaction name="separator"/>
@@ -84,6 +85,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionGenerateTask">
+   <property name="text">
+    <string>Сгенерировать</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
    </property>
   </action>
  </widget>

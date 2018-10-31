@@ -18,6 +18,8 @@ MainWindow::MainWindow(QWidget *parent)
           &MainWindow::openTaskDialog);
   connect(ui->actionSaveTask, &QAction::triggered, this,
           &MainWindow::saveTaskDialog);
+  connect(ui->actionGenerateTask, &QAction::triggered, this,
+          &MainWindow::generateTaskDialog);
   connect(ui->actionQuit, &QAction::triggered, this, &QMainWindow::close);
 }
 
@@ -29,6 +31,10 @@ void MainWindow::onOpenTaskListener(OnOpenListener listener) {
 
 void MainWindow::onSaveTaskListener(OnSaveListener listener) {
   saveTaskListener = listener;
+}
+
+void MainWindow::onGenerateTaskListener(OnGenerateListener listener) {
+  generateTaskListener = listener;
 }
 
 void MainWindow::openTaskDialog() {
@@ -47,6 +53,12 @@ void MainWindow::saveTaskDialog() {
       fileName.append(".json");
     }
     saveTaskListener(fileName.toStdString());
+  }
+}
+
+void MainWindow::generateTaskDialog() {
+  if (generateTaskListener) {
+    generateTaskListener();
   }
 }
 

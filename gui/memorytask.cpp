@@ -53,7 +53,7 @@ void MemoryTask::setMemoryBlocks(const std::vector<MemoryBlock> &blocks) {
   auto *list = ui->listMemBlocks;
   list->clear();
   for (const auto &block : blocks) {
-    list->addItem(new MemoryBlockItem(block));
+    list->addItem(new MemoryBlockItem(block, true));
   }
 }
 

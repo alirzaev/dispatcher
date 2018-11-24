@@ -30,7 +30,7 @@ public:
 
   MemoryBlock(const MemoryBlock &other) = default;
 
-  MemoryBlock() { MemoryBlock(-1, 0, 1); }
+  MemoryBlock() : MemoryBlock(-1, 0, 256) {}
 
   MemoryBlock &operator=(const MemoryBlock &rhs) = default;
 
@@ -68,7 +68,7 @@ public:
               const std::vector<MemoryBlock> &freeBlocks)
       : blocks(blocks), freeBlocks(freeBlocks) {}
 
-  MemoryState() { MemoryState(initial()); }
+  MemoryState() : MemoryState(MemoryState::initial()) {}
 
   MemoryState(const MemoryState &state) = default;
 

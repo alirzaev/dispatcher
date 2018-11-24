@@ -11,7 +11,7 @@ private:
 
 public:
   MemoryBlockItem(const MemoryManagement::Types::MemoryBlock &block,
-                  QListWidget *parent = nullptr);
+                  bool highlightFree = false, QListWidget *parent = nullptr);
 
   const MemoryManagement::Types::MemoryBlock &block() const;
 };

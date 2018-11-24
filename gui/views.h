@@ -73,11 +73,15 @@ public:
 
   using OnSaveListener = function<void(const std::string &)>;
 
+  using OnGenerateListener = function<void()>;
+
   MainWindowView() = default;
 
   virtual void onOpenTaskListener(OnOpenListener listener) = 0;
 
   virtual void onSaveTaskListener(OnSaveListener listener) = 0;
+
+  virtual void onGenerateTaskListener(OnGenerateListener listener) = 0;
 
   virtual std::vector<TaskView>
   createTaskViews(const std::vector<Utils::Tasks::Task> &tasks) = 0;

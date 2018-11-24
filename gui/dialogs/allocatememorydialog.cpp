@@ -19,8 +19,12 @@ AllocateMemoryDialog::AllocateMemoryDialog(QWidget *parent, int32_t maxSize)
 AllocateMemoryDialog::~AllocateMemoryDialog() { delete ui; }
 
 void AllocateMemoryDialog::tryAccept() {
-  if (!ui->PIDEdit->text().isEmpty() && !ui->sizeEdit->text().isEmpty()) {
-    this->data = {ui->PIDEdit->text().toInt(), ui->sizeEdit->text().toInt()};
+  bool pidOk, sizeOk;
+  int32_t pid = ui->PIDEdit->text().toInt(&pidOk, 10);
+  int32_t size = ui->sizeEdit->text().toInt(&sizeOk, 10);
+  if (pidOk && sizeOk && (pid > -1 && pid < 256) &&
+      (size > 0 && size <= maxSize)) {
+    this->data = {pid, size};
     this->accept();
   }
 }

@@ -15,6 +15,7 @@
 #include "views.h"
 #include <algo/memory/operations.h>
 #include <algo/memory/types.h>
+#include <generators/memory_task.h>
 #include <utils/io.h>
 #include <utils/tasks.h>
 
@@ -182,13 +183,11 @@ private:
 
   std::vector<TaskPresenter> _taskPresenters;
 
-  void loadTasks(const std::string &path) {
-    std::ifstream file(path);
-
-    auto tasks = Utils::IO::loadTasks(file);
+  void openTasks(const std::vector<Utils::Tasks::Task> &tasks) {
     std::vector<Models::TaskModel> newTaskModels;
     for (const auto &task : tasks) {
-      if (auto *p = std::get_if<Utils::Tasks::MemoryTask>(&task)) {
+      if (auto *p = std::get_if<Utils::Tasks::MemoryTask>(&task);
+          p != nullptr) {
         newTaskModels.push_back(Models::MemoryModel{p->state(), *p});
       }
     }
@@ -196,13 +195,21 @@ private:
     auto views = _view->createTaskViews(tasks);
     std::vector<TaskPresenter> newTaskPresenters;
     for (size_t i = 0; i < views.size(); ++i) {
-      if (auto *view = std::get_if<Views::MemoryTaskView *>(&views[i])) {
+      if (auto *view = std::get_if<Views::MemoryTaskView *>(&views[i]);
+          view != nullptr) {
         auto *model = std::get_if<Models::MemoryModel>(&newTaskModels[i]);
         newTaskPresenters.emplace_back(new MemoryTaskPresenter(*view, model));
       }
     }
     _taskModels.swap(newTaskModels);
     _taskPresenters.swap(newTaskPresenters);
+  }
+
+  void loadTasks(const std::string &path) {
+    std::ifstream file(path);
+
+    auto tasks = Utils::IO::loadTasks(file);
+    openTasks(tasks);
   }
 
   void saveTasks(const std::string &path) {
@@ -219,6 +226,11 @@ private:
     Utils::IO::saveTasks(tasks, file);
   }
 
+  void generateTasks() {
+    std::vector<Utils::Tasks::Task> tasks({Generators::MemoryTask::generate()});
+    openTasks(tasks);
+  }
+
 public:
   MainWindowPresenter(Views::MainWindowView *view) : _view(view) {
     _view->onOpenTaskListener(
@@ -226,6 +238,8 @@ public:
 
     _view->onSaveTaskListener(
         [=](const std::string &path) { this->saveTasks(path); });
+
+    _view->onGenerateTaskListener([=]() { this->generateTasks(); });
   }
 };
 } // namespace Presenters

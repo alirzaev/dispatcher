@@ -35,16 +35,24 @@ inline int32_t randRange(int32_t a, int32_t b) {
   return dist(e);
 }
 
-inline Strategies::StrategyPtr randStrategy() {
-  auto strategyIndex = randRange(0, 2);
-  switch (strategyIndex) {
-  case 0:
-    return MemoryManagement::Strategies::FirstAppropriateStrategy::create();
-  case 1:
-    return MemoryManagement::Strategies::MostAppropriateStrategy::create();
-  case 2:
-    return MemoryManagement::Strategies::LeastAppropriateStrategy::create();
+template <class BidIt>
+inline auto randChoice(BidIt first, BidIt last) -> decltype(*first) {
+  auto size = std::distance(first, last);
+  auto index = randRange(0, size - 1);
+  auto it = first;
+  for (decltype(index) i = 0; i < index; ++i) {
+    ++it;
   }
+  return *it;
+}
+
+inline Strategies::StrategyPtr randStrategy() {
+  vector<MemoryManagement::Strategies::StrategyPtr> strategies = {
+      MemoryManagement::Strategies::FirstAppropriateStrategy::create(),
+      MemoryManagement::Strategies::MostAppropriateStrategy::create(),
+      MemoryManagement::Strategies::LeastAppropriateStrategy::create()};
+
+  return randChoice(strategies.begin(), strategies.end());
 }
 
 inline Requests::RequestType randRequestType() {
@@ -55,18 +63,7 @@ inline Requests::RequestType randRequestType() {
       Requests::RequestType::FREE_MEMORY,
       Requests::RequestType::TERMINATE_PROCESS,
       Requests::RequestType::TERMINATE_PROCESS};
-  return types[randRange(0, 5)];
-}
-
-template <class BidIt>
-inline auto randChoice(BidIt first, BidIt last) -> decltype(*first) {
-  auto size = std::distance(first, last);
-  auto index = randRange(0, size - 1);
-  auto it = first;
-  for (decltype(index) i = 0; i < index; ++i) {
-    ++it;
-  }
-  return *it;
+  return randChoice(types.begin(), types.end());
 }
 
 inline set<int32_t> getAvailablePids(const Types::MemoryState &state) {

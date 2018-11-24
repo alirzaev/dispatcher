@@ -17,10 +17,10 @@ using namespace MemoryManagement;
 using MemoryManagement::Types::MemoryBlock;
 using MemoryManagement::Types::MemoryState;
 
-QString createProcessDescr =
-    "Создан новый процесс PID = %1. "
-    "Для размещения процесса в памяти требуется выделить "
-    "%2 байт (%3 параграфов)";
+QString createProcessDescr = "Создан новый процесс PID = %1. "
+                             "Для размещения процесса в памяти (включая "
+                             "служебную информацию) требуется выделить "
+                             "%2 байт (%3 параграфов)";
 
 QString terminateProcessDescr = "Процесс PID = %1 завершен";
 
@@ -53,7 +53,7 @@ void MemoryTask::setMemoryBlocks(const std::vector<MemoryBlock> &blocks) {
   auto *list = ui->listMemBlocks;
   list->clear();
   for (const auto &block : blocks) {
-    list->addItem(new MemoryBlockItem(block));
+    list->addItem(new MemoryBlockItem(block, true));
   }
 }
 

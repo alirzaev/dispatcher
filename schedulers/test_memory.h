@@ -10,190 +10,123 @@
 #include "algo/memory/types.h"
 
 using namespace MemoryManagement;
-using MemoryManagement::Types::MemoryBlock;
 using std::vector;
 
 TEST_CASE("test_memory_requests") {
-  SECTION("Create instance of CreateProcess") {
-    auto request = Requests::CreateProcess::create(0, 4096, 1);
+  SECTION("Create instance of CreateProcessReq") {
+    auto request = CreateProcessReq(0, 4096, 1);
 
-    REQUIRE(request->pid == 0);
-    REQUIRE(request->bytes == 4096);
-    REQUIRE(request->pages == 1);
-    REQUIRE(request->type == Requests::RequestType::CREATE_PROCESS);
+    REQUIRE(request.pid() == 0);
+    REQUIRE(request.bytes() == 4096);
+    REQUIRE(request.pages() == 1);
   }
 
-  SECTION("Convert to JSON instance of CreateProcess") {
-    auto request = Requests::CreateProcess::create(0, 4096, 1);
+  SECTION("Convert to JSON instance of CreateProcessReq") {
+    auto request = CreateProcessReq(0, 4096, 1);
 
     auto expected = nlohmann::json{
         {"type", "CREATE_PROCESS"}, {"pid", 0}, {"bytes", 4096}, {"pages", 1}};
-    auto actual = request->dump();
+    auto actual = request.dump();
 
     REQUIRE(actual == expected);
   }
 
-  SECTION("Check preconditions for CreateProcess") {
-    REQUIRE_THROWS_AS(Requests::CreateProcess::create(-2, 4096, 1),
-                      Exceptions::RequestException);
-    REQUIRE_THROWS_AS(Requests::CreateProcess::create(256, 4096, 1),
-                      Exceptions::RequestException);
+  SECTION("Check preconditions for CreateProcessReq") {
+    REQUIRE_THROWS_AS(CreateProcessReq(-2, 4096, 1), RequestException);
+    REQUIRE_THROWS_AS(CreateProcessReq(256, 4096, 1), RequestException);
 
-    REQUIRE_THROWS_AS(Requests::CreateProcess::create(0, -1, 1),
-                      Exceptions::RequestException);
-    REQUIRE_THROWS_AS(Requests::CreateProcess::create(0, 257 * 4096, 1),
-                      Exceptions::RequestException);
-    REQUIRE_THROWS_AS(Requests::CreateProcess::create(0, 4097, 1),
-                      Exceptions::RequestException);
-    REQUIRE_THROWS_AS(Requests::CreateProcess::create(0, 4096, 2),
-                      Exceptions::RequestException);
+    REQUIRE_THROWS_AS(CreateProcessReq(0, -1, 1), RequestException);
+    REQUIRE_THROWS_AS(CreateProcessReq(0, 257 * 4096, 1), RequestException);
+    REQUIRE_THROWS_AS(CreateProcessReq(0, 4097, 1), RequestException);
+    REQUIRE_THROWS_AS(CreateProcessReq(0, 4096, 2), RequestException);
 
-    REQUIRE_THROWS_AS(Requests::CreateProcess::create(0, 4096, 0),
-                      Exceptions::RequestException);
-    REQUIRE_THROWS_AS(Requests::CreateProcess::create(0, 4096, 257),
-                      Exceptions::RequestException);
+    REQUIRE_THROWS_AS(CreateProcessReq(0, 4096, 0), RequestException);
+    REQUIRE_THROWS_AS(CreateProcessReq(0, 4096, 257), RequestException);
   }
 
-  SECTION("Copy instance of CreateProcess") {
-    auto request = Requests::CreateProcess::create(0, 4096, 1);
-    auto copy = *request;
+  SECTION("Create instance of TerminateProcessReq") {
+    auto request = TerminateProcessReq(0);
 
-    REQUIRE(copy.pid == request->pid);
-    REQUIRE(copy.bytes == request->bytes);
-    REQUIRE(copy.pages == request->pages);
+    REQUIRE(request.pid() == 0);
   }
 
-  SECTION("Create instance of TerminateProcess") {
-    auto request = Requests::TerminateProcess::create(0);
-
-    REQUIRE(request->pid == 0);
-    REQUIRE(request->type == Requests::RequestType::TERMINATE_PROCESS);
-  }
-
-  SECTION("Convert to JSON instance of TerminateProcess") {
-    auto request = Requests::TerminateProcess::create(0);
+  SECTION("Convert to JSON instance of TerminateProcessReq") {
+    auto request = TerminateProcessReq(0);
 
     auto expected = nlohmann::json{{"type", "TERMINATE_PROCESS"}, {"pid", 0}};
-    auto actual = request->dump();
+    auto actual = request.dump();
 
     REQUIRE(actual == expected);
   }
 
-  SECTION("Check preconditions for TerminateProcess") {
-    REQUIRE_THROWS_AS(Requests::TerminateProcess::create(-2),
-                      Exceptions::RequestException);
-    REQUIRE_THROWS_AS(Requests::TerminateProcess::create(256),
-                      Exceptions::RequestException);
-  }
-
-  SECTION("Copy instance of TerminateProcess") {
-    auto request = Requests::TerminateProcess::create(0);
-    auto copy = *request;
-
-    REQUIRE(copy.pid == request->pid);
+  SECTION("Check preconditions for TerminateProcessReq") {
+    REQUIRE_THROWS_AS(TerminateProcessReq(-2), RequestException);
+    REQUIRE_THROWS_AS(TerminateProcessReq(256), RequestException);
   }
 
   SECTION("Create instance of AllocateMemory") {
-    auto request = Requests::AllocateMemory::create(0, 4096, 1);
+    auto request = AllocateMemory(0, 4096, 1);
 
-    REQUIRE(request->pid == 0);
-    REQUIRE(request->bytes == 4096);
-    REQUIRE(request->pages == 1);
-    REQUIRE(request->type == Requests::RequestType::ALLOCATE_MEMORY);
+    REQUIRE(request.pid() == 0);
+    REQUIRE(request.bytes() == 4096);
+    REQUIRE(request.pages() == 1);
   }
 
   SECTION("Convert to JSON instance of AllocateMemory") {
-    auto request = Requests::AllocateMemory::create(0, 4096, 1);
+    auto request = AllocateMemory(0, 4096, 1);
 
     auto expected = nlohmann::json{
         {"type", "ALLOCATE_MEMORY"}, {"pid", 0}, {"bytes", 4096}, {"pages", 1}};
-    auto actual = request->dump();
+    auto actual = request.dump();
 
     REQUIRE(actual == expected);
   }
 
   SECTION("Check preconditions for AllocateMemory") {
-    REQUIRE_THROWS_AS(Requests::AllocateMemory::create(-2, 4096, 1),
-                      Exceptions::RequestException);
-    REQUIRE_THROWS_AS(Requests::AllocateMemory::create(256, 4096, 1),
-                      Exceptions::RequestException);
+    REQUIRE_THROWS_AS(AllocateMemory(-2, 4096, 1), RequestException);
+    REQUIRE_THROWS_AS(AllocateMemory(256, 4096, 1), RequestException);
 
-    REQUIRE_THROWS_AS(Requests::AllocateMemory::create(0, -1, 1),
-                      Exceptions::RequestException);
-    REQUIRE_THROWS_AS(Requests::AllocateMemory::create(0, 257 * 4096, 1),
-                      Exceptions::RequestException);
-    REQUIRE_THROWS_AS(Requests::AllocateMemory::create(0, 4097, 1),
-                      Exceptions::RequestException);
-    REQUIRE_THROWS_AS(Requests::AllocateMemory::create(0, 4096, 2),
-                      Exceptions::RequestException);
+    REQUIRE_THROWS_AS(AllocateMemory(0, -1, 1), RequestException);
+    REQUIRE_THROWS_AS(AllocateMemory(0, 257 * 4096, 1), RequestException);
+    REQUIRE_THROWS_AS(AllocateMemory(0, 4097, 1), RequestException);
+    REQUIRE_THROWS_AS(AllocateMemory(0, 4096, 2), RequestException);
 
-    REQUIRE_THROWS_AS(Requests::AllocateMemory::create(0, 4096, 0),
-                      Exceptions::RequestException);
-    REQUIRE_THROWS_AS(Requests::AllocateMemory::create(0, 4096, 257),
-                      Exceptions::RequestException);
+    REQUIRE_THROWS_AS(AllocateMemory(0, 4096, 0), RequestException);
+    REQUIRE_THROWS_AS(AllocateMemory(0, 4096, 257), RequestException);
   }
 
   SECTION("Copy instance of AllocateMemory") {
-    auto request = Requests::AllocateMemory::create(0, 4096, 1);
-    auto copy = *request;
+    auto request = AllocateMemory(0, 4096, 1);
+    auto copy = request;
 
-    REQUIRE(copy.pid == request->pid);
-    REQUIRE(copy.bytes == request->bytes);
-    REQUIRE(copy.pages == request->pages);
+    REQUIRE(copy.pid() == request.pid());
+    REQUIRE(copy.bytes() == request.bytes());
+    REQUIRE(copy.pages() == request.pages());
   }
 
   SECTION("Create instance of FreeMemory") {
-    auto request = Requests::FreeMemory::create(0, 12);
+    auto request = FreeMemory(0, 12);
 
-    REQUIRE(request->pid == 0);
-    REQUIRE(request->address == 12);
-    REQUIRE(request->type == Requests::RequestType::FREE_MEMORY);
+    REQUIRE(request.pid() == 0);
+    REQUIRE(request.address() == 12);
   }
 
   SECTION("Convert to JSON instance of FreeMemory") {
-    auto request = Requests::FreeMemory::create(0, 12);
+    auto request = FreeMemory(0, 12);
 
     auto expected =
         nlohmann::json{{"type", "FREE_MEMORY"}, {"pid", 0}, {"address", 12}};
-    auto actual = request->dump();
+    auto actual = request.dump();
 
     REQUIRE(actual == expected);
   }
 
   SECTION("Check preconditions for FreeMemory") {
-    REQUIRE_THROWS_AS(Requests::FreeMemory::create(-2, 0),
-                      Exceptions::RequestException);
-    REQUIRE_THROWS_AS(Requests::FreeMemory::create(256, 0),
-                      Exceptions::RequestException);
+    REQUIRE_THROWS_AS(FreeMemory(-2, 0), RequestException);
+    REQUIRE_THROWS_AS(FreeMemory(256, 0), RequestException);
 
-    REQUIRE_THROWS_AS(Requests::FreeMemory::create(0, -1),
-                      Exceptions::RequestException);
-    REQUIRE_THROWS_AS(Requests::FreeMemory::create(0, 256),
-                      Exceptions::RequestException);
-  }
-
-  SECTION("Copy instance of FreeMemory") {
-    auto request = Requests::FreeMemory::create(0, 12);
-    auto copy = *request;
-
-    REQUIRE(copy.pid == request->pid);
-    REQUIRE(copy.address == request->address);
-  }
-
-  SECTION("Create array of AbstractRequests") {
-    Requests::RequestPtr requests[] = {Requests::CreateProcess::create(0, 2, 1),
-                                       Requests::TerminateProcess::create(0)};
-
-    REQUIRE(requests[0]->type == Requests::RequestType::CREATE_PROCESS);
-    REQUIRE(requests[1]->type == Requests::RequestType::TERMINATE_PROCESS);
-  }
-
-  SECTION("Dynamic cast from AbstractRequest to CreateProcess") {
-    Requests::RequestPtr request = Requests::CreateProcess::create(0, 2, 1);
-    auto *createProcess =
-        dynamic_cast<Requests::CreateProcess *>(request.get());
-    REQUIRE(createProcess != nullptr);
-    REQUIRE(createProcess->type == Requests::RequestType::CREATE_PROCESS);
+    REQUIRE_THROWS_AS(FreeMemory(0, -1), RequestException);
+    REQUIRE_THROWS_AS(FreeMemory(0, 256), RequestException);
   }
 }
 
@@ -206,7 +139,7 @@ TEST_CASE("test_memory_operations") {
                                   {-1, 36, 7}};
     vector<MemoryBlock> freeBlocks = {{-1, 15, 20}, //
                                       {-1, 36, 7}};
-    Types::MemoryState state(blocks, freeBlocks);
+    MemoryState state(blocks, freeBlocks);
 
     vector<MemoryBlock> expectedBlocks = {{0, 0, 12},   //
                                           {2, 12, 3},   //
@@ -216,9 +149,9 @@ TEST_CASE("test_memory_operations") {
                                           {-1, 36, 7}};
     vector<MemoryBlock> expectedFreeBlocks = {{-1, 36, 7}, //
                                               {-1, 19, 16}};
-    Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+    MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
 
-    auto actualState = Operations::allocateMemory(state, 2, 3, 4);
+    auto actualState = allocateMemory(state, 2, 3, 4);
     REQUIRE(actualState == expectedState);
   }
 
@@ -230,7 +163,7 @@ TEST_CASE("test_memory_operations") {
                                   {-1, 36, 7}};
     vector<MemoryBlock> freeBlocks = {{-1, 15, 20}, //
                                       {-1, 36, 7}};
-    Types::MemoryState state(blocks, freeBlocks);
+    MemoryState state(blocks, freeBlocks);
 
     vector<MemoryBlock> expectedBlocks = {{0, 0, 12},  //
                                           {2, 12, 3},  //
@@ -238,9 +171,9 @@ TEST_CASE("test_memory_operations") {
                                           {2, 35, 1},  //
                                           {-1, 36, 7}};
     vector<MemoryBlock> expectedFreeBlocks = {{-1, 36, 7}};
-    Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+    MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
 
-    auto actualState = Operations::allocateMemory(state, 2, 3, 20);
+    auto actualState = allocateMemory(state, 2, 3, 20);
     REQUIRE(actualState == expectedState);
   }
 
@@ -252,7 +185,7 @@ TEST_CASE("test_memory_operations") {
                                   {-1, 36, 7}};
     vector<MemoryBlock> freeBlocks = {{-1, 15, 20}, //
                                       {-1, 36, 7}};
-    Types::MemoryState state(blocks, freeBlocks);
+    MemoryState state(blocks, freeBlocks);
 
     vector<MemoryBlock> expectedBlocks = {{0, 0, 12},   //
                                           {2, 12, 3},   //
@@ -262,9 +195,9 @@ TEST_CASE("test_memory_operations") {
     vector<MemoryBlock> expectedFreeBlocks = {{-1, 15, 20}, //
                                               {-1, 36, 7},  //
                                               {-1, 35, 1}};
-    Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+    MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
 
-    auto actualState = Operations::freeMemory(state, 2, 3);
+    auto actualState = freeMemory(state, 2, 3);
     REQUIRE(actualState == expectedState);
   }
 
@@ -278,16 +211,16 @@ TEST_CASE("test_memory_operations") {
     };
     vector<MemoryBlock> freeBlocks = {{-1, 15, 20}, //
                                       {-1, 36, 7}};
-    Types::MemoryState state(blocks, freeBlocks);
+    MemoryState state(blocks, freeBlocks);
 
     vector<MemoryBlock> expectedBlocks = {{0, 0, 12}, //
                                           {2, 12, 3}, //
                                           {2, 15, 1}, //
                                           {-1, 16, 27}};
     vector<MemoryBlock> expectedFreeBlocks = {{-1, 16, 27}};
-    Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+    MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
 
-    auto actualState = Operations::defragmentMemory(state);
+    auto actualState = defragmentMemory(state);
     REQUIRE(actualState == expectedState);
   }
 
@@ -305,7 +238,7 @@ TEST_CASE("test_memory_operations") {
                                       {-1, 36, 7},  //
                                       {-1, 55, 2},  //
                                       {-1, 57, 6}};
-    Types::MemoryState state(blocks, freeBlocks);
+    MemoryState state(blocks, freeBlocks);
 
     vector<MemoryBlock> expectedBlocks = {{0, 0, 12},   //
                                           {2, 12, 3},   //
@@ -316,23 +249,23 @@ TEST_CASE("test_memory_operations") {
     vector<MemoryBlock> expectedFreeBlocks = {{-1, 55, 2}, //
                                               {-1, 57, 6}, //
                                               {-1, 15, 28}};
-    Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+    MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
 
-    auto actualState = Operations::compressMemory(state, 2);
+    auto actualState = compressMemory(state, 2);
     REQUIRE(actualState == expectedState);
   }
 }
 
 TEST_CASE("test_memory_first_appropriate_strategy") {
   SECTION("Create instance of FirstAppropriateStrategy") {
-    auto strategy = Strategies::FirstAppropriateStrategy::create();
+    auto strategy = FirstAppropriateStrategy::create();
 
-    REQUIRE(strategy->type == Strategies::StrategyType::FIRST_APPROPRIATE);
+    REQUIRE(strategy->type == StrategyType::FIRST_APPROPRIATE);
   }
 
-  SECTION("Process CreateProcess request") {
-    auto strategy = Strategies::FirstAppropriateStrategy::create();
-    auto request = *Requests::CreateProcess::create(3, 16384, 4);
+  SECTION("Process CreateProcessReq request") {
+    auto strategy = FirstAppropriateStrategy::create();
+    auto request = CreateProcessReq(3, 16384, 4);
 
     vector<MemoryBlock> blocks = {{0, 0, 12},   //
                                   {2, 12, 3},   //
@@ -341,7 +274,7 @@ TEST_CASE("test_memory_first_appropriate_strategy") {
                                   {-1, 36, 7}};
     vector<MemoryBlock> freeBlocks = {{-1, 15, 20}, //
                                       {-1, 36, 7}};
-    Types::MemoryState state(blocks, freeBlocks);
+    MemoryState state(blocks, freeBlocks);
 
     vector<MemoryBlock> expectedBlocks = {{0, 0, 12},   //
                                           {2, 12, 3},   //
@@ -351,15 +284,15 @@ TEST_CASE("test_memory_first_appropriate_strategy") {
                                           {-1, 36, 7}};
     vector<MemoryBlock> expectedFreeBlocks = {{-1, 19, 16}, //
                                               {-1, 36, 7}};
-    Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+    MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
 
-    auto actualState = strategy->createProcess(request, state);
+    auto actualState = strategy->processRequest(request, state);
     REQUIRE(actualState == expectedState);
   }
 
-  SECTION("Process TerminateProcess request") {
-    auto strategy = Strategies::FirstAppropriateStrategy::create();
-    auto request = *Requests::TerminateProcess::create(2);
+  SECTION("Process TerminateProcessReq request") {
+    auto strategy = FirstAppropriateStrategy::create();
+    auto request = TerminateProcessReq(2);
 
     vector<MemoryBlock> blocks = {{2, 0, 12},  //*
                                   {2, 12, 3},  //*
@@ -367,22 +300,22 @@ TEST_CASE("test_memory_first_appropriate_strategy") {
                                   {1, 35, 1},  //
                                   {-1, 36, 7}};
     vector<MemoryBlock> freeBlocks = {{-1, 36, 7}};
-    Types::MemoryState state(blocks, freeBlocks);
+    MemoryState state(blocks, freeBlocks);
 
     vector<MemoryBlock> expectedBlocks = {{-1, 0, 35}, //
                                           {1, 35, 1},  //
                                           {-1, 36, 7}};
     vector<MemoryBlock> expectedFreeBlocks = {{-1, 0, 35}, //
                                               {-1, 36, 7}};
-    Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+    MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
 
-    auto actualState = strategy->terminateProcess(request, state);
+    auto actualState = strategy->processRequest(request, state);
     REQUIRE(actualState == expectedState);
   }
 
   SECTION("Process AllocateMemory request") {
-    auto strategy = Strategies::FirstAppropriateStrategy::create();
-    auto request = *Requests::AllocateMemory::create(1, 8192, 2);
+    auto strategy = FirstAppropriateStrategy::create();
+    auto request = AllocateMemory(1, 8192, 2);
 
     vector<MemoryBlock> blocks = {{2, 0, 12},   //
                                   {2, 12, 3},   //
@@ -391,7 +324,7 @@ TEST_CASE("test_memory_first_appropriate_strategy") {
                                   {-1, 36, 7}};
     vector<MemoryBlock> freeBlocks = {{-1, 15, 20}, //*
                                       {-1, 36, 7}};
-    Types::MemoryState state(blocks, freeBlocks);
+    MemoryState state(blocks, freeBlocks);
 
     vector<MemoryBlock> expectedBlocks = {{2, 0, 12},   //
                                           {2, 12, 3},   //
@@ -401,15 +334,15 @@ TEST_CASE("test_memory_first_appropriate_strategy") {
                                           {-1, 36, 7}};
     vector<MemoryBlock> expectedFreeBlocks = {{-1, 17, 18}, //
                                               {-1, 36, 7}};
-    Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+    MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
 
-    auto actualState = strategy->allocateMemory(request, state);
+    auto actualState = strategy->processRequest(request, state);
     REQUIRE(actualState == expectedState);
   }
 
   SECTION("Process AllocateMemory request (with defragmentation)") {
-    auto strategy = Strategies::FirstAppropriateStrategy::create();
-    auto request = *Requests::AllocateMemory::create(1, 90112, 22);
+    auto strategy = FirstAppropriateStrategy::create();
+    auto request = AllocateMemory(1, 90112, 22);
 
     vector<MemoryBlock> blocks = {{2, 0, 12},   //
                                   {2, 12, 3},   //
@@ -420,7 +353,7 @@ TEST_CASE("test_memory_first_appropriate_strategy") {
         {-1, 15, 20}, //*
         {-1, 36, 7}   //*
     };
-    Types::MemoryState state(blocks, freeBlocks);
+    MemoryState state(blocks, freeBlocks);
 
     vector<MemoryBlock> expectedBlocks = {{2, 0, 12},  //
                                           {2, 12, 3},  //
@@ -428,15 +361,15 @@ TEST_CASE("test_memory_first_appropriate_strategy") {
                                           {1, 16, 22}, //
                                           {-1, 38, 5}};
     vector<MemoryBlock> expectedFreeBlocks = {{-1, 38, 5}};
-    Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+    MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
 
-    auto actualState = strategy->allocateMemory(request, state);
+    auto actualState = strategy->processRequest(request, state);
     REQUIRE(actualState == expectedState);
   }
 
   SECTION("Process AllocateMemory request (out of memory)") {
-    auto strategy = Strategies::FirstAppropriateStrategy::create();
-    auto request = *Requests::AllocateMemory::create(1, 122800, 30);
+    auto strategy = FirstAppropriateStrategy::create();
+    auto request = AllocateMemory(1, 122800, 30);
 
     vector<MemoryBlock> blocks = {{2, 0, 12},   //
                                   {2, 12, 3},   //
@@ -445,7 +378,7 @@ TEST_CASE("test_memory_first_appropriate_strategy") {
                                   {-1, 36, 7}};
     vector<MemoryBlock> freeBlocks = {{-1, 15, 20}, //
                                       {-1, 36, 7}};
-    Types::MemoryState state(blocks, freeBlocks);
+    MemoryState state(blocks, freeBlocks);
 
     vector<MemoryBlock> expectedBlocks = {{2, 0, 12},   //
                                           {2, 12, 3},   //
@@ -454,15 +387,15 @@ TEST_CASE("test_memory_first_appropriate_strategy") {
                                           {-1, 36, 7}};
     vector<MemoryBlock> expectedFreeBlocks = {{-1, 15, 20}, //
                                               {-1, 36, 7}};
-    Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+    MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
 
-    auto actualState = strategy->allocateMemory(request, state);
+    auto actualState = strategy->processRequest(request, state);
     REQUIRE(actualState == expectedState);
   }
 
   SECTION("Process FreeMemory request") {
-    auto strategy = Strategies::FirstAppropriateStrategy::create();
-    auto request = *Requests::FreeMemory::create(1, 35);
+    auto strategy = FirstAppropriateStrategy::create();
+    auto request = FreeMemory(1, 35);
 
     vector<MemoryBlock> blocks = {
         {2, 0, 12},  //
@@ -472,30 +405,30 @@ TEST_CASE("test_memory_first_appropriate_strategy") {
         {-1, 36, 7}  //*
     };
     vector<MemoryBlock> freeBlocks = {{-1, 36, 7}};
-    Types::MemoryState state(blocks, freeBlocks);
+    MemoryState state(blocks, freeBlocks);
 
     vector<MemoryBlock> expectedBlocks = {{2, 0, 12},  //
                                           {2, 12, 3},  //
                                           {2, 15, 20}, //
                                           {-1, 35, 8}};
     vector<MemoryBlock> expectedFreeBlocks = {{-1, 35, 8}};
-    Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+    MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
 
-    auto actualState = strategy->freeMemory(request, state);
+    auto actualState = strategy->processRequest(request, state);
     REQUIRE(actualState == expectedState);
   }
 }
 
 TEST_CASE("test_memory_most_appropriate_strategy") {
   SECTION("Create instance of MostAppropriateStrategy") {
-    auto strategy = Strategies::MostAppropriateStrategy::create();
+    auto strategy = MostAppropriateStrategy::create();
 
-    REQUIRE(strategy->type == Strategies::StrategyType::MOST_APPROPRIATE);
+    REQUIRE(strategy->type == StrategyType::MOST_APPROPRIATE);
   }
 
-  SECTION("Process CreateProcess request") {
-    auto strategy = Strategies::MostAppropriateStrategy::create();
-    auto request = *Requests::CreateProcess::create(3, 16384, 4);
+  SECTION("Process CreateProcessReq request") {
+    auto strategy = MostAppropriateStrategy::create();
+    auto request = CreateProcessReq(3, 16384, 4);
 
     vector<MemoryBlock> blocks = {
         {0, 0, 12},   //
@@ -506,7 +439,7 @@ TEST_CASE("test_memory_most_appropriate_strategy") {
     };
     vector<MemoryBlock> freeBlocks = {{-1, 36, 7}, //
                                       {-1, 15, 20}};
-    Types::MemoryState state(blocks, freeBlocks);
+    MemoryState state(blocks, freeBlocks);
 
     vector<MemoryBlock> expectedBlocks = {{0, 0, 12},   //
                                           {2, 12, 3},   //
@@ -516,15 +449,15 @@ TEST_CASE("test_memory_most_appropriate_strategy") {
                                           {-1, 40, 3}};
     vector<MemoryBlock> expectedFreeBlocks = {{-1, 40, 3}, //
                                               {-1, 15, 20}};
-    Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+    MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
 
-    auto actualState = strategy->createProcess(request, state);
+    auto actualState = strategy->processRequest(request, state);
     REQUIRE(actualState == expectedState);
   }
 
-  SECTION("Process TerminateProcess request") {
-    auto strategy = Strategies::MostAppropriateStrategy::create();
-    auto request = *Requests::TerminateProcess::create(2);
+  SECTION("Process TerminateProcessReq request") {
+    auto strategy = MostAppropriateStrategy::create();
+    auto request = TerminateProcessReq(2);
 
     vector<MemoryBlock> blocks = {{2, 0, 12},  //*
                                   {2, 12, 3},  //*
@@ -532,22 +465,22 @@ TEST_CASE("test_memory_most_appropriate_strategy") {
                                   {1, 35, 1},  //
                                   {-1, 36, 7}};
     vector<MemoryBlock> freeBlocks = {{-1, 36, 7}};
-    Types::MemoryState state(blocks, freeBlocks);
+    MemoryState state(blocks, freeBlocks);
 
     vector<MemoryBlock> expectedBlocks = {{-1, 0, 35}, //
                                           {1, 35, 1},  //
                                           {-1, 36, 7}};
     vector<MemoryBlock> expectedFreeBlocks = {{-1, 36, 7}, //
                                               {-1, 0, 35}};
-    Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+    MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
 
-    auto actualState = strategy->terminateProcess(request, state);
+    auto actualState = strategy->processRequest(request, state);
     REQUIRE(actualState == expectedState);
   }
 
   SECTION("Process AllocateMemory request") {
-    auto strategy = Strategies::MostAppropriateStrategy::create();
-    auto request = *Requests::AllocateMemory::create(1, 8192, 2);
+    auto strategy = MostAppropriateStrategy::create();
+    auto request = AllocateMemory(1, 8192, 2);
 
     vector<MemoryBlock> blocks = {{2, 0, 12},   //
                                   {2, 12, 3},   //
@@ -556,7 +489,7 @@ TEST_CASE("test_memory_most_appropriate_strategy") {
                                   {-1, 36, 7}};
     vector<MemoryBlock> freeBlocks = {{-1, 36, 7}, //*
                                       {-1, 15, 20}};
-    Types::MemoryState state(blocks, freeBlocks);
+    MemoryState state(blocks, freeBlocks);
 
     vector<MemoryBlock> expectedBlocks = {{2, 0, 12},   //
                                           {2, 12, 3},   //
@@ -566,15 +499,15 @@ TEST_CASE("test_memory_most_appropriate_strategy") {
                                           {-1, 38, 5}};
     vector<MemoryBlock> expectedFreeBlocks = {{-1, 38, 5}, //
                                               {-1, 15, 20}};
-    Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+    MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
 
-    auto actualState = strategy->allocateMemory(request, state);
+    auto actualState = strategy->processRequest(request, state);
     REQUIRE(actualState == expectedState);
   }
 
   SECTION("Process AllocateMemory request (with defragmentation)") {
-    auto strategy = Strategies::MostAppropriateStrategy::create();
-    auto request = *Requests::AllocateMemory::create(1, 90112, 22);
+    auto strategy = MostAppropriateStrategy::create();
+    auto request = AllocateMemory(1, 90112, 22);
 
     vector<MemoryBlock> blocks = {{2, 0, 12},   //
                                   {2, 12, 3},   //
@@ -585,7 +518,7 @@ TEST_CASE("test_memory_most_appropriate_strategy") {
         {-1, 36, 7}, //*
         {-1, 15, 20} //*
     };
-    Types::MemoryState state(blocks, freeBlocks);
+    MemoryState state(blocks, freeBlocks);
 
     vector<MemoryBlock> expectedBlocks = {{2, 0, 12},  //
                                           {2, 12, 3},  //
@@ -593,15 +526,15 @@ TEST_CASE("test_memory_most_appropriate_strategy") {
                                           {1, 16, 22}, //
                                           {-1, 38, 5}};
     vector<MemoryBlock> expectedFreeBlocks = {{-1, 38, 5}};
-    Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+    MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
 
-    auto actualState = strategy->allocateMemory(request, state);
+    auto actualState = strategy->processRequest(request, state);
     REQUIRE(actualState == expectedState);
   }
 
   SECTION("Process AllocateMemory request (out of memory)") {
-    auto strategy = Strategies::MostAppropriateStrategy::create();
-    auto request = *Requests::AllocateMemory::create(1, 122800, 30);
+    auto strategy = MostAppropriateStrategy::create();
+    auto request = AllocateMemory(1, 122800, 30);
 
     vector<MemoryBlock> blocks = {{2, 0, 12},   //
                                   {2, 12, 3},   //
@@ -610,7 +543,7 @@ TEST_CASE("test_memory_most_appropriate_strategy") {
                                   {-1, 36, 7}};
     vector<MemoryBlock> freeBlocks = {{-1, 36, 7}, //
                                       {-1, 15, 20}};
-    Types::MemoryState state(blocks, freeBlocks);
+    MemoryState state(blocks, freeBlocks);
 
     vector<MemoryBlock> expectedBlocks = {{2, 0, 12},   //
                                           {2, 12, 3},   //
@@ -619,15 +552,15 @@ TEST_CASE("test_memory_most_appropriate_strategy") {
                                           {-1, 36, 7}};
     vector<MemoryBlock> expectedFreeBlocks = {{-1, 36, 7}, //
                                               {-1, 15, 20}};
-    Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+    MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
 
-    auto actualState = strategy->allocateMemory(request, state);
+    auto actualState = strategy->processRequest(request, state);
     REQUIRE(actualState == expectedState);
   }
 
   SECTION("Process FreeMemory request") {
-    auto strategy = Strategies::MostAppropriateStrategy::create();
-    auto request = *Requests::FreeMemory::create(1, 35);
+    auto strategy = MostAppropriateStrategy::create();
+    auto request = FreeMemory(1, 35);
 
     vector<MemoryBlock> blocks = {
         {2, 0, 12},  //
@@ -637,30 +570,30 @@ TEST_CASE("test_memory_most_appropriate_strategy") {
         {-1, 36, 7}  //*
     };
     vector<MemoryBlock> freeBlocks = {{-1, 36, 7}};
-    Types::MemoryState state(blocks, freeBlocks);
+    MemoryState state(blocks, freeBlocks);
 
     vector<MemoryBlock> expectedBlocks = {{2, 0, 12},  //
                                           {2, 12, 3},  //
                                           {2, 15, 20}, //
                                           {-1, 35, 8}};
     vector<MemoryBlock> expectedFreeBlocks = {{-1, 35, 8}};
-    Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+    MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
 
-    auto actualState = strategy->freeMemory(request, state);
+    auto actualState = strategy->processRequest(request, state);
     REQUIRE(actualState == expectedState);
   }
 }
 
 TEST_CASE("test_memory_least_appropriate_strategy") {
   SECTION("Create instance of LeastAppropriateStrategy") {
-    auto strategy = Strategies::LeastAppropriateStrategy::create();
+    auto strategy = LeastAppropriateStrategy::create();
 
-    REQUIRE(strategy->type == Strategies::StrategyType::LEAST_APPROPRIATE);
+    REQUIRE(strategy->type == StrategyType::LEAST_APPROPRIATE);
   }
 
-  SECTION("Process CreateProcess request") {
-    auto strategy = Strategies::LeastAppropriateStrategy::create();
-    auto request = *Requests::CreateProcess::create(3, 16384, 4);
+  SECTION("Process CreateProcessReq request") {
+    auto strategy = LeastAppropriateStrategy::create();
+    auto request = CreateProcessReq(3, 16384, 4);
 
     vector<MemoryBlock> blocks = {{0, 0, 12},   //
                                   {2, 12, 3},   //
@@ -669,7 +602,7 @@ TEST_CASE("test_memory_least_appropriate_strategy") {
                                   {-1, 36, 7}};
     vector<MemoryBlock> freeBlocks = {{-1, 15, 20}, //
                                       {-1, 36, 7}};
-    Types::MemoryState state(blocks, freeBlocks);
+    MemoryState state(blocks, freeBlocks);
 
     vector<MemoryBlock> expectedBlocks = {{0, 0, 12},   //
                                           {2, 12, 3},   //
@@ -679,15 +612,15 @@ TEST_CASE("test_memory_least_appropriate_strategy") {
                                           {-1, 36, 7}};
     vector<MemoryBlock> expectedFreeBlocks = {{-1, 19, 16}, //
                                               {-1, 36, 7}};
-    Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+    MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
 
-    auto actualState = strategy->createProcess(request, state);
+    auto actualState = strategy->processRequest(request, state);
     REQUIRE(actualState == expectedState);
   }
 
-  SECTION("Process TerminateProcess request") {
-    auto strategy = Strategies::LeastAppropriateStrategy::create();
-    auto request = *Requests::TerminateProcess::create(2);
+  SECTION("Process TerminateProcessReq request") {
+    auto strategy = LeastAppropriateStrategy::create();
+    auto request = TerminateProcessReq(2);
 
     vector<MemoryBlock> blocks = {
         {-1, 0, 7},  //
@@ -697,22 +630,22 @@ TEST_CASE("test_memory_least_appropriate_strategy") {
         {2, 23, 20}, //*
     };
     vector<MemoryBlock> freeBlocks = {{-1, 0, 7}};
-    Types::MemoryState state(blocks, freeBlocks);
+    MemoryState state(blocks, freeBlocks);
 
     vector<MemoryBlock> expectedBlocks = {{-1, 0, 7}, //
                                           {1, 7, 1},  //
                                           {-1, 8, 35}};
     vector<MemoryBlock> expectedFreeBlocks = {{-1, 8, 35}, //
                                               {-1, 0, 7}};
-    Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+    MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
 
-    auto actualState = strategy->terminateProcess(request, state);
+    auto actualState = strategy->processRequest(request, state);
     REQUIRE(actualState == expectedState);
   }
 
   SECTION("Process AllocateMemory request") {
-    auto strategy = Strategies::LeastAppropriateStrategy::create();
-    auto request = *Requests::AllocateMemory::create(1, 8192, 2);
+    auto strategy = LeastAppropriateStrategy::create();
+    auto request = AllocateMemory(1, 8192, 2);
 
     vector<MemoryBlock> blocks = {{2, 0, 12},   //
                                   {2, 12, 3},   //
@@ -721,7 +654,7 @@ TEST_CASE("test_memory_least_appropriate_strategy") {
                                   {-1, 36, 7}};
     vector<MemoryBlock> freeBlocks = {{-1, 15, 20}, //*
                                       {-1, 36, 7}};
-    Types::MemoryState state(blocks, freeBlocks);
+    MemoryState state(blocks, freeBlocks);
 
     vector<MemoryBlock> expectedBlocks = {{2, 0, 12},   //
                                           {2, 12, 3},   //
@@ -731,15 +664,15 @@ TEST_CASE("test_memory_least_appropriate_strategy") {
                                           {-1, 36, 7}};
     vector<MemoryBlock> expectedFreeBlocks = {{-1, 17, 18}, //
                                               {-1, 36, 7}};
-    Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+    MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
 
-    auto actualState = strategy->allocateMemory(request, state);
+    auto actualState = strategy->processRequest(request, state);
     REQUIRE(actualState == expectedState);
   }
 
   SECTION("Process AllocateMemory request (with defragmentation)") {
-    auto strategy = Strategies::LeastAppropriateStrategy::create();
-    auto request = *Requests::AllocateMemory::create(1, 90112, 22);
+    auto strategy = LeastAppropriateStrategy::create();
+    auto request = AllocateMemory(1, 90112, 22);
 
     vector<MemoryBlock> blocks = {{2, 0, 12},   //
                                   {2, 12, 3},   //
@@ -750,7 +683,7 @@ TEST_CASE("test_memory_least_appropriate_strategy") {
         {-1, 15, 20}, //*
         {-1, 36, 7}   //*
     };
-    Types::MemoryState state(blocks, freeBlocks);
+    MemoryState state(blocks, freeBlocks);
 
     vector<MemoryBlock> expectedBlocks = {{2, 0, 12},  //
                                           {2, 12, 3},  //
@@ -758,15 +691,15 @@ TEST_CASE("test_memory_least_appropriate_strategy") {
                                           {1, 16, 22}, //
                                           {-1, 38, 5}};
     vector<MemoryBlock> expectedFreeBlocks = {{-1, 38, 5}};
-    Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+    MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
 
-    auto actualState = strategy->allocateMemory(request, state);
+    auto actualState = strategy->processRequest(request, state);
     REQUIRE(actualState == expectedState);
   }
 
   SECTION("Process AllocateMemory request (out of memory)") {
-    auto strategy = Strategies::LeastAppropriateStrategy::create();
-    auto request = *Requests::AllocateMemory::create(1, 122800, 30);
+    auto strategy = LeastAppropriateStrategy::create();
+    auto request = AllocateMemory(1, 122800, 30);
 
     vector<MemoryBlock> blocks = {{2, 0, 12},   //
                                   {2, 12, 3},   //
@@ -775,7 +708,7 @@ TEST_CASE("test_memory_least_appropriate_strategy") {
                                   {-1, 36, 7}};
     vector<MemoryBlock> freeBlocks = {{-1, 15, 20}, //
                                       {-1, 36, 7}};
-    Types::MemoryState state(blocks, freeBlocks);
+    MemoryState state(blocks, freeBlocks);
 
     vector<MemoryBlock> expectedBlocks = {{2, 0, 12},   //
                                           {2, 12, 3},   //
@@ -784,15 +717,15 @@ TEST_CASE("test_memory_least_appropriate_strategy") {
                                           {-1, 36, 7}};
     vector<MemoryBlock> expectedFreeBlocks = {{-1, 15, 20}, //
                                               {-1, 36, 7}};
-    Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+    MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
 
-    auto actualState = strategy->allocateMemory(request, state);
+    auto actualState = strategy->processRequest(request, state);
     REQUIRE(actualState == expectedState);
   }
 
   SECTION("Process FreeMemory request") {
-    auto strategy = Strategies::LeastAppropriateStrategy::create();
-    auto request = *Requests::FreeMemory::create(1, 35);
+    auto strategy = LeastAppropriateStrategy::create();
+    auto request = FreeMemory(1, 35);
 
     vector<MemoryBlock> blocks = {
         {2, 0, 12},  //
@@ -802,16 +735,16 @@ TEST_CASE("test_memory_least_appropriate_strategy") {
         {-1, 36, 7}  //*
     };
     vector<MemoryBlock> freeBlocks = {MemoryBlock{-1, 36, 7}};
-    Types::MemoryState state(blocks, freeBlocks);
+    MemoryState state(blocks, freeBlocks);
 
     vector<MemoryBlock> expectedBlocks = {{2, 0, 12},  //
                                           {2, 12, 3},  //
                                           {2, 15, 20}, //
                                           {-1, 35, 8}};
     vector<MemoryBlock> expectedFreeBlocks = {{-1, 35, 8}};
-    Types::MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
+    MemoryState expectedState(expectedBlocks, expectedFreeBlocks);
 
-    auto actualState = strategy->freeMemory(request, state);
+    auto actualState = strategy->processRequest(request, state);
     REQUIRE(actualState == expectedState);
   }
 }
@@ -827,18 +760,18 @@ TEST_CASE("test_memory_types_block") {
 
   SECTION("Create invalid instance of MemoryBlock") {
     // Invalid PID
-    REQUIRE_THROWS_AS(MemoryBlock(-2, 0, 10), Exceptions::TypeException);
-    REQUIRE_THROWS_AS(MemoryBlock(256, 0, 10), Exceptions::TypeException);
+    REQUIRE_THROWS_AS(MemoryBlock(-2, 0, 10), TypeException);
+    REQUIRE_THROWS_AS(MemoryBlock(256, 0, 10), TypeException);
 
     // Invalid address
-    REQUIRE_THROWS_AS(MemoryBlock(0, -1, 10), Exceptions::TypeException);
-    REQUIRE_THROWS_AS(MemoryBlock(0, 256, 10), Exceptions::TypeException);
+    REQUIRE_THROWS_AS(MemoryBlock(0, -1, 10), TypeException);
+    REQUIRE_THROWS_AS(MemoryBlock(0, 256, 10), TypeException);
 
     // Invalid size
-    REQUIRE_THROWS_AS(MemoryBlock(0, 0, 0), Exceptions::TypeException);
-    REQUIRE_THROWS_AS(MemoryBlock(0, 0, 300), Exceptions::TypeException);
+    REQUIRE_THROWS_AS(MemoryBlock(0, 0, 0), TypeException);
+    REQUIRE_THROWS_AS(MemoryBlock(0, 0, 300), TypeException);
 
     // Memory block is out of bound
-    REQUIRE_THROWS_AS(MemoryBlock(0, 200, 100), Exceptions::TypeException);
+    REQUIRE_THROWS_AS(MemoryBlock(0, 200, 100), TypeException);
   }
 }

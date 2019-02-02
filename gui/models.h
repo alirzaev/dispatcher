@@ -9,9 +9,9 @@ namespace Models {
 struct ProcessesModel {};
 
 struct MemoryModel {
-  MemoryManagement::Types::MemoryState state;
+  MemoryManagement::MemoryState state;
 
-  Utils::Tasks::MemoryTask task;
+  Utils::MemoryTask task;
 };
 
 using TaskModel = std::variant<ProcessesModel, MemoryModel>;

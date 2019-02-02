@@ -9,8 +9,9 @@
 #include <exception>
 #include <memory>
 #include <string>
+#include <variant>
 
-namespace MemoryManagement::Strategies {
+namespace MemoryManagement {
 using std::shared_ptr;
 
 enum class StrategyType {
@@ -21,56 +22,48 @@ enum class StrategyType {
 
 class AbstractStrategy {
 public:
+  virtual ~AbstractStrategy() {}
+
   AbstractStrategy(StrategyType type) : type(type) {}
 
   const StrategyType type;
 
   virtual std::string toString() const = 0;
 
-  Types::MemoryState processRequest(Requests::RequestPtr request,
-                                    const Types::MemoryState state) const {
-    if (request->type == Requests::RequestType::CREATE_PROCESS) {
-      auto obj = *dynamic_cast<Requests::CreateProcess *>(request.get());
-      return createProcess(obj, state);
-    } else if (request->type == Requests::RequestType::TERMINATE_PROCESS) {
-      auto obj = *dynamic_cast<Requests::TerminateProcess *>(request.get());
-      return terminateProcess(obj, state);
-    } else if (request->type == Requests::RequestType::ALLOCATE_MEMORY) {
-      auto obj = *dynamic_cast<Requests::AllocateMemory *>(request.get());
-      return allocateMemory(obj, state);
-    } else if (request->type == Requests::RequestType::FREE_MEMORY) {
-      auto obj = *dynamic_cast<Requests::FreeMemory *>(request.get());
-      return freeMemory(obj, state);
-    } else {
-      throw Exceptions::StrategyException("UNKNOWN_REQUEST");
-    }
+  MemoryState processRequest(const Request &request,
+                             const MemoryState &state) const {
+    return std::visit(
+        [this, state](const auto &req) {
+          return this->processRequest(req, state);
+        },
+        request);
   }
 
-  Types::MemoryState createProcess(const Requests::CreateProcess request,
-                                   const Types::MemoryState &state) const {
-    return sortFreeBlocks(
-        allocateMemoryGeneral(*Requests::AllocateMemory::create(
-                                  request.pid, request.bytes, request.pages),
-                              state, true));
+  MemoryState processRequest(const CreateProcessReq &request,
+                             const MemoryState &state) const {
+    return sortFreeBlocks(allocateMemoryGeneral(
+        AllocateMemory(request.pid(), request.bytes(), request.pages()), state,
+        true));
   }
 
-  Types::MemoryState terminateProcess(const Requests::TerminateProcess request,
-                                      const Types::MemoryState &state) const {
+  MemoryState processRequest(const TerminateProcessReq &request,
+                             const MemoryState &state) const {
     auto currentState = state;
 
     while (true) {
       auto [blocks, freeBlocks] = currentState;
       // ищем очередной блок памяти, выделенный процессу
-      auto pos = std::find_if(
-          blocks.begin(), blocks.end(),
-          [&request](const auto &block) { return request.pid == block.pid(); });
+      auto pos = std::find_if(blocks.begin(), blocks.end(),
+                              [&request](const auto &block) {
+                                return request.pid() == block.pid();
+                              });
       if (pos == blocks.end()) {
         break;
       }
 
       // освобождаем блок
       uint32_t index = static_cast<uint32_t>(pos - blocks.begin());
-      currentState = Operations::freeMemory(currentState, request.pid, index);
+      currentState = freeMemory(currentState, request.pid(), index);
     }
 
     // сжатие памяти
@@ -78,48 +71,45 @@ public:
     return sortFreeBlocks(compressAllMemory(currentState));
   }
 
-  Types::MemoryState allocateMemory(const Requests::AllocateMemory request,
-                                    const Types::MemoryState &state) const {
+  MemoryState processRequest(const AllocateMemory &request,
+                             const MemoryState &state) const {
     return sortFreeBlocks(allocateMemoryGeneral(request, state, false));
   }
 
-  Types::MemoryState freeMemory(const Requests::FreeMemory request,
-                                const Types::MemoryState &state) const {
+  MemoryState processRequest(const FreeMemory &request,
+                             const MemoryState &state) const {
     auto currentState = state;
     auto [blocks, freeBlocks] = currentState;
 
     // ищем блок, начинающийся с заданного адреса
     auto pos = std::find_if(blocks.begin(), blocks.end(),
                             [&request](const auto &block) {
-                              return block.address() == request.address;
+                              return block.address() == request.address();
                             });
     // если такого блока нет, игнорируем заявку
     if (pos == blocks.end()) {
       return state;
     }
     // если блок выделен другому процессу, игнорируем заявку
-    if (pos->pid() != request.pid) {
+    if (pos->pid() != request.pid()) {
       return state;
     }
 
     // освобождаем блок
     uint32_t index = static_cast<uint32_t>(pos - blocks.begin());
-    currentState = Operations::freeMemory(state, request.pid, index);
+    currentState = freeMemory(state, request.pid(), index);
 
     // сжатие памяти
     // переупорядочение свободных блоков памяти
     return sortFreeBlocks(compressAllMemory(currentState));
   }
 
-  virtual ~AbstractStrategy() {}
-
 protected:
-  virtual Types::MemoryState
-  sortFreeBlocks(const Types::MemoryState &state) const = 0;
+  virtual MemoryState sortFreeBlocks(const MemoryState &state) const = 0;
 
-  virtual std::vector<Types::MemoryBlock>::const_iterator
-  findFreeBlock(const std::vector<Types::MemoryBlock> &blocks,
-                const std::vector<Types::MemoryBlock> &freeBlocks,
+  virtual std::vector<MemoryBlock>::const_iterator
+  findFreeBlock(const std::vector<MemoryBlock> &blocks,
+                const std::vector<MemoryBlock> &freeBlocks,
                 int32_t size) const final {
     auto freeBlockPos = std::find_if(
         freeBlocks.cbegin(), freeBlocks.cend(),
@@ -131,8 +121,7 @@ protected:
     }
   }
 
-  virtual Types::MemoryState
-  compressAllMemory(const Types::MemoryState &state) const final {
+  virtual MemoryState compressAllMemory(const MemoryState &state) const final {
     auto currentState = state;
 
     while (true) {
@@ -147,7 +136,7 @@ protected:
 
       // если есть, то выполняем сжатие
       if (index < blocks.size() - 1) {
-        currentState = Operations::compressMemory(currentState, index);
+        currentState = compressMemory(currentState, index);
       } else {
         break;
       }
@@ -156,16 +145,15 @@ protected:
     return currentState;
   }
 
-  virtual Types::MemoryState
-  allocateMemoryGeneral(const Requests::AllocateMemory request,
-                        const Types::MemoryState &state,
+  virtual MemoryState
+  allocateMemoryGeneral(const AllocateMemory &request, const MemoryState &state,
                         const bool createProcess = false) const final {
     auto [blocks, freeBlocks] = state;
 
     // проверить, выделены ли процессу какие-либо блоки памяти
     auto processPos = std::find_if(
         blocks.begin(), blocks.end(),
-        [&request](const auto &block) { return block.pid() == request.pid; });
+        [&request](const auto &block) { return block.pid() == request.pid(); });
     // обработка некорректных ситуаций:
     // 1. Создание уже существующего процесса
     // 2. Выделение памяти несуществующему процессу
@@ -181,22 +169,20 @@ protected:
 
     // проверить, если свободный блок подходящего размера
     // если есть, то выделить процессу память в этом блоке
-    if (auto pos = findFreeBlock(blocks, freeBlocks, request.pages);
+    if (auto pos = findFreeBlock(blocks, freeBlocks, request.pages());
         pos != blocks.end()) {
       uint32_t index = static_cast<uint32_t>(pos - blocks.cbegin());
 
-      return Operations::allocateMemory(state, index, request.pid,
-                                        request.pages);
+      return allocateMemory(state, index, request.pid(), request.pages());
     } else if (totalFree >=
-               request.pages) { // если суммарно свободной памяти достаточно, то
-                                // выполнить дефрагментацию
-      auto newState = Operations::defragmentMemory(state);
+               request.pages()) { // если суммарно свободной памяти достаточно,
+                                  // то выполнить дефрагментацию
+      auto newState = defragmentMemory(state);
       auto [blocks, freeBlocks] = newState;
-      auto pos = findFreeBlock(blocks, freeBlocks, request.pages);
+      auto pos = findFreeBlock(blocks, freeBlocks, request.pages());
       uint32_t index = static_cast<uint32_t>(pos - blocks.cbegin());
 
-      return Operations::allocateMemory(newState, index, request.pid,
-                                        request.pages);
+      return allocateMemory(newState, index, request.pid(), request.pages());
     } else { // недостаточно свободной памяти, проигнорировать заявку
       return state;
     }
@@ -214,8 +200,7 @@ public:
   }
 
 protected:
-  Types::MemoryState
-  sortFreeBlocks(const Types::MemoryState &state) const override {
+  MemoryState sortFreeBlocks(const MemoryState &state) const override {
     auto currentState = state;
     auto [blocks, freeBlocks] = currentState;
 
@@ -247,8 +232,7 @@ private:
       : AbstractStrategy(StrategyType::MOST_APPROPRIATE) {}
 
 protected:
-  Types::MemoryState
-  sortFreeBlocks(const Types::MemoryState &state) const override {
+  MemoryState sortFreeBlocks(const MemoryState &state) const override {
     auto currentState = state;
     auto [blocks, freeBlocks] = currentState;
 
@@ -281,8 +265,7 @@ private:
       : AbstractStrategy(StrategyType::LEAST_APPROPRIATE) {}
 
 protected:
-  Types::MemoryState
-  sortFreeBlocks(const Types::MemoryState &state) const override {
+  MemoryState sortFreeBlocks(const MemoryState &state) const override {
     auto currentState = state;
     auto [blocks, freeBlocks] = currentState;
 
@@ -301,4 +284,4 @@ protected:
     return {blocks, freeBlocks};
   }
 };
-} // namespace MemoryManagement::Strategies
+} // namespace MemoryManagement

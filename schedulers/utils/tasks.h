@@ -14,11 +14,8 @@
 #include "../algo/memory/strategies.h"
 #include "exceptions.h"
 
-namespace Utils::Tasks {
-using namespace MemoryManagement::Strategies;
-using namespace MemoryManagement::Types;
-using namespace MemoryManagement::Requests;
-using namespace Exceptions;
+namespace Utils {
+using namespace MemoryManagement;
 
 class MemoryTask {
 private:
@@ -28,23 +25,23 @@ private:
 
   MemoryState _state;
 
-  std::vector<RequestPtr> _requests;
+  std::vector<Request> _requests;
 
   MemoryTask(StrategyPtr strategy, uint32_t completed, const MemoryState &state,
-             const std::vector<RequestPtr> requests)
+             const std::vector<Request> requests)
       : _strategy(strategy), _completed(completed), _state(state),
         _requests(requests) {}
 
 public:
   static MemoryTask create(StrategyPtr strategy, uint32_t completed,
                            const MemoryState &state,
-                           const std::vector<RequestPtr> requests) {
+                           const std::vector<Request> requests) {
     return {strategy, completed, state, requests};
   }
 
   static void validate(StrategyPtr strategy, uint32_t completed,
                        const MemoryState &state,
-                       const std::vector<RequestPtr> requests) {
+                       const std::vector<Request> requests) {
     if (requests.size() < completed) {
       throw TaskException("COMPLETED_OOR");
     }
@@ -57,7 +54,7 @@ public:
       if (currentState != state) {
         throw TaskException("STATE_MISMATCH");
       }
-    } catch (MemoryManagement::Exceptions::BaseException &ex) {
+    } catch (MemoryManagement::BaseException &ex) {
       throw TaskException(ex.what());
     }
   }
@@ -69,7 +66,7 @@ public:
 
   const MemoryState &state() const { return _state; }
 
-  const std::vector<RequestPtr> &requests() const { return _requests; }
+  const std::vector<Request> &requests() const { return _requests; }
 
   nlohmann::json dump() const {
     nlohmann::json obj;
@@ -82,13 +79,15 @@ public:
 
     obj["state"] = state().dump();
 
-    auto jsonRequests = nlohmann::json::array();
+    obj["requests"] = nlohmann::json::array();
 
     for (auto request : requests()) {
-      jsonRequests.push_back(request->dump());
+      std::visit(
+          [&obj](const auto &request) {
+            obj["requests"].push_back(request.dump());
+          },
+          request);
     }
-
-    obj["requests"] = jsonRequests;
 
     return obj;
   }
@@ -107,13 +106,20 @@ public:
       } else {
         return std::nullopt;
       }
-    } catch (const std::exception &ex) {
+    } catch (...) {
       return std::nullopt;
     }
   }
 };
 
-class ProcessesTask {};
+class ProcessesTask {
+public:
+  nlohmann::json dump() const {
+    nlohmann::json obj;
+    obj["type"] = "PROCESS_TASK";
+    return obj;
+  }
+};
 
 using Task = std::variant<MemoryTask, ProcessesTask>;
-} // namespace Utils::Tasks
+} // namespace Utils

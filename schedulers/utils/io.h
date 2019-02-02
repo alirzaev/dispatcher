@@ -2,18 +2,16 @@
 
 #include <istream>
 #include <ostream>
+#include <variant>
 #include <vector>
 
 #include "tasks.h"
 
-namespace {
-using namespace MemoryManagement::Strategies;
-using namespace MemoryManagement::Types;
-using namespace MemoryManagement::Requests;
-using Utils::Exceptions::TaskException;
-using Utils::Tasks::MemoryTask;
+namespace Utils::details {
+using Utils::TaskException;
 
 inline MemoryTask loadMemoryTask(const nlohmann::json &obj) {
+  using namespace MemoryManagement;
   StrategyPtr strategy;
 
   auto strategyType = obj["strategy"];
@@ -29,26 +27,25 @@ inline MemoryTask loadMemoryTask(const nlohmann::json &obj) {
 
   uint32_t completed = obj["completed"];
 
-  std::vector<RequestPtr> requests;
-  for (auto reqObj : obj["requests"]) {
-    if (reqObj["type"] == "CREATE_PROCESS") {
-      requests.push_back(CreateProcess::create(reqObj["pid"], reqObj["bytes"],
-                                               reqObj["pages"]));
-    } else if (reqObj["type"] == "TERMINATE_PROCESS") {
-      requests.push_back(TerminateProcess::create(reqObj["pid"]));
-    } else if (reqObj["type"] == "ALLOCATE_MEMORY") {
-      requests.push_back(AllocateMemory::create(reqObj["pid"], reqObj["bytes"],
-                                                reqObj["pages"]));
-    } else if (reqObj["type"] == "FREE_MEMORY") {
-      requests.push_back(FreeMemory::create(reqObj["pid"], reqObj["address"]));
+  std::vector<Request> requests;
+  for (auto req : obj["requests"]) {
+    if (req["type"] == "CREATE_PROCESS") {
+      requests.push_back(CreateProcessReq(req["pid"], req["bytes"], req["pages"]));
+    } else if (req["type"] == "TERMINATE_PROCESS") {
+      requests.push_back(TerminateProcessReq(req["pid"]));
+    } else if (req["type"] == "ALLOCATE_MEMORY") {
+      requests.push_back(
+          AllocateMemory(req["pid"], req["bytes"], req["pages"]));
+    } else if (req["type"] == "FREE_MEMORY") {
+      requests.push_back(FreeMemory(req["pid"], req["address"]));
     } else {
       throw TaskException("UNKNOWN_REQUEST");
     }
   }
 
   std::vector<MemoryBlock> blocks, freeBlocks;
-  for (auto blockObj : obj["state"]["blocks"]) {
-    blocks.emplace_back(blockObj["pid"], blockObj["address"], blockObj["size"]);
+  for (auto block : obj["state"]["blocks"]) {
+    blocks.emplace_back(block["pid"], block["address"], block["size"]);
   }
   for (auto blockObj : obj["state"]["free_blocks"]) {
     freeBlocks.emplace_back(blockObj["pid"], blockObj["address"],
@@ -58,17 +55,17 @@ inline MemoryTask loadMemoryTask(const nlohmann::json &obj) {
   return MemoryTask::create(strategy, completed, {blocks, freeBlocks},
                             requests);
 }
-} // namespace
+} // namespace Utils::details
 
-namespace Utils::IO {
-inline std::vector<Tasks::Task> loadTasks(std::istream &is) {
+namespace Utils {
+inline std::vector<Task> loadTasks(std::istream &is) {
   nlohmann::json obj;
   is >> obj;
-  std::vector<Tasks::Task> tasks;
+  std::vector<Task> tasks;
 
-  for (auto taskObj : obj) {
-    if (taskObj["type"] == "MEMORY_TASK") {
-      tasks.push_back(loadMemoryTask(taskObj));
+  for (auto task : obj) {
+    if (task["type"] == "MEMORY_TASK") {
+      tasks.emplace_back(details::loadMemoryTask(task));
     } else {
       throw TaskException("UNKNOWN_TASK");
     }
@@ -77,15 +74,13 @@ inline std::vector<Tasks::Task> loadTasks(std::istream &is) {
   return tasks;
 }
 
-inline void saveTasks(const std::vector<Tasks::Task> &tasks, std::ostream &os) {
+inline void saveTasks(const std::vector<Task> &tasks, std::ostream &os) {
   auto obj = nlohmann::json::array();
 
-  for (auto task : tasks) {
-    if (auto *p = std::get_if<Tasks::MemoryTask>(&task); p != nullptr) {
-      obj.push_back(p->dump());
-    }
+  for (Task task : tasks) {
+    std::visit([&obj](const auto &task) { obj.push_back(task.dump()); }, task);
   }
 
   os << obj;
 }
-} // namespace Utils::IO
+} // namespace Utils

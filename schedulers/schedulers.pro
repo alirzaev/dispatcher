@@ -1,9 +1,9 @@
 TEMPLATE = app
-CONFIG += console c++1z
+CONFIG += console c++17
 CONFIG -= app_bundle
 CONFIG -= qt
 
-QMAKE_CXXFLAGS += -Wa,-mbig-obj
+#QMAKE_CXXFLAGS += -Wa,-mbig-obj
 
 SOURCES += \
     main.cpp
@@ -20,4 +20,5 @@ HEADERS += \
     utils/io.h \
     utils/tasks.h \
     test_memory.h \
-    config.h
+    config.h \
+    utils/overload.h

@@ -5,88 +5,95 @@
 #include <QRegExp>
 #include <QString>
 
+#include <variant>
 #include <vector>
 
 #include "dialogs/allocatememorydialog.h"
 #include "listitems/memoryblockitem.h"
-#include "memorytask.h"
 #include "menus/memoryblockmenu.h"
+#include "utils/overload.h"
+
+#include "memorytask.h"
 #include "ui_memorytask.h"
 
 using namespace MemoryManagement;
-using MemoryManagement::Types::MemoryBlock;
-using MemoryManagement::Types::MemoryState;
+using namespace std::literals;
+using std::vector;
 
-QString createProcessDescr = "Создан новый процесс PID = %1. "
-                             "Для размещения процесса в памяти (включая "
-                             "служебную информацию) требуется выделить "
-                             "%2 байт (%3 параграфов)";
-
-QString terminateProcessDescr = "Процесс PID = %1 завершен";
-
-QString freeMemoryDescr = "Процесс PID = %1 выдал запрос на освобождение "
-                          "блока памяти с адресом %2";
-
-QString allocateMemoryDescr = "Процесс PID = %1 выдал запрос на выделение ему "
-                              "%2 байт (%3 параграфов) оперативной памяти";
-
-MemoryTask::MemoryTask(QWidget *parent)
-    : QWidget(parent), Views::MemoryTaskView(), ui(new Ui::MemoryTask) {
+MemoryTask::MemoryTask(Models::MemoryModel model, QWidget *parent)
+    : QWidget(parent), ui(new Ui::MemoryTask), _model(model) {
   ui->setupUi(this);
 
   ui->listMemBlocks->setContextMenuPolicy(Qt::CustomContextMenu);
+
   connect(ui->listMemBlocks, &QListWidget::customContextMenuRequested, this,
           &MemoryTask::provideContextMenu);
-  connect(ui->acceptRequest, &QPushButton::clicked, this, [=]() {
-    if (nextRequestListener)
-      nextRequestListener(collectState());
-  });
+  connect(ui->acceptRequest, &QPushButton::clicked, this,
+          &MemoryTask::nextRequest);
   connect(ui->resetState, &QPushButton::clicked, this, [=]() {
-    if (resetStateListener)
-      resetStateListener();
+    _model.state = _model.task.state();
+    refresh();
   });
+
+  refresh();
 }
 
 MemoryTask::~MemoryTask() { delete ui; }
 
-void MemoryTask::setMemoryBlocks(const std::vector<MemoryBlock> &blocks) {
+void MemoryTask::setMemoryBlocks(const vector<MemoryBlock> &blocks) {
   auto *list = ui->listMemBlocks;
   list->clear();
+
   for (const auto &block : blocks) {
     list->addItem(new MemoryBlockItem(block, true));
   }
 }
 
-void MemoryTask::setFreeMemoryBlocks(const std::vector<MemoryBlock> &blocks) {
+void MemoryTask::setFreeMemoryBlocks(const vector<MemoryBlock> &blocks) {
   auto *list = ui->listFreeBlocks;
   list->clear();
+
   for (const auto &block : blocks) {
     list->addItem(new MemoryBlockItem(block));
   }
 }
 
-void MemoryTask::setRequest(MemoryManagement::Requests::RequestPtr request) {
+void MemoryTask::setRequest(const Request &request) {
   auto *label = ui->labelRequestDescr;
-  if (request->type == Requests::RequestType::CREATE_PROCESS) {
-    auto obj = *dynamic_cast<Requests::CreateProcess *>(request.get());
-    label->setText(
-        createProcessDescr.arg(obj.pid).arg(obj.bytes).arg(obj.pages));
-  } else if (request->type == Requests::RequestType::TERMINATE_PROCESS) {
-    auto obj = *dynamic_cast<Requests::TerminateProcess *>(request.get());
-    label->setText(terminateProcessDescr.arg(obj.pid));
-  } else if (request->type == Requests::RequestType::ALLOCATE_MEMORY) {
-    auto obj = *dynamic_cast<Requests::AllocateMemory *>(request.get());
-    label->setText(
-        allocateMemoryDescr.arg(obj.pid).arg(obj.bytes).arg(obj.pages));
-  } else if (request->type == Requests::RequestType::FREE_MEMORY) {
-    auto obj = *dynamic_cast<Requests::FreeMemory *>(request.get());
-    label->setText(freeMemoryDescr.arg(obj.pid).arg(obj.address));
-  }
+
+  std::visit(
+      overload{
+          [label](const CreateProcessReq &req) {
+            label->setText(QString("Создан новый процесс PID = %1. "
+                                   "Для размещения процесса в памяти (включая "
+                                   "служебную информацию) требуется выделить "
+                                   "%2 байт (%3 параграфов)")
+                               .arg(req.pid())
+                               .arg(req.bytes())
+                               .arg(req.pages()));
+          },
+          [label](const TerminateProcessReq &req) {
+            label->setText(QString("Процесс PID = %1 завершен").arg(req.pid()));
+          },
+          [label](const AllocateMemory &req) {
+            label->setText(
+                QString("Процесс PID = %1 выдал запрос на выделение ему "
+                        "%2 байт (%3 параграфов) оперативной памяти")
+                    .arg(req.pid())
+                    .arg(req.bytes())
+                    .arg(req.pages()));
+          },
+          [label](const FreeMemory &req) {
+            label->setText(
+                QString("Процесс PID = %1 выдал запрос на освобождение "
+                        "блока памяти с адресом %2")
+                    .arg(req.pid())
+                    .arg(req.address()));
+          }},
+      request);
 }
 
-void MemoryTask::setStrategy(Strategies::StrategyType type) {
-  using Strategies::StrategyType;
-
+void MemoryTask::setStrategy(StrategyType type) {
   QString s = "Стратегия: %1";
   auto *label = ui->strategyLabel;
 
@@ -100,15 +107,18 @@ void MemoryTask::setStrategy(Strategies::StrategyType type) {
 }
 
 void MemoryTask::provideContextMenu(const QPoint &pos) {
+  qDebug() << "ContextMenu";
+
   auto globalPos = ui->listMemBlocks->mapToGlobal(pos);
-  auto selectedBlock =
-      dynamic_cast<MemoryBlockItem *>(ui->listMemBlocks->itemAt(pos));
+  auto listItem = ui->listMemBlocks->itemAt(pos);
+  auto selectedBlock = dynamic_cast<MemoryBlockItem *>(listItem);
   auto row = ui->listMemBlocks->indexAt(pos).row();
+  auto blockIndex = static_cast<uint32_t>(row);
 
   if (row == -1 || !selectedBlock) {
     return;
   }
-  qDebug() << selectedBlock->text() << row;
+  qDebug() << "ContextMenu:" << selectedBlock->text() << row;
 
   MemoryBlockMenu menu(selectedBlock->block());
 
@@ -120,23 +130,21 @@ void MemoryTask::provideContextMenu(const QPoint &pos) {
   auto block = selectedBlock->block();
 
   if (action->text() == MemoryBlockMenu::ACTION_ALLOCATE) {
-    qDebug() << "allocate";
-    processActionAllocate(block, row);
+    qDebug() << "ContextMenu: allocate";
+    processActionAllocate(block, blockIndex);
   } else if (action->text() == MemoryBlockMenu::ACTION_FREE) {
-    qDebug() << "free";
-    processActionFree(block, row);
+    qDebug() << "ContextMenu: free";
+    processActionFree(block, blockIndex);
   } else if (action->text() == MemoryBlockMenu::ACTION_COMPRESS) {
-    qDebug() << "compress";
-    processActionCompress(block, row);
+    qDebug() << "ContextMenu: compress";
+    processActionCompress(blockIndex);
   } else if (action->text() == MemoryBlockMenu::ACTION_DEFRAGMENT) {
-    qDebug() << "defragment";
-    processActionDefragment(block, row);
+    qDebug() << "ContextMenu: defragment";
+    processActionDefragment();
   }
 }
 
 MemoryState MemoryTask::collectState() {
-  using std::vector;
-
   vector<MemoryBlock> blocks, freeBlocks;
 
   for (int i = 0; i < ui->listMemBlocks->count(); ++i) {
@@ -152,60 +160,97 @@ MemoryState MemoryTask::collectState() {
   return {blocks, freeBlocks};
 }
 
-void MemoryTask::processActionAllocate(const MemoryBlock &block, int row) {
+void MemoryTask::processActionAllocate(const MemoryBlock &block,
+                                       uint32_t blockIndex) {
   auto dialog = AllocateMemoryDialog(this, block.size());
   auto res = dialog.exec();
-  if (res == QDialog::Accepted && allocateActionListener) {
+
+  if (res == QDialog::Accepted) {
     auto [pid, size] = dialog.data;
-    auto state = collectState();
 
-    allocateActionListener({pid, size, row}, state);
+    try {
+      _model.state = collectState();
+      _model.state = allocateMemory(_model.state, blockIndex, pid, size);
+      refresh();
+    } catch (const OperationException &ex) {
+      if (ex.what() == "BLOCK_IS_USED"s) {
+        showErrorMessage("Данный блок памяти уже выделен другому процессу");
+      } else if (ex.what() == "TOO_SMALL"s) {
+        showErrorMessage(
+            "Процесс нельзя поместить в свободный блок, содержащий столько же "s +
+            "парагрфов, сколько требуется данному процессу"s);
+      } else {
+        showErrorMessage("Неизвестная ошибка: "s + ex.what());
+      }
+    } catch (const std::exception &ex) {
+      showErrorMessage("Неизвестная ошибка: "s + ex.what());
+    }
   }
 }
 
-void MemoryTask::processActionFree(const MemoryBlock &block, int row) {
-  if (freeActionListener) {
-    auto state = collectState();
-    freeActionListener({block.pid(), row}, state);
+void MemoryTask::processActionFree(const MemoryBlock &block,
+                                   uint32_t blockIndex) {
+  auto pid = block.pid();
+
+  try {
+    _model.state = collectState();
+    _model.state = freeMemory(_model.state, pid, blockIndex);
+    refresh();
+  } catch (const std::exception &ex) {
+    showErrorMessage("Неизвестная ошибка: "s + ex.what());
   }
 }
 
-void MemoryTask::processActionDefragment(const MemoryBlock &block, int row) {
-  if (defragmentActionListener) {
-    auto state = collectState();
-    defragmentActionListener(state);
+void MemoryTask::processActionDefragment() {
+  try {
+    _model.state = collectState();
+    _model.state = defragmentMemory(_model.state);
+    refresh();
+  } catch (const std::exception &ex) {
+    showErrorMessage("Неизвестная ошибка: "s + ex.what());
   }
 }
 
-void MemoryTask::processActionCompress(const MemoryBlock &block, int row) {
-  if (compressActionListener) {
-    auto state = collectState();
-    compressActionListener(row, state);
+void MemoryTask::processActionCompress(uint32_t blockIndex) {
+  try {
+    _model.state = collectState();
+    _model.state = compressMemory(_model.state, blockIndex);
+    refresh();
+  } catch (const OperationException &ex) {
+    if (ex.what() == "SINGLE_BLOCK"s) {
+      showErrorMessage("Следующий блок свободен или отсутствует");
+    } else {
+      showErrorMessage("Неизвестная ошибка: "s + ex.what());
+    }
+  } catch (const std::exception &ex) {
+    showErrorMessage("Неизвестная ошибка: "s + ex.what());
   }
 }
 
-void MemoryTask::onAllocateAction(OnAllocateActionListener listener) {
-  allocateActionListener = listener;
+void MemoryTask::refresh() {
+  auto [blocks, freeBlocks] = _model.state;
+  setMemoryBlocks(blocks);
+  setFreeMemoryBlocks(freeBlocks);
+  setStrategy(_model.task.strategy()->type);
+  if (_model.task.done()) {
+    setRequest(_model.task.requests().back());
+    showInfoMessage("Вы успешно выполнили данное задание");
+  } else {
+    auto index = _model.task.completed();
+    setRequest(_model.task.requests()[index]);
+  }
 }
 
-void MemoryTask::onFreeAction(OnFreeActionListener listener) {
-  freeActionListener = listener;
-}
-
-void MemoryTask::onDefragmentAction(OnDefragmentActionListener listener) {
-  defragmentActionListener = listener;
-}
-
-void MemoryTask::onCompressAction(OnCompressActionListener listener) {
-  compressActionListener = listener;
-}
-
-void MemoryTask::onNextRequestListener(OnNextRequestListener listener) {
-  nextRequestListener = listener;
-}
-
-void MemoryTask::onResetStateListener(OnResetStateListener listener) {
-  resetStateListener = listener;
+void MemoryTask::nextRequest() {
+  _model.state = collectState();
+  auto task = _model.task.next(_model.state);
+  if (task) {
+    _model.task = task.value();
+    _model.state = _model.task.state();
+    refresh();
+  } else {
+    showErrorMessage("Заявка обработана неверно");
+  }
 }
 
 void MemoryTask::showErrorMessage(const std::string &message) {
@@ -215,3 +260,5 @@ void MemoryTask::showErrorMessage(const std::string &message) {
 void MemoryTask::showInfoMessage(const std::string &message) {
   QMessageBox::information(this, "Внимание", QString::fromStdString(message));
 }
+
+Models::MemoryModel MemoryTask::model() const { return _model; }

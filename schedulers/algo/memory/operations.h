@@ -9,9 +9,7 @@
 #include "exceptions.h"
 #include "types.h"
 
-namespace MemoryManagement::Operations {
-using namespace MemoryManagement::Types;
-using namespace MemoryManagement::Exceptions;
+namespace MemoryManagement {
 /*
  * Операция выделения памяти процессу в заданном блоке памяти.
  * Выделенная память размещается в начале блока памяти. Новый
@@ -155,4 +153,4 @@ inline MemoryState compressMemory(const MemoryState &state,
 
   return {newBlocks, freeBlocks};
 }
-} // namespace MemoryManagement::Operations
+} // namespace MemoryManagement

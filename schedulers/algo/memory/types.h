@@ -7,7 +7,7 @@
 
 #include "exceptions.h"
 
-namespace MemoryManagement::Types {
+namespace MemoryManagement {
 class MemoryBlock {
 private:
   int32_t _pid;
@@ -44,16 +44,16 @@ public:
 
   static void validate(int32_t pid, int32_t address, int32_t size) {
     if (pid < -1 || pid > 255) {
-      throw Exceptions::TypeException("INVALID_PID");
+      throw TypeException("INVALID_PID");
     }
     if (address < 0 || address > 255) {
-      throw Exceptions::TypeException("INVALID_ADDRESS");
+      throw TypeException("INVALID_ADDRESS");
     }
     if (size < 1 || size > 256) {
-      throw Exceptions::TypeException("INVALID_SIZE");
+      throw TypeException("INVALID_SIZE");
     }
     if (address + size > 256) {
-      throw Exceptions::TypeException("OUT_OF_BOUNDS");
+      throw TypeException("OUT_OF_BOUNDS");
     }
   }
 };
@@ -102,4 +102,4 @@ public:
     return {{MemoryBlock{-1, 0, 256}}, {MemoryBlock{-1, 0, 256}}};
   }
 };
-} // namespace MemoryManagement::Types
+} // namespace MemoryManagement

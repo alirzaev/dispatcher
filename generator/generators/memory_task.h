@@ -4,8 +4,11 @@
 #include <cstdint>
 #include <ctime>
 #include <iterator>
+#include <map>
 #include <random>
 #include <set>
+#include <typeindex>
+#include <typeinfo>
 #include <utility>
 #include <vector>
 
@@ -17,11 +20,11 @@
 namespace Generators::MemoryTask::Details {
 using namespace MemoryManagement;
 using std::set;
+using std::type_index;
 using std::vector;
 
 struct MemoryBlockCmp {
-  bool operator()(const Types::MemoryBlock &first,
-                  const Types::MemoryBlock &second) const {
+  bool operator()(const MemoryBlock &first, const MemoryBlock &second) const {
     return first.size() < second.size();
   }
 };
@@ -46,27 +49,26 @@ inline auto randChoice(BidIt first, BidIt last) -> decltype(*first) {
   return *it;
 }
 
-inline Strategies::StrategyPtr randStrategy() {
-  vector<MemoryManagement::Strategies::StrategyPtr> strategies = {
-      MemoryManagement::Strategies::FirstAppropriateStrategy::create(),
-      MemoryManagement::Strategies::MostAppropriateStrategy::create(),
-      MemoryManagement::Strategies::LeastAppropriateStrategy::create()};
+inline StrategyPtr randStrategy() {
+  vector<MemoryManagement::StrategyPtr> strategies = {
+      MemoryManagement::FirstAppropriateStrategy::create(),
+      MemoryManagement::MostAppropriateStrategy::create(),
+      MemoryManagement::LeastAppropriateStrategy::create()};
 
   return randChoice(strategies.begin(), strategies.end());
 }
 
-inline Requests::RequestType randRequestType() {
-  vector<Requests::RequestType> types = {
-      Requests::RequestType::CREATE_PROCESS,
-      Requests::RequestType::CREATE_PROCESS,
-      Requests::RequestType::ALLOCATE_MEMORY,
-      Requests::RequestType::FREE_MEMORY,
-      Requests::RequestType::TERMINATE_PROCESS,
-      Requests::RequestType::TERMINATE_PROCESS};
+inline std::type_index randRequestType() {
+  auto types = {type_index(typeid(CreateProcessReq)),
+                type_index(typeid(CreateProcessReq)),
+                type_index(typeid(AllocateMemory)),
+                type_index(typeid(FreeMemory)),
+                type_index(typeid(TerminateProcessReq)),
+                type_index(typeid(TerminateProcessReq))};
   return randChoice(types.begin(), types.end());
 }
 
-inline set<int32_t> getAvailablePids(const Types::MemoryState &state) {
+inline set<int32_t> getAvailablePids(const MemoryState &state) {
   const auto [blocks, freeBlocks] = state;
   set<int32_t> existingPids, availabePids;
   for (const auto &block : blocks) {
@@ -82,7 +84,7 @@ inline set<int32_t> getAvailablePids(const Types::MemoryState &state) {
   return availabePids;
 }
 
-inline set<int32_t> getUsedPids(const Types::MemoryState &state) {
+inline set<int32_t> getUsedPids(const MemoryState &state) {
   const auto [blocks, freeBlocks] = state;
   set<int32_t> usedPids;
   for (const auto &block : blocks) {
@@ -101,8 +103,7 @@ inline std::pair<int32_t, int32_t> genRequestedMemory(int32_t availablePages) {
   return {pages, randRange(min, max)};
 }
 
-inline Requests::RequestPtr genCreateProcess(const Types::MemoryState &state,
-                                             bool valid = true) {
+inline Request genCreateProcess(const MemoryState &state, bool valid = true) {
   const auto [blocks, freeBlocks] = state;
   auto usedPids = getUsedPids(state), availabePids = getAvailablePids(state);
 
@@ -115,32 +116,31 @@ inline Requests::RequestPtr genCreateProcess(const Types::MemoryState &state,
     auto [pages, bytes] = genRequestedMemory(freePages);
 
     auto newPid = randChoice(availabePids.begin(), availabePids.end());
-    return Requests::CreateProcess::create(newPid, bytes, pages);
+    return CreateProcessReq(newPid, bytes, pages);
   } else {
     auto [pages, bytes] = genRequestedMemory(randRange(1, 255));
 
     auto newPid = randRange(0, 255);
-    return Requests::CreateProcess::create(newPid, bytes, pages);
+    return CreateProcessReq(newPid, bytes, pages);
   }
 }
 
-inline Requests::RequestPtr genTerminateProcess(const Types::MemoryState &state,
-                                                bool valid = true) {
+inline Request genTerminateProcess(const MemoryState &state,
+                                   bool valid = true) {
   auto usedPids = getUsedPids(state), availabePids = getAvailablePids(state);
   if (valid && !usedPids.empty()) {
     auto pid = randChoice(usedPids.begin(), usedPids.end());
-    return Requests::TerminateProcess::create(pid);
+    return TerminateProcessReq(pid);
   } else if (usedPids.empty()) {
     auto pid = randChoice(availabePids.begin(), availabePids.end());
-    return Requests::TerminateProcess::create(pid);
+    return TerminateProcessReq(pid);
   } else {
     auto pid = randChoice(usedPids.begin(), usedPids.end());
-    return Requests::TerminateProcess::create(pid);
+    return TerminateProcessReq(pid);
   }
 }
 
-inline Requests::RequestPtr genAllocateMemory(const Types::MemoryState &state,
-                                              bool valid = true) {
+inline Request genAllocateMemory(const MemoryState &state, bool valid = true) {
   const auto [blocks, freeBlocks] = state;
   auto usedPids = getUsedPids(state), availabePids = getAvailablePids(state);
 
@@ -153,21 +153,20 @@ inline Requests::RequestPtr genAllocateMemory(const Types::MemoryState &state,
     auto [pages, bytes] = genRequestedMemory(freePages);
 
     auto newPid = randChoice(usedPids.begin(), usedPids.end());
-    return Requests::AllocateMemory::create(newPid, bytes, pages);
+    return AllocateMemory(newPid, bytes, pages);
   } else {
     auto [pages, bytes] = genRequestedMemory(randRange(1, 255));
 
     auto newPid = randRange(0, 255);
-    return Requests::AllocateMemory::create(newPid, bytes, pages);
+    return AllocateMemory(newPid, bytes, pages);
   }
 }
 
-inline Requests::RequestPtr genFreeMemory(const Types::MemoryState &state,
-                                          bool valid = true) {
+inline Request genFreeMemory(const MemoryState &state, bool valid = true) {
   const auto [blocks, freeBlocks] = state;
   auto usedPids = getUsedPids(state), availabePids = getAvailablePids(state);
 
-  set<Types::MemoryBlock, MemoryBlockCmp> usedBlocks;
+  set<MemoryBlock, MemoryBlockCmp> usedBlocks;
   for (const auto &block : blocks) {
     if (block.pid() != -1) {
       usedBlocks.insert(block);
@@ -176,48 +175,40 @@ inline Requests::RequestPtr genFreeMemory(const Types::MemoryState &state,
 
   if (valid && !usedBlocks.empty()) {
     auto block = randChoice(usedBlocks.begin(), usedBlocks.end());
-    return Requests::FreeMemory::create(block.pid(), block.address());
+    return FreeMemory(block.pid(), block.address());
   } else {
     auto pid = randRange(0, 255);
     auto address = randRange(0, 255);
-    return Requests::FreeMemory::create(pid, address);
+    return FreeMemory(pid, address);
   }
 }
 } // namespace Generators::MemoryTask::Details
 
 namespace Generators::MemoryTask {
-inline Utils::Tasks::MemoryTask generate(uint32_t requestCount = 40) {
-  using namespace MemoryManagement::Requests;
-  using namespace MemoryManagement::Types;
+inline Utils::MemoryTask generate(uint32_t requestCount = 40) {
   using namespace Details;
 
   auto strategy = randStrategy();
-  auto state = Types::MemoryState::initial();
-  std::vector<RequestPtr> requests;
+  auto state = MemoryState::initial();
+  std::vector<Request> requests;
 
   for (uint32_t i = 0; i < requestCount; ++i) {
-    RequestPtr newRequest;
     bool valid = randRange(0, 256) % 3 > 0;
-
     auto type = randRequestType();
-    switch (type) {
-    case RequestType::CREATE_PROCESS:
-      newRequest = Details::genCreateProcess(state, valid);
-      break;
-    case RequestType::TERMINATE_PROCESS:
-      newRequest = Details::genTerminateProcess(state, valid);
-      break;
-    case RequestType::ALLOCATE_MEMORY:
-      newRequest = Details::genAllocateMemory(state, valid);
-      break;
-    case RequestType::FREE_MEMORY:
-      newRequest = Details::genFreeMemory(state, valid);
-      break;
+
+    if (type == type_index(typeid(CreateProcessReq))) {
+      requests.push_back(Details::genCreateProcess(state, valid));
+    } else if (type == type_index(typeid(TerminateProcessReq))) {
+      requests.push_back(Details::genTerminateProcess(state, valid));
+    } else if (type == type_index(typeid(AllocateMemory))) {
+      requests.push_back(Details::genAllocateMemory(state, valid));
+    } else {
+      requests.push_back(Details::genFreeMemory(state, valid));
     }
-    requests.push_back(newRequest);
-    state = strategy->processRequest(newRequest, state);
+
+    state = strategy->processRequest(requests.back(), state);
   }
-  return Utils::Tasks::MemoryTask::create(strategy, 0, MemoryState::initial(),
-                                          requests);
-}
+  return Utils::MemoryTask::create(strategy, 0, MemoryState::initial(),
+                                   requests);
+} // namespace Generators::MemoryTask
 } // namespace Generators::MemoryTask

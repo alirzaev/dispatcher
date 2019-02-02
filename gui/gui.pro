@@ -22,7 +22,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-CONFIG += c++1z
+CONFIG += c++17
 
 INCLUDEPATH += \
     "../3rdparty" \
@@ -39,8 +39,6 @@ SOURCES += \
 
 HEADERS += \
     mainwindow.h \
-    presenters.h \
-    views.h \
     memorytask.h \
     models.h \
     dialogs/allocatememorydialog.h \

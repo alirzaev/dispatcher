@@ -2,9 +2,8 @@
 
 #include <QString>
 
-MemoryBlockItem::MemoryBlockItem(
-    const MemoryManagement::Types::MemoryBlock &block, bool highlightFree,
-    QListWidget *parent)
+MemoryBlockItem::MemoryBlockItem(const MemoryManagement::MemoryBlock &block,
+                                 bool highlightFree, QListWidget *parent)
     : QListWidgetItem(parent), _block(block) {
   auto blockRepr = QString("address: %1; size: %2; pid: %3")
                        .arg(block.address(), 3)
@@ -20,6 +19,6 @@ MemoryBlockItem::MemoryBlockItem(
   setText(blockRepr);
 }
 
-const MemoryManagement::Types::MemoryBlock &MemoryBlockItem::block() const {
+const MemoryManagement::MemoryBlock &MemoryBlockItem::block() const {
   return _block;
 }

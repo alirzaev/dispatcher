@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "algo/processes/requests.h"
+#include "algo/processes/types.h"
 
 using namespace ProcessesManagement;
 using std::vector;
@@ -45,7 +46,7 @@ TEST_CASE("test_processes_requests") {
                       ProcessesManagement::RequestException);
     REQUIRE_THROWS_AS(ProcessesManagement::CreateProcessReq(0, -1, 0, -1),
                       ProcessesManagement::RequestException);
-    REQUIRE_THROWS_AS(ProcessesManagement::CreateProcessReq(0, -1, 2, 1),
+    REQUIRE_THROWS_AS(ProcessesManagement::CreateProcessReq(0, -1, 1, 2),
                       ProcessesManagement::RequestException);
     REQUIRE_THROWS_AS(ProcessesManagement::CreateProcessReq(0, -1, 2, 2, -1),
                       ProcessesManagement::RequestException);
@@ -147,6 +148,60 @@ TEST_CASE("test_processes_requests") {
 
     auto expected = nlohmann::json{{"type", "TIME_QUANTUM_EXPIRED"}};
     auto actual = request.dump();
+
+    REQUIRE(actual == expected);
+  }
+}
+
+TEST_CASE("test_processes_types_process") {
+  SECTION("Create valid instance of Process") {
+    Process process;
+
+    REQUIRE(process.pid() == 0);
+    REQUIRE(process.ppid() == -1);
+    REQUIRE(process.priority() == 0);
+    REQUIRE(process.basePriority() == 0);
+    REQUIRE(process.timer() == 0);
+    REQUIRE(process.workTime() == 0);
+    REQUIRE(process.state() == ProcessState::ACTIVE);
+  }
+
+  SECTION("Check preconditions for Process") {
+    // Invalid PID
+    REQUIRE_THROWS_AS(Process().pid(-2), ProcessesManagement::TypeException);
+    REQUIRE_THROWS_AS(Process().pid(256), ProcessesManagement::TypeException);
+
+    // Invalid PPID
+    REQUIRE_THROWS_AS(Process().ppid(-2), ProcessesManagement::TypeException);
+    REQUIRE_THROWS_AS(Process().ppid(256), ProcessesManagement::TypeException);
+
+    // Invalid priority
+    REQUIRE_THROWS_AS(Process().priority(-1),
+                      ProcessesManagement::TypeException);
+    REQUIRE_THROWS_AS(Process().priority(16),
+                      ProcessesManagement::TypeException);
+
+    // Invalid base priority
+    REQUIRE_THROWS_AS(Process().basePriority(-1),
+                      ProcessesManagement::TypeException);
+    REQUIRE_THROWS_AS(Process().basePriority(16),
+                      ProcessesManagement::TypeException);
+    REQUIRE_THROWS_AS(Process().basePriority(1),
+                      ProcessesManagement::TypeException);
+
+    // Invalid times
+    REQUIRE_THROWS_AS(Process().timer(-1), ProcessesManagement::TypeException);
+    REQUIRE_THROWS_AS(Process().workTime(-1),
+                      ProcessesManagement::TypeException);
+  }
+
+  SECTION("Convert to JSON instance of Process") {
+    auto process = ProcessesManagement::Process();
+
+    auto expected = nlohmann::json{
+        {"pid", 0},   {"ppid", -1},    {"priority", 0},    {"basePriority", 0},
+        {"timer", 0}, {"workTime", 0}, {"state", "ACTIVE"}};
+    auto actual = process.dump();
 
     REQUIRE(actual == expected);
   }

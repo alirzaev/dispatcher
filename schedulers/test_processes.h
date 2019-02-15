@@ -1,0 +1,4 @@
+#ifndef TEST_PROCESSES_H
+#define TEST_PROCESSES_H
+
+#endif // TEST_PROCESSES_H

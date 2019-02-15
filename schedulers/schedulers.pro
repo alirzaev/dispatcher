@@ -16,9 +16,12 @@ HEADERS += \
     algo/memory/requests.h \
     algo/memory/strategies.h \
     algo/memory/types.h \
+    algo/processes/requests.h \
+    algo/processes/exceptions.h \
     utils/exceptions.h \
     utils/io.h \
     utils/tasks.h \
-    test_memory.h \
+    utils/overload.h \
     config.h \
-    utils/overload.h
+    test_memory.h \
+    test_processes.h

@@ -51,7 +51,7 @@ public:
     if (priority < 0 || priority > 15) {
       throw RequestException("INVALID_PRIORITY");
     }
-    if (basePriority < 0 || basePriority > 15 || basePriority < priority) {
+    if (basePriority < 0 || basePriority > 15 || basePriority > priority) {
       throw RequestException("INVALID_BASE_PRIORITY");
     }
     if (timer < 0) {

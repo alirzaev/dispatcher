@@ -1,7 +1,9 @@
 #pragma once
 
 #include "exceptions.h"
+#include <array>
 #include <cstdint>
+#include <deque>
 #include <string>
 #include <tuple>
 #include <variant>
@@ -150,5 +152,50 @@ public:
             {"timer", _timer},       {"workTime", _workTime},
             {"state", state}};
   }
+};
+
+class ProcessesState {
+public:
+  std::vector<Process> processes;
+
+  std::array<std::deque<int32_t>, 16> queues;
+
+  ProcessesState(const std::vector<Process> &processes,
+                 const std::array<std::deque<int32_t>, 16> &queues)
+      : processes(processes), queues(queues) {}
+
+  ProcessesState() : ProcessesState(ProcessesState::initial()) {}
+
+  ProcessesState(const ProcessesState &state) = default;
+
+  ProcessesState(ProcessesState &&state) = default;
+
+  ProcessesState &operator=(const ProcessesState &state) = default;
+
+  ProcessesState &operator=(ProcessesState &&state) = default;
+
+  bool operator==(const ProcessesState &state) const {
+    return processes == state.processes && queues == state.queues;
+  }
+
+  bool operator!=(const ProcessesState &state) const {
+    return !(*this == state);
+  }
+
+  nlohmann::json dump() const {
+    auto jsonProcesses = nlohmann::json::array();
+    auto jsonQueues = nlohmann::json::array();
+
+    for (const auto &process : processes) {
+      jsonProcesses.push_back(process.dump());
+    }
+    for (const auto &queue : queues) {
+      jsonQueues.push_back(queue);
+    }
+
+    return {{"processes", jsonProcesses}, {"queues", jsonQueues}};
+  }
+
+  static ProcessesState initial() { return {{}, {}}; }
 };
 } // namespace ProcessesManagement

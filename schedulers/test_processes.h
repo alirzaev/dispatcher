@@ -1,13 +1,20 @@
 #include <catch2/catch.hpp>
 #include <nlohmann/json.hpp>
 
+#include <array>
+#include <deque>
 #include <vector>
 
+#include "algo/processes/exceptions.h"
+#include "algo/processes/operations.h"
 #include "algo/processes/requests.h"
 #include "algo/processes/types.h"
 
 using namespace ProcessesManagement;
+using std::array;
+using std::deque;
 using std::vector;
+using Queues = std::array<std::deque<int32_t>, 16>;
 
 TEST_CASE("test_processes_requests") {
   SECTION("Create instance of CreateProcessReq") {
@@ -153,6 +160,169 @@ TEST_CASE("test_processes_requests") {
   }
 }
 
+TEST_CASE("test_processes_operations") {
+  SECTION("Chenge process state") {
+    ProcessesState state{
+        {Process{}.pid(0).state(ProcState::EXECUTING)}, // processes
+        {}                                              // queues
+    };
+    ProcessesState expectedState{
+        {Process{}.pid(0).state(ProcState::WAITING)}, // processes
+        {}                                            // queues
+    };
+
+    auto actualState = changeProcessState(state, 0, ProcState::WAITING);
+    REQUIRE(actualState == expectedState);
+  }
+
+  SECTION("Chenge process state (invalid PID)") {
+    ProcessesState state{
+        {Process{}.pid(0).state(ProcState::EXECUTING)}, // processes
+        {}                                              // queues
+    };
+
+    REQUIRE_THROWS_AS(changeProcessState(state, 1, ProcState::WAITING),
+                      ProcessesManagement::OperationException);
+  }
+
+  SECTION("Chenge process state (the same state)") {
+    ProcessesState state{
+        {Process{}.pid(0).state(ProcState::EXECUTING)}, // processes
+        {}                                              // queues
+    };
+    ProcessesState expectedState{
+        {Process{}.pid(0).state(ProcState::EXECUTING)}, // processes
+        {}                                              // queues
+    };
+
+    auto actualState = changeProcessState(state, 0, ProcState::EXECUTING);
+    REQUIRE(actualState == expectedState);
+  }
+
+  SECTION("Push to queue") {
+    ProcessesState state{
+        {Process{}.pid(0).state(ProcState::ACTIVE)}, // processes
+        {}                                           // queues
+    };
+
+    Queues expectedQueues;
+    expectedQueues[0].push_back(0);
+
+    ProcessesState expectedState{
+        {Process{}.pid(0).state(ProcState::ACTIVE)}, // processes
+        expectedQueues                               // queues
+    };
+
+    auto actualState = pushToQueue(state, 0, 0);
+    REQUIRE(actualState == expectedState);
+  }
+
+  SECTION("Push to queue (invalid PID)") {
+    ProcessesState state{
+        {Process{}.pid(0).state(ProcState::ACTIVE)}, // processes
+        {}                                           // queues
+    };
+
+    REQUIRE_THROWS_AS(pushToQueue(state, 0, 1),
+                      ProcessesManagement::OperationException);
+  }
+
+  SECTION("Push to queue (process is already in queue)") {
+    Queues queues;
+    queues[0].push_back(0);
+    ProcessesState state{
+        {Process{}.pid(0).state(ProcState::ACTIVE)}, // processes
+        queues                                       // queues
+    };
+
+    REQUIRE_THROWS_AS(pushToQueue(state, 0, 0),
+                      ProcessesManagement::OperationException);
+  }
+
+  SECTION("Pop from queue") {
+    Queues queues;
+    queues[0].push_back(0);
+    ProcessesState state{
+        {Process{}.pid(0).state(ProcState::ACTIVE)}, // processes
+        queues                                       // queues
+    };
+
+    ProcessesState expectedState{
+        {Process{}.pid(0).state(ProcState::ACTIVE)}, // processes
+        {}                                           // queues
+    };
+
+    auto actualState = popFromQueue(state, 0);
+    REQUIRE(actualState == expectedState);
+  }
+
+  SECTION("Pop from queue (empty queue)") {
+    ProcessesState state{
+        {Process{}.pid(0).state(ProcState::ACTIVE)}, // processes
+        {}                                           // queues
+    };
+
+    REQUIRE_THROWS_AS(popFromQueue(state, 0),
+                      ProcessesManagement::OperationException);
+  }
+
+  SECTION("Switch to process") {
+    ProcessesState state{
+        {Process{}.pid(0).state(ProcState::ACTIVE),
+         Process{}.pid(1).state(ProcState::EXECUTING)}, // processes
+        {}                                              // queues
+    };
+
+    ProcessesState expectedState{
+        {Process{}.pid(0).state(ProcState::EXECUTING),
+         Process{}.pid(1).state(ProcState::ACTIVE)}, // processes
+        {}                                           // queues
+    };
+
+    auto actualState = switchTo(state, 0);
+    REQUIRE(actualState == expectedState);
+  }
+
+  SECTION("Switch to process (the same process)") {
+    ProcessesState state{
+        {Process{}.pid(0).state(ProcState::ACTIVE),
+         Process{}.pid(1).state(ProcState::EXECUTING)}, // processes
+        {}                                              // queues
+    };
+
+    ProcessesState expectedState{
+        {Process{}.pid(0).state(ProcState::ACTIVE),
+         Process{}.pid(1).state(ProcState::EXECUTING)}, // processes
+        {}                                              // queues
+    };
+
+    auto actualState = switchTo(state, 1);
+    REQUIRE(actualState == expectedState);
+  }
+
+  SECTION("Switch to process (invalid PID)") {
+    ProcessesState state{
+        {Process{}.pid(0).state(ProcState::ACTIVE),
+         Process{}.pid(1).state(ProcState::EXECUTING)}, // processes
+        {}                                              // queues
+    };
+
+    REQUIRE_THROWS_AS(switchTo(state, 2),
+                      ProcessesManagement::OperationException);
+  }
+
+  SECTION("Switch to process (invalid proc state)") {
+    ProcessesState state{
+        {Process{}.pid(0).state(ProcState::WAITING),
+         Process{}.pid(1).state(ProcState::EXECUTING)}, // processes
+        {}                                              // queues
+    };
+
+    REQUIRE_THROWS_AS(switchTo(state, 0),
+                      ProcessesManagement::OperationException);
+  }
+}
+
 TEST_CASE("test_processes_types_process") {
   SECTION("Create valid instance of Process") {
     Process process;
@@ -163,7 +333,7 @@ TEST_CASE("test_processes_types_process") {
     REQUIRE(process.basePriority() == 0);
     REQUIRE(process.timer() == 0);
     REQUIRE(process.workTime() == 0);
-    REQUIRE(process.state() == ProcessState::ACTIVE);
+    REQUIRE(process.state() == ProcState::ACTIVE);
   }
 
   SECTION("Check preconditions for Process") {

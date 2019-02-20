@@ -25,4 +25,5 @@ HEADERS += \
     utils/overload.h \
     config.h \
     test_memory.h \
-    test_processes.h
+    test_processes.h \
+    algo/processes/operations.h

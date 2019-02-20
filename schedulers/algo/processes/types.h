@@ -12,7 +12,7 @@
 
 namespace ProcessesManagement {
 
-enum class ProcessState { ACTIVE, EXECUTING, WAITING };
+enum class ProcState { ACTIVE, EXECUTING, WAITING };
 
 class Process {
 private:
@@ -28,12 +28,12 @@ private:
 
   int32_t _workTime;
 
-  ProcessState _state;
+  ProcState _state;
 
 public:
   Process()
       : _pid(0), _ppid(-1), _priority(0), _basePriority(0), _timer(0),
-        _workTime(0), _state(ProcessState::ACTIVE) {}
+        _workTime(0), _state(ProcState::ACTIVE) {}
 
   Process(const Process &other) = default;
 
@@ -59,7 +59,7 @@ public:
 
   int32_t pid() const { return _pid; }
 
-  ProcessState state() const { return _state; }
+  ProcState state() const { return _state; }
 
   Process ppid(int32_t ppid) const {
     if (ppid < -1 || ppid > 255) {
@@ -127,7 +127,7 @@ public:
     return other;
   }
 
-  Process state(ProcessState state) const {
+  Process state(ProcState state) const {
     Process other = *this;
     other._state = state;
 
@@ -137,13 +137,13 @@ public:
   nlohmann::json dump() const {
     std::string state;
     switch (_state) {
-    case ProcessState::ACTIVE:
+    case ProcState::ACTIVE:
       state = "ACTIVE";
       break;
-    case ProcessState::EXECUTING:
+    case ProcState::EXECUTING:
       state = "EXECUTING";
       break;
-    case ProcessState::WAITING:
+    case ProcState::WAITING:
       state = "WAITING";
       break;
     }

@@ -2,6 +2,9 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <functional>
+#include <map>
+#include <set>
 
 #include "exceptions.h"
 #include "types.h"
@@ -113,5 +116,61 @@ inline ProcessesState switchTo(const ProcessesState &state, int32_t nextPid) {
   *next = next->state(ProcState::EXECUTING);
 
   return {processes, queues};
+}
+
+/*
+ * Операция завершения процесса (в т.ч. и дочерних)
+ *
+ * @param state состояние процессов
+ * @param pid идентификатор процесса
+ *
+ * @return новое состояние процессов
+ */
+inline ProcessesState terminateProcess(const ProcessesState &state,
+                                       int32_t pid) {
+  auto [processes, queues] = state;
+
+  auto it =
+      std::find_if(processes.begin(), processes.end(),
+                   [pid](const auto &process) { return process.pid() == pid; });
+
+  if (it == processes.end()) {
+    throw OperationException("NO_SUCH_PROCESS");
+  }
+
+  std::map<int32_t, std::vector<int32_t>> parents;
+  for (const auto &process : processes) {
+    if (process.ppid() != -1) {
+      parents[process.ppid()].push_back(process.pid());
+    }
+  }
+  std::set<int32_t> toTerminate;
+  std::function<void(int32_t)> rec = [&rec, &toTerminate,
+                                      &parents](int32_t pid) {
+    toTerminate.insert(pid);
+    for (const auto &child : parents[pid]) {
+      rec(child);
+    }
+  };
+  rec(pid);
+
+  decltype(processes) newProcesses;
+  decltype(queues) newQueues;
+
+  for (const auto &process : processes) {
+    if (toTerminate.find(process.pid()) == toTerminate.end()) {
+      newProcesses.push_back(process);
+    }
+  }
+  for (size_t i = 0; i < queues.size(); ++i) {
+    const auto &queue = queues[i];
+    auto &newQueue = newQueues[i];
+    for (const auto &pid : queue) {
+      if (toTerminate.find(pid) == toTerminate.end()) {
+        newQueue.push_back(pid);
+      }
+    }
+  }
+  return {newProcesses, newQueues};
 }
 } // namespace ProcessesManagement

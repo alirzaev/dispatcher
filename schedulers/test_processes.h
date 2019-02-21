@@ -321,6 +321,48 @@ TEST_CASE("test_processes_operations") {
     REQUIRE_THROWS_AS(switchTo(state, 0),
                       ProcessesManagement::OperationException);
   }
+
+  SECTION("Terminate process") {
+    Queues queues;
+    queues[0] = {0, 1};
+    queues[1] = {3, 4, 2};
+    ProcessesState state{
+        {Process{}.pid(0),          //
+         Process{}.pid(1).ppid(0),  //
+         Process{}.pid(2).ppid(1),  //
+         Process{}.pid(3),          //
+         Process{}.pid(4).ppid(3)}, // processes
+        queues                      // queues
+    };
+
+    Queues expecteQueues;
+    expecteQueues[1] = {3, 4};
+    ProcessesState expectedState{
+        {Process{}.pid(3),          //
+         Process{}.pid(4).ppid(3)}, // processes
+        expecteQueues               // queues // queues
+    };
+
+    auto actualState = terminateProcess(state, 0);
+    REQUIRE(actualState == expectedState);
+  }
+
+  SECTION("Terminate process (invalid PID)") {
+    Queues queues;
+    queues[0] = {0, 1};
+    queues[1] = {3, 4, 2};
+    ProcessesState state{
+        {Process{}.pid(0),          //
+         Process{}.pid(1).ppid(0),  //
+         Process{}.pid(2).ppid(1),  //
+         Process{}.pid(3),          //
+         Process{}.pid(4).ppid(3)}, // processes
+        queues                      // queues
+    };
+
+    REQUIRE_THROWS_AS(terminateProcess(state, 5),
+                      ProcessesManagement::OperationException);
+  }
 }
 
 TEST_CASE("test_processes_types_process") {

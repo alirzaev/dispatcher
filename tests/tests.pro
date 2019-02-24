@@ -11,7 +11,9 @@ SOURCES += \
     main.cpp
 
 HEADERS += \
-    generators/memory_task.h
+    config.h \
+    test_memory.h \
+    test_processes.h
 
 LIBS += \
     -L../schedulers

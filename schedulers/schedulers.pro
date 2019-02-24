@@ -1,12 +1,11 @@
-TEMPLATE = app
-CONFIG += console c++17
+TEMPLATE = lib
+CONFIG += c++17
 CONFIG -= app_bundle
 CONFIG -= qt
 
 #QMAKE_CXXFLAGS += -Wa,-mbig-obj
 
 SOURCES += \
-    main.cpp \
     algo/processes/roundrobin.cpp
 
 INCLUDEPATH += "../3rdparty"
@@ -24,8 +23,11 @@ HEADERS += \
     utils/io.h \
     utils/tasks.h \
     utils/overload.h \
-    config.h \
-    test_memory.h \
-    test_processes.h \
     algo/processes/operations.h \
     algo/processes/strategies.h
+
+# The following keeps the generated files at least somewhat separate
+# from the source files.
+UI_DIR = uics
+MOC_DIR = mocs
+OBJECTS_DIR = objs

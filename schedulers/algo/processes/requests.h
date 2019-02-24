@@ -1,6 +1,8 @@
 #pragma once
 
 #include "exceptions.h"
+#include "types.h"
+
 #include <cstdint>
 #include <variant>
 
@@ -82,6 +84,16 @@ public:
             {"basePriority", _basePriority},
             {"timer", _timer},
             {"workTime", _workTime}};
+  }
+
+  Process toProcess() const {
+    return Process{}
+        .pid(pid())
+        .ppid(ppid())
+        .priority(priority())
+        .basePriority(basePriority())
+        .timer(timer())
+        .workTime(workTime());
   }
 };
 

@@ -363,6 +363,45 @@ TEST_CASE("test_processes_operations") {
     REQUIRE_THROWS_AS(terminateProcess(state, 5),
                       ProcessesManagement::OperationException);
   }
+
+  SECTION("Add process") {
+    ProcessesState state{
+        {Process{}.pid(0),          //
+         Process{}.pid(1).ppid(0),  //
+         Process{}.pid(2).ppid(1)}, // processes
+        {}                          // queues
+    };
+
+    ProcessesState expectedState{
+        {Process{}.pid(0),         //
+         Process{}.pid(1).ppid(0), //
+         Process{}.pid(2).ppid(1), //
+         Process{}.pid(3)},        // processes
+        {}                         // queues
+    };
+
+    auto actualState = addProcess(state, Process{}.pid(3));
+    REQUIRE(actualState == expectedState);
+  }
+
+  SECTION("Add process (process already exists)") {
+    ProcessesState state{
+        {Process{}.pid(0),          //
+         Process{}.pid(1).ppid(0),  //
+         Process{}.pid(2).ppid(1)}, // processes
+        {}                          // queues
+    };
+
+    ProcessesState expectedState{
+        {Process{}.pid(0),          //
+         Process{}.pid(1).ppid(0),  //
+         Process{}.pid(2).ppid(1)}, // processes
+        {}                          // queues
+    };
+
+    REQUIRE_THROWS_AS(addProcess(state, Process{}.pid(0)),
+                      ProcessesManagement::OperationException);
+  }
 }
 
 TEST_CASE("test_processes_types_process") {

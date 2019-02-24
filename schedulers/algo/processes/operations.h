@@ -175,4 +175,30 @@ inline ProcessesState terminateProcess(const ProcessesState &state,
   }
   return {newProcesses, newQueues};
 }
+
+/*
+ * Операция добавления нового процесса в список процессов
+ *
+ * @param state состояние процессов
+ * @param process дескриптор процесса
+ *
+ * @return новое состояние процессов
+ */
+inline ProcessesState addProcess(const ProcessesState &state, Process process) {
+  auto [processes, queues] = state;
+
+  auto it = std::find_if(processes.begin(), processes.end(),
+                         [&process](const auto &current) {
+                           return current.pid() == process.pid();
+                         });
+
+  if (it != processes.end()) {
+    throw OperationException("PROCESS_EXISTS");
+  }
+
+  processes.push_back(process);
+  std::sort(processes.begin(), processes.end());
+
+  return {processes, queues};
+}
 } // namespace ProcessesManagement

@@ -36,15 +36,8 @@ ProcessesState
 RoundRobinStrategy::processRequest(const CreateProcessReq &request,
                                    const ProcessesState &state) const {
   auto newState = state;
-  auto process = Process{}
-                     .pid(request.pid())
-                     .ppid(request.ppid())
-                     .priority(request.priority())
-                     .basePriority(request.basePriority())
-                     .timer(request.timer())
-                     .workTime(request.workTime());
-  newState.processes.push_back(process);
-  std::sort(newState.processes.begin(), newState.processes.end());
+  auto process = request.toProcess();
+  newState = addProcess(newState, process);
   newState = pushToQueue(newState, 0, process.pid());
 
   auto current = getCurrent(newState);

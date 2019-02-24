@@ -106,13 +106,15 @@ inline ProcessesState switchTo(const ProcessesState &state, int32_t nextPid) {
   if (next == processes.end()) {
     throw OperationException("NO_SUCH_PROCESS");
   }
-  if (*prev == *next) {
+  if (prev != processes.end() && *prev == *next) {
     return state;
   }
   if (next->state() != ProcState::ACTIVE) {
     throw OperationException("INVALID_STATE");
   }
-  *prev = prev->state(ProcState::ACTIVE);
+  if (prev != processes.end()) {
+    *prev = prev->state(ProcState::ACTIVE);
+  }
   *next = next->state(ProcState::EXECUTING);
 
   return {processes, queues};

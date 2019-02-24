@@ -47,6 +47,14 @@ public:
                       rhs._state};
   }
 
+  bool operator<(const Process &rhs) const {
+    return std::tuple{_pid,   _ppid,     _priority, _basePriority,
+                      _timer, _workTime, _state} <
+           std::tuple{rhs._pid,          rhs._ppid,  rhs._priority,
+                      rhs._basePriority, rhs._timer, rhs._workTime,
+                      rhs._state};
+  }
+
   int32_t ppid() const { return _ppid; }
 
   int32_t priority() const { return _priority; }

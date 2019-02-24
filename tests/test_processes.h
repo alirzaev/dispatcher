@@ -161,7 +161,7 @@ TEST_CASE("test_processes_requests") {
 }
 
 TEST_CASE("test_processes_operations") {
-  SECTION("Chenge process state") {
+  SECTION("Change process state") {
     ProcessesState state{
         {Process{}.pid(0).state(ProcState::EXECUTING)}, // processes
         {}                                              // queues
@@ -175,7 +175,7 @@ TEST_CASE("test_processes_operations") {
     REQUIRE(actualState == expectedState);
   }
 
-  SECTION("Chenge process state (invalid PID)") {
+  SECTION("Change process state (invalid PID)") {
     ProcessesState state{
         {Process{}.pid(0).state(ProcState::EXECUTING)}, // processes
         {}                                              // queues
@@ -185,7 +185,7 @@ TEST_CASE("test_processes_operations") {
                       ProcessesManagement::OperationException);
   }
 
-  SECTION("Chenge process state (the same state)") {
+  SECTION("Change process state (the same state)") {
     ProcessesState state{
         {Process{}.pid(0).state(ProcState::EXECUTING)}, // processes
         {}                                              // queues

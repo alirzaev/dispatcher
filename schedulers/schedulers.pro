@@ -6,7 +6,8 @@ CONFIG -= qt
 #QMAKE_CXXFLAGS += -Wa,-mbig-obj
 
 SOURCES += \
-    main.cpp
+    main.cpp \
+    algo/processes/roundrobin.cpp
 
 INCLUDEPATH += "../3rdparty"
 
@@ -26,4 +27,5 @@ HEADERS += \
     config.h \
     test_memory.h \
     test_processes.h \
-    algo/processes/operations.h
+    algo/processes/operations.h \
+    algo/processes/strategies.h

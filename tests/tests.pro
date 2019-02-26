@@ -12,11 +12,6 @@ SOURCES += \
     processes.cpp \
     memory.cpp
 
-HEADERS +=
-
-LIBS += \
-    -L../schedulers
-
 # The following keeps the generated files at least somewhat separate
 # from the source files.
 UI_DIR = uics

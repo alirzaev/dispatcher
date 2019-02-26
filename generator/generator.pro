@@ -13,9 +13,6 @@ SOURCES += \
 HEADERS += \
     generators/memory_task.h
 
-LIBS += \
-    -L../schedulers
-
 # The following keeps the generated files at least somewhat separate
 # from the source files.
 UI_DIR = uics

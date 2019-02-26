@@ -5,9 +5,6 @@ CONFIG -= qt
 
 #QMAKE_CXXFLAGS += -Wa,-mbig-obj
 
-SOURCES += \
-    algo/processes/roundrobin.cpp
-
 INCLUDEPATH += "../3rdparty"
 
 HEADERS += \
@@ -24,7 +21,9 @@ HEADERS += \
     utils/tasks.h \
     utils/overload.h \
     algo/processes/operations.h \
-    algo/processes/strategies.h
+    algo/processes/strategies.h \
+    algo/processes/strategies/abstract.h \
+    algo/processes/strategies/roundrobin.h
 
 # The following keeps the generated files at least somewhat separate
 # from the source files.

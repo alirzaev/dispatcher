@@ -50,9 +50,6 @@ FORMS += \
     memorytask.ui \
     dialogs/allocatememorydialog.ui
 
-LIBS += \
-    -L../schedulers
-
 TARGET = dispatcher
 
 # The following keeps the generated files at least somewhat separate

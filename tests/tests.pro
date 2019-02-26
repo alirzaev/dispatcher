@@ -8,12 +8,11 @@ INCLUDEPATH += \
     ../schedulers
 
 SOURCES += \
-    main.cpp
+    main.cpp \
+    processes.cpp \
+    memory.cpp
 
-HEADERS += \
-    config.h \
-    test_memory.h \
-    test_processes.h
+HEADERS +=
 
 LIBS += \
     -L../schedulers

@@ -1,3 +1,6 @@
-#include "config.h"
-#include "test_memory.h"
-#include "test_processes.h"
+#ifndef CATCH_CONFIG_MAIN
+#define CATCH_CONFIG_MAIN
+#endif
+#define DO_NOT_USE_WMAIN
+
+#include <catch2/catch.hpp>

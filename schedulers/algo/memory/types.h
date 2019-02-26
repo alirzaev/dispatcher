@@ -1,9 +1,10 @@
 #pragma once
 
 #include <cstdint>
-#include <nlohmann/json.hpp>
 #include <tuple>
 #include <vector>
+
+#include <nlohmann/json.hpp>
 
 #include "exceptions.h"
 

@@ -1,12 +1,13 @@
 #pragma once
 
-#include "exceptions.h"
 #include <cstdint>
 #include <memory>
 #include <string>
 #include <variant>
 
 #include <nlohmann/json.hpp>
+
+#include "exceptions.h"
 
 namespace MemoryManagement {
 

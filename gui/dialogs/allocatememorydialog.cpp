@@ -1,8 +1,8 @@
-#include "allocatememorydialog.h"
-#include "ui_allocatememorydialog.h"
-
 #include <QDialogButtonBox>
 #include <QIntValidator>
+
+#include "allocatememorydialog.h"
+#include "ui_allocatememorydialog.h"
 
 AllocateMemoryDialog::AllocateMemoryDialog(QWidget *parent, int32_t maxSize)
     : QDialog(parent), ui(new Ui::AllocateMemoryDialog), maxSize(maxSize) {

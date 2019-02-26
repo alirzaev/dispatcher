@@ -8,10 +8,11 @@
 #include <variant>
 #include <vector>
 
+#include <utils/overload.h>
+
 #include "dialogs/allocatememorydialog.h"
 #include "listitems/memoryblockitem.h"
 #include "menus/memoryblockmenu.h"
-#include "utils/overload.h"
 
 #include "memorytask.h"
 #include "ui_memorytask.h"

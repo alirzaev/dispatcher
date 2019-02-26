@@ -1,13 +1,13 @@
+#include <vector>
+
 #include <catch2/catch.hpp>
 #include <nlohmann/json.hpp>
 
-#include <vector>
-
-#include "algo/memory/exceptions.h"
-#include "algo/memory/operations.h"
-#include "algo/memory/requests.h"
-#include "algo/memory/strategies.h"
-#include "algo/memory/types.h"
+#include <algo/memory/exceptions.h>
+#include <algo/memory/operations.h>
+#include <algo/memory/requests.h>
+#include <algo/memory/strategies.h>
+#include <algo/memory/types.h>
 
 using namespace MemoryManagement;
 using std::vector;

@@ -3,8 +3,9 @@
 #include <QPoint>
 #include <QWidget>
 
-#include "models.h"
 #include <algo/memory/types.h>
+
+#include "models.h"
 
 using MemoryManagement::MemoryBlock;
 

@@ -1,15 +1,16 @@
+#include <fstream>
+
 #include <QAction>
 #include <QFileDialog>
 
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
-
-#include "memorytask.h"
-
-#include <fstream>
 #include <generators/memory_task.h>
 #include <utils/io.h>
 #include <utils/tasks.h>
+
+#include "memorytask.h"
+
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {

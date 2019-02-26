@@ -1,6 +1,6 @@
-#include "memoryblockitem.h"
-
 #include <QString>
+
+#include "memoryblockitem.h"
 
 MemoryBlockItem::MemoryBlockItem(const MemoryManagement::MemoryBlock &block,
                                  bool highlightFree, QListWidget *parent)

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "exceptions.h"
 #include <array>
 #include <cstdint>
 #include <deque>
@@ -9,6 +8,8 @@
 #include <variant>
 
 #include <nlohmann/json.hpp>
+
+#include "exceptions.h"
 
 namespace ProcessesManagement {
 

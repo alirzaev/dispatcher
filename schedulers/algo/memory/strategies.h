@@ -1,15 +1,15 @@
 #pragma once
 
-#include "operations.h"
-#include "requests.h"
-#include "types.h"
-
 #include <algorithm>
 #include <cstdint>
 #include <exception>
 #include <memory>
 #include <string>
 #include <variant>
+
+#include "operations.h"
+#include "requests.h"
+#include "types.h"
 
 namespace MemoryManagement {
 using std::shared_ptr;

@@ -1,12 +1,12 @@
 #pragma once
 
-#include "exceptions.h"
-#include "types.h"
-
 #include <cstdint>
 #include <variant>
 
 #include <nlohmann/json.hpp>
+
+#include "exceptions.h"
+#include "types.h"
 
 namespace ProcessesManagement {
 

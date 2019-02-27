@@ -1,13 +1,16 @@
 #include <fstream>
+#include <variant>
 
 #include <QAction>
 #include <QFileDialog>
 
 #include <generators/memory_task.h>
 #include <utils/io.h>
+#include <utils/overload.h>
 #include <utils/tasks.h>
 
 #include "memorytask.h"
+#include "processestask.h"
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -47,13 +50,20 @@ void MainWindow::loadTasks(const std::vector<Utils::Task> &tasks) {
   tabs->clear();
 
   for (const auto &task : tasks) {
-    if (std::holds_alternative<Utils::MemoryTask>(task)) {
-      auto memoryTask = std::get<Utils::MemoryTask>(task);
-      auto model = Models::MemoryModel{memoryTask.state(), memoryTask};
+    std::visit(
+        overload{[tabs, this](const Utils::MemoryTask &task) {
+                   auto model = Models::MemoryModel{task.state(), task};
 
-      auto *taskWidget = new MemoryTask(model, this);
-      tabs->addTab(taskWidget, "Диспетчеризация памяти");
-    }
+                   auto *taskWidget = new MemoryTask(model, this);
+                   tabs->addTab(taskWidget, "Диспетчеризация памяти");
+                 },
+                 [tabs, this](const Utils::ProcessesTask &task) {
+                   auto model = Models::ProcessesModel{task.state(), task};
+
+                   auto *taskWidget = new ProcessesTask(model, this);
+                   tabs->addTab(taskWidget, "Диспетчеризация процессов");
+                 }},
+        task);
   }
 }
 
@@ -75,6 +85,9 @@ void MainWindow::saveTasks() {
   for (int i = 0; i < ui->tabWidget->count(); ++i) {
     auto *widget = ui->tabWidget->widget(i);
     if (auto *p = dynamic_cast<MemoryTask *>(widget); p != nullptr) {
+      auto model = p->model();
+      tasks.push_back(model.task);
+    } else if (auto *p = dynamic_cast<ProcessesTask *>(widget); p != nullptr) {
       auto model = p->model();
       tasks.push_back(model.task);
     }

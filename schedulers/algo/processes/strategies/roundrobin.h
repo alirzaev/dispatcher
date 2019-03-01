@@ -107,7 +107,7 @@ public:
     }
     return newState;
   }
-  ProcessesState processRequest(const TimeQuantumExpired &request,
+  ProcessesState processRequest(const TimeQuantumExpired &,
                                 const ProcessesState &state) const override {
     auto newState = state;
     auto current = getCurrent(newState);

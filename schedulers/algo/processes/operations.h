@@ -196,6 +196,14 @@ inline ProcessesState addProcess(const ProcessesState &state, Process process) {
     throw OperationException("PROCESS_EXISTS");
   }
 
+  auto parent = std::find_if(processes.begin(), processes.end(),
+                             [&process](const auto &current) {
+                               return current.pid() == process.ppid();
+                             });
+  if (process.ppid() != -1 && parent == processes.end()) {
+    throw OperationException("NO_SUCH_PPID");
+  }
+
   processes.push_back(process);
   std::sort(processes.begin(), processes.end());
 

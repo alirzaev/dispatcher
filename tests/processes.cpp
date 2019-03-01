@@ -402,6 +402,18 @@ TEST_CASE("test_processes_operations") {
     REQUIRE_THROWS_AS(addProcess(state, Process{}.pid(0)),
                       ProcessesManagement::OperationException);
   }
+
+  SECTION("Add process (parent process does not exist)") {
+    ProcessesState state{
+        {Process{}.pid(0),          //
+         Process{}.pid(1).ppid(0),  //
+         Process{}.pid(2).ppid(1)}, // processes
+        {}                          // queues
+    };
+
+    REQUIRE_THROWS_AS(addProcess(state, Process{}.pid(3).ppid(4)),
+                      ProcessesManagement::OperationException);
+  }
 }
 
 TEST_CASE("test_processes_types_process") {

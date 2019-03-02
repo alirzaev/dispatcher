@@ -1,7 +1,9 @@
 #pragma once
 
-#include <QDialog>
+#include <cstdint>
 #include <utility>
+
+#include <QDialog>
 
 namespace Ui {
 class AllocateMemoryDialog;
@@ -16,7 +18,7 @@ public:
   explicit AllocateMemoryDialog(QWidget *parent = nullptr,
                                 int32_t maxSize = 256);
 
-  ~AllocateMemoryDialog();
+  ~AllocateMemoryDialog() override;
 
 private:
   Ui::AllocateMemoryDialog *ui;

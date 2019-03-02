@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QMenu>
+#include <QString>
 #include <QWidget>
 
 #include <algo/memory/types.h>

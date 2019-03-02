@@ -1,5 +1,6 @@
 #include <QDialogButtonBox>
 #include <QIntValidator>
+#include <QMessageBox>
 
 #include "allocatememorydialog.h"
 #include "ui_allocatememorydialog.h"
@@ -19,12 +20,16 @@ AllocateMemoryDialog::AllocateMemoryDialog(QWidget *parent, int32_t maxSize)
 AllocateMemoryDialog::~AllocateMemoryDialog() { delete ui; }
 
 void AllocateMemoryDialog::tryAccept() {
-  bool pidOk, sizeOk;
-  int32_t pid = ui->PIDEdit->text().toInt(&pidOk, 10);
-  int32_t size = ui->sizeEdit->text().toInt(&sizeOk, 10);
-  if (pidOk && sizeOk && (pid > -1 && pid < 256) &&
-      (size > 0 && size <= maxSize)) {
-    this->data = {pid, size};
-    this->accept();
+  bool valid = ui->PIDEdit->hasAcceptableInput() //
+               && ui->sizeEdit->hasAcceptableInput();
+  if (!valid) {
+    QMessageBox::critical(this, "Ошибка", "Поля заполнены неверно");
+    return;
   }
+
+  int32_t pid = ui->PIDEdit->text().toInt();
+  int32_t size = ui->sizeEdit->text().toInt();
+
+  this->data = {pid, size};
+  this->accept();
 }

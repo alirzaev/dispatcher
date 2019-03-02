@@ -1,5 +1,6 @@
 #include <fstream>
 #include <variant>
+#include <vector>
 
 #include <QAction>
 #include <QFileDialog>
@@ -8,6 +9,8 @@
 #include <utils/io.h>
 #include <utils/overload.h>
 #include <utils/tasks.h>
+
+#include "models.h"
 
 #include "memorytask.h"
 #include "processestask.h"

@@ -1,7 +1,11 @@
 #pragma once
 
+#include <vector>
+
 #include <QMainWindow>
 #include <QWidget>
+
+#include <utils/tasks.h>
 
 #include "models.h"
 

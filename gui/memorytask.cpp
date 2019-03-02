@@ -1,14 +1,22 @@
 #include <QDebug>
+#include <QListWidget>
 #include <QMenu>
 #include <QMessageBox>
+#include <QPoint>
 #include <QPushButton>
 #include <QRegExp>
 #include <QString>
 
+#include <cstdint>
 #include <variant>
 #include <vector>
 
+#include <algo/memory/requests.h>
+#include <algo/memory/strategies.h>
+#include <algo/memory/types.h>
 #include <utils/overload.h>
+
+#include "literals.h"
 
 #include "dialogs/allocatememorydialog.h"
 #include "listitems/memoryblockitem.h"
@@ -17,8 +25,10 @@
 #include "memorytask.h"
 #include "ui_memorytask.h"
 
-using namespace MemoryManagement;
 using namespace std::literals;
+using namespace MemoryManagement;
+using namespace Utils::Literals;
+
 using std::vector;
 
 MemoryTask::MemoryTask(Models::MemoryModel model, QWidget *parent)
@@ -63,47 +73,42 @@ void MemoryTask::setRequest(const Request &request) {
   auto *label = ui->labelRequestDescr;
 
   std::visit(
-      overload{
-          [label](const CreateProcessReq &req) {
-            label->setText(QString("Создан новый процесс PID = %1. "
-                                   "Для размещения процесса в памяти (включая "
-                                   "служебную информацию) требуется выделить "
-                                   "%2 байт (%3 параграфов)")
-                               .arg(req.pid())
-                               .arg(req.bytes())
-                               .arg(req.pages()));
-          },
-          [label](const TerminateProcessReq &req) {
-            label->setText(QString("Процесс PID = %1 завершен").arg(req.pid()));
-          },
-          [label](const AllocateMemory &req) {
-            label->setText(
-                QString("Процесс PID = %1 выдал запрос на выделение ему "
-                        "%2 байт (%3 параграфов) оперативной памяти")
-                    .arg(req.pid())
-                    .arg(req.bytes())
-                    .arg(req.pages()));
-          },
-          [label](const FreeMemory &req) {
-            label->setText(
-                QString("Процесс PID = %1 выдал запрос на освобождение "
-                        "блока памяти с адресом %2")
-                    .arg(req.pid())
-                    .arg(req.address()));
-          }},
+      overload{[label](const CreateProcessReq &req) {
+                 label->setText("Создан новый процесс PID = %1. "
+                                "Для размещения процесса в памяти (включая "
+                                "служебную информацию) требуется выделить "
+                                "%2 байт (%3 параграфов)"_qs.arg(req.pid())
+                                    .arg(req.bytes())
+                                    .arg(req.pages()));
+               },
+               [label](const TerminateProcessReq &req) {
+                 label->setText("Процесс PID = %1 завершен"_qs.arg(req.pid()));
+               },
+               [label](const AllocateMemory &req) {
+                 label->setText(
+                     "Процесс PID = %1 выдал запрос на выделение ему "
+                     "%2 байт (%3 параграфов) оперативной памяти"_qs
+                         .arg(req.pid())
+                         .arg(req.bytes())
+                         .arg(req.pages()));
+               },
+               [label](const FreeMemory &req) {
+                 label->setText("Процесс PID = %1 выдал запрос на освобождение "
+                                "блока памяти с адресом %2"_qs.arg(req.pid())
+                                    .arg(req.address()));
+               }},
       request);
 }
 
 void MemoryTask::setStrategy(StrategyType type) {
-  QString s = "Стратегия: %1";
   auto *label = ui->strategyLabel;
 
   if (type == StrategyType::FIRST_APPROPRIATE) {
-    label->setText(s.arg("первый подходящий"));
+    label->setText("Стратегия: первый подходящий");
   } else if (type == StrategyType::MOST_APPROPRIATE) {
-    label->setText(s.arg("наиболее подходящий"));
+    label->setText("Стратегия: наиболее подходящий");
   } else if (type == StrategyType::LEAST_APPROPRIATE) {
-    label->setText(s.arg("наименее подходящий"));
+    label->setText("Стратегия: наименее подходящий");
   }
 }
 

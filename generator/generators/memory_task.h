@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <ctime>
 #include <functional>
@@ -9,6 +10,7 @@
 #include <optional>
 #include <random>
 #include <set>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -29,24 +31,23 @@ struct MemoryBlockCmp {
   }
 };
 
-inline int32_t randRange(int32_t a, int32_t b) {
+template <class I, typename = std::enable_if_t<std::is_integral_v<I>>>
+inline I randRange(I a, I b) {
   if (a > b) {
     std::swap(a, b);
   }
   static std::mt19937 e(static_cast<unsigned int>(std::time(nullptr)));
-  std::uniform_int_distribution<int32_t> dist(a, b);
+  std::uniform_int_distribution<I> dist(a, b);
   return dist(e);
 }
 
-template <class BidIt>
+template <class BidIt,
+          typename = std::enable_if_t<!std::is_fundamental_v<BidIt>>>
 inline auto randChoice(BidIt first, BidIt last) -> decltype(*first) {
   auto size = std::distance(first, last);
-  auto index = randRange(0, size - 1);
-  auto it = first;
-  for (decltype(index) i = 0; i < index; ++i) {
-    ++it;
-  }
-  return *it;
+  auto index = randRange<decltype(size)>(0, size - 1);
+  std::advance(first, index);
+  return *first;
 }
 
 inline StrategyPtr randStrategy() {

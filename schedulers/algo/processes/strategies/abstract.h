@@ -70,6 +70,18 @@ protected:
       return {*current};
     };
   }
+
+  std::optional<Process> getProcessByPid(const ProcessesState &state,
+                                         int32_t pid) const {
+    if (auto it = std::find_if(
+            state.processes.begin(), state.processes.end(),
+            [&pid](const auto &process) { return process.pid() == pid; });
+        it != state.processes.end()) {
+      return {*it};
+    } else {
+      return std::nullopt;
+    }
+  }
 };
 
 using StrategyPtr = std::shared_ptr<AbstractStrategy>;

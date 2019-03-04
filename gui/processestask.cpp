@@ -65,18 +65,24 @@ void ProcessesTask::connectAll() {
           [=](int) { this->setQueuesLists(_model.state.queues); });
   connect(ui->spinBoxQueue2, QOverload<int>::of(&QSpinBox::valueChanged), this,
           [=](int) { this->setQueuesLists(_model.state.queues); });
-  connect(ui->pushButtonQueue1Push, &QPushButton::clicked, this, [=]() {
+  auto push1Handler = [=]() {
     auto pid = ui->lineEditQueue1Push->text().toInt();
     auto queue = ui->spinBoxQueue1->value();
 
     pushToQueue(queue, pid);
-  });
-  connect(ui->pushButtonQueue2Push, &QPushButton::clicked, this, [=]() {
+  };
+  auto push2Handler = [=]() {
     auto pid = ui->lineEditQueue2Push->text().toInt();
     auto queue = ui->spinBoxQueue2->value();
 
     pushToQueue(queue, pid);
-  });
+  };
+  connect(ui->pushButtonQueue1Push, &QPushButton::clicked, this, push1Handler);
+  connect(ui->lineEditQueue1Push, &QLineEdit::returnPressed, this,
+          push1Handler);
+  connect(ui->pushButtonQueue2Push, &QPushButton::clicked, this, push2Handler);
+  connect(ui->lineEditQueue2Push, &QLineEdit::returnPressed, this,
+          push2Handler);
   connect(ui->pushButtonQueue1Pop, &QPushButton::clicked, this, [=]() {
     auto queue = ui->spinBoxQueue1->value();
 

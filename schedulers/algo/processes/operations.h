@@ -60,6 +60,7 @@ inline ProcessesState pushToQueue(const ProcessesState &state,
       }
     }
     queues.at(static_cast<size_t>(queueIndex)).push_back(pid);
+    *it = it->priority(queueIndex);
     return {processes, queues};
   }
 }
@@ -79,6 +80,13 @@ inline ProcessesState popFromQueue(const ProcessesState &state,
   auto &queue = queues.at(static_cast<size_t>(queueIndex));
   if (queue.empty()) {
     throw OperationException("EMPTY_QUEUE");
+  }
+  auto pid = queue.front();
+  auto it =
+      std::find_if(processes.begin(), processes.end(),
+                   [pid](const auto &process) { return process.pid() == pid; });
+  if (it == processes.end()) {
+    throw OperationException("NO_SUCH_PROCESS");
   }
   queue.pop_front();
   return {processes, queues};

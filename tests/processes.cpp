@@ -206,14 +206,14 @@ TEST_CASE("test_processes_operations") {
     };
 
     Queues expectedQueues;
-    expectedQueues[0].push_back(0);
+    expectedQueues[1].push_back(0);
 
     ProcessesState expectedState{
-        {Process{}.pid(0).state(ProcState::ACTIVE)}, // processes
-        expectedQueues                               // queues
+        {Process{}.pid(0).priority(1).state(ProcState::ACTIVE)}, // processes
+        expectedQueues                                           // queues
     };
 
-    auto actualState = pushToQueue(state, 0, 0);
+    auto actualState = pushToQueue(state, 1, 0);
     REQUIRE(actualState == expectedState);
   }
 
@@ -241,18 +241,18 @@ TEST_CASE("test_processes_operations") {
 
   SECTION("Pop from queue") {
     Queues queues;
-    queues[0].push_back(0);
+    queues[1].push_back(0);
     ProcessesState state{
-        {Process{}.pid(0).state(ProcState::ACTIVE)}, // processes
-        queues                                       // queues
+        {Process{}.pid(0).priority(1).state(ProcState::ACTIVE)}, // processes
+        queues                                                   // queues
     };
 
     ProcessesState expectedState{
-        {Process{}.pid(0).state(ProcState::ACTIVE)}, // processes
-        {}                                           // queues
+        {Process{}.pid(0).priority(1).state(ProcState::ACTIVE)}, // processes
+        {}                                                       // queues
     };
 
-    auto actualState = popFromQueue(state, 0);
+    auto actualState = popFromQueue(state, 1);
     REQUIRE(actualState == expectedState);
   }
 

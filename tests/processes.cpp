@@ -414,6 +414,38 @@ TEST_CASE("test_processes_operations") {
     REQUIRE_THROWS_AS(addProcess(state, Process{}.pid(3).ppid(4)),
                       ProcessesManagement::OperationException);
   }
+
+  SECTION("Update timer") {
+    ProcessesState state{
+        {Process{}.pid(0).state(ProcState::ACTIVE),
+         Process{}.pid(1).timer(0).state(ProcState::EXECUTING)}, // processes
+        {}                                                       // queues
+    };
+
+    ProcessesState expectedState{
+        {Process{}.pid(0).state(ProcState::ACTIVE),
+         Process{}.pid(1).timer(1).state(ProcState::EXECUTING)}, // processes
+        {}                                                       // queues
+    };
+
+    auto actualState = updateTimer(state);
+    REQUIRE(actualState == expectedState);
+  }
+
+  SECTION("Update timer (no executing process)") {
+    ProcessesState state{
+        {Process{}.pid(0).state(ProcState::ACTIVE)}, // processes
+        {}                                           // queues
+    };
+
+    ProcessesState expectedState{
+        {Process{}.pid(0).state(ProcState::ACTIVE)}, // processes
+        {}                                           // queues
+    };
+
+    auto actualState = updateTimer(state);
+    REQUIRE(actualState == expectedState);
+  }
 }
 
 TEST_CASE("test_processes_types_process") {

@@ -217,4 +217,26 @@ inline ProcessesState addProcess(const ProcessesState &state, Process process) {
 
   return {processes, queues};
 }
+
+/*
+ * Операция обновления таймера
+ *
+ * @param state состояние процессов
+ *
+ * @return новое состояние процессов
+ */
+inline ProcessesState updateTimer(const ProcessesState &state) {
+  auto [processes, queues] = state;
+
+  auto it =
+      std::find_if(processes.begin(), processes.end(), [](const auto &current) {
+        return current.state() == ProcState::EXECUTING;
+      });
+
+  if (it != processes.end()) {
+    *it = it->timer(it->timer() + 1);
+  }
+
+  return {processes, queues};
+}
 } // namespace ProcessesManagement

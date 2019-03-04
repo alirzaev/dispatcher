@@ -31,11 +31,12 @@ public:
                                 const ProcessesState &state) const {
     return std::visit(
         [this, state](const auto &req) {
-          return this->processRequest(req, state);
+          return updateTimer(this->processRequest(req, state));
         },
         request);
   }
 
+protected:
   virtual ProcessesState processRequest(const CreateProcessReq &request,
                                         const ProcessesState &state) const = 0;
 
@@ -54,7 +55,6 @@ public:
   virtual ProcessesState processRequest(const TimeQuantumExpired &request,
                                         const ProcessesState &state) const = 0;
 
-protected:
   virtual std::optional<std::pair<int32_t, int32_t>>
   schedule(const ProcessesState &state) const = 0;
 

@@ -39,7 +39,7 @@ protected:
 private:
   RoundRobinStrategy() : AbstractStrategy(StrategyType::ROUNDROBIN) {}
 
-public:
+protected:
   ProcessesState processRequest(const CreateProcessReq &request,
                                 const ProcessesState &state) const override {
     auto newState = state;

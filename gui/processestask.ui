@@ -54,12 +54,18 @@
          <property name="text">
           <string>Подтвердить</string>
          </property>
+         <property name="shortcut">
+          <string>Alt+Return</string>
+         </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="resetState">
          <property name="text">
           <string>Сбросить</string>
+         </property>
+         <property name="shortcut">
+          <string>Ctrl+Z</string>
          </property>
         </widget>
        </item>

@@ -53,6 +53,9 @@
        </property>
        <item>
         <widget class="QPushButton" name="acceptRequest">
+         <property name="toolTip">
+          <string>Проверить действия пользователя и перейти к следующей заявке (Alt+Enter)</string>
+         </property>
          <property name="text">
           <string>Подтвердить</string>
          </property>
@@ -63,6 +66,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="resetState">
+         <property name="toolTip">
+          <string>Отменить все действия пользователя для текущей заявки (Ctrl+Z)</string>
+         </property>
          <property name="text">
           <string>Сбросить</string>
          </property>

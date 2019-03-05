@@ -15,7 +15,7 @@
 
 namespace ProcessesManagement {
 
-enum class StrategyType { ROUNDROBIN };
+enum class StrategyType { ROUNDROBIN, FCFS };
 
 class AbstractStrategy {
 public:

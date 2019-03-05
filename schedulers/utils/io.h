@@ -66,6 +66,8 @@ inline ProcessesTask loadProcessesTask(const nlohmann::json &obj) {
   auto strategyType = obj["strategy"];
   if (strategyType == "ROUNDROBIN") {
     strategy = RoundRobinStrategy::create();
+  } else if (strategyType == "FCFS") {
+    strategy = FcfsStrategy::create();
   } else {
     throw TaskException("UNKNOWN_STRATEGY");
   }

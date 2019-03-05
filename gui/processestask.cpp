@@ -324,6 +324,8 @@ void ProcessesTask::setStrategy(StrategyType type) {
 
   if (type == StrategyType::ROUNDROBIN) {
     label->setText("Стратегия: Round Robin"_qs);
+  } else if (type == StrategyType::FCFS) {
+    label->setText("Стратегия: FCFS"_qs);
   }
 }
 

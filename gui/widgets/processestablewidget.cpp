@@ -26,6 +26,7 @@ ProcessesTableWidget::ProcessesTableWidget(QWidget *parent)
   setHorizontalHeaderLabels({"PID"_qs, "PPID"_qs, "Состояние"_qs,
                              "Приториет"_qs, "Б. приоритет"_qs, "t"_qs, "T"_qs,
                              "T-t"_qs});
+  setSortingEnabled(true);
   resizeColumnsToContents();
   verticalHeader()->setVisible(false);
 }

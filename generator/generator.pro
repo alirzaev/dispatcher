@@ -11,7 +11,12 @@ SOURCES += \
     main.cpp
 
 HEADERS += \
-    generators/memory_task.h
+    generators/memory_task.h \
+    generators/processes_task.h \
+    generators/processes_task/task_generators.h \
+    generators/processes_task/task_roundrobin_generator.h \
+    generators/processes_task/task_abstract_generator.h \
+    generators/rand_utils.h
 
 # The following keeps the generated files at least somewhat separate
 # from the source files.

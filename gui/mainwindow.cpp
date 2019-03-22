@@ -6,6 +6,7 @@
 #include <QFileDialog>
 
 #include <generators/memory_task.h>
+#include <generators/processes_task.h>
 #include <utils/io.h>
 #include <utils/overload.h>
 #include <utils/tasks.h>
@@ -100,5 +101,6 @@ void MainWindow::saveTasks() {
 }
 
 void MainWindow::createTasks() {
-  loadTasks({Generators::MemoryTask::generate()});
+  loadTasks({Generators::MemoryTask::generate(),
+             Generators::ProcessesTask::generate()});
 }

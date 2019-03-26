@@ -253,8 +253,8 @@ void ProcessesTask::refresh() {
 }
 
 void ProcessesTask::nextRequest() {
-  _model.state = updateTimer(collectState());
-  auto task = _model.task.next(_model.state);
+  auto state = updateTimer(collectState());
+  auto task = _model.task.next(state);
   if (task) {
     _model.task = task.value();
     _model.state = _model.task.state();

@@ -163,18 +163,7 @@ protected:
   }
   ProcessesState processRequest(const TimeQuantumExpired &,
                                 const ProcessesState &state) const override {
-    auto newState = state;
-    auto current = getCurrent(newState);
-    if (current.has_value()) {
-      newState = pushToQueue(newState, 0, current->pid());
-    }
-    auto next = schedule(newState);
-    if (next.has_value()) {
-      auto [pid, queue] = next.value();
-      newState = popFromQueue(newState, queue);
-      newState = switchTo(newState, pid);
-    }
-    return newState;
+    return state;
   }
 };
 } // namespace ProcessesManagement

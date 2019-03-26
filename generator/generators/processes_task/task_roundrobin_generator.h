@@ -26,6 +26,8 @@ class RoundRobinTaskGenerator : public AbstractTaskGenerator {
 public:
   RoundRobinTaskGenerator() = default;
 
+  bool preemptive() const override { return true; }
+
   ~RoundRobinTaskGenerator() override = default;
 
   optional<Request> CreateProcessReq(const ProcessesState &state,

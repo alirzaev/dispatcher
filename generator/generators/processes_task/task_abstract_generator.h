@@ -33,6 +33,8 @@ public:
 
   AbstractTaskGenerator() = default;
 
+  virtual bool preemptive() const { return false; }
+
   virtual vector<Request> generate(const ProcessesState &state,
                                    optional<Request> last,
                                    bool valid = true) const {
@@ -47,8 +49,11 @@ public:
         this->InitIO(state, valid),
         this->TerminateIO(state, valid),
         this->TerminateIO(state, valid),
-        this->TransferControl(state, valid),
-        this->TimeQuantumExpired(state, valid)};
+        this->TransferControl(state, valid)};
+
+    if (preemptive()) {
+      requests.push_back(this->TimeQuantumExpired(state, valid));
+    }
 
     vector<Request> filtered;
     if (!last.has_value()) {

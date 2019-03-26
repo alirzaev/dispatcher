@@ -50,8 +50,10 @@ inline auto randChoice(BidIt first, BidIt last) -> decltype(*first) {
   return *first;
 }
 
-inline StrategyPtr randStrategy() {
-  vector<StrategyPtr> strategies = {RoundRobinStrategy::create()};
+inline std::pair<StrategyPtr, GeneratorPtr> randStrategy() {
+  vector<std::pair<StrategyPtr, GeneratorPtr>> strategies = {
+      {RoundRobinStrategy::create(), make_shared<RoundRobinTaskGenerator>()},
+      {FcfsStrategy::create(), make_shared<FcfsTaskGenerator>()}};
 
   return randChoice(strategies.begin(), strategies.end());
 }
@@ -69,8 +71,7 @@ inline Utils::ProcessesTask generate(uint32_t requestCount = 40) {
   using namespace ProcessesManagement;
   using std::vector;
 
-  auto generator = randGenerator();
-  auto strategy = randStrategy();
+  auto [strategy, generator] = randStrategy();
   auto state = ProcessesState::initial();
   vector<Request> requests;
 

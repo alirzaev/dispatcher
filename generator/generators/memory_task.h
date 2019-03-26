@@ -216,7 +216,7 @@ inline Utils::MemoryTask generate(uint32_t requestCount = 40) {
   vector<Request> requests;
 
   for (uint32_t i = 0; i < requestCount; ++i) {
-    bool validRequired = randRange(0, 256) % 3 > 0;
+    bool validRequired = randRange(0, 256) % 8 > 0;
     vector<Request> validRequests, invalidRequests;
 
     for (auto gen : gens) {

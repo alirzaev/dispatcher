@@ -31,6 +31,8 @@ struct MemoryBlockCmp {
   }
 };
 
+inline constexpr int32_t maxPid() { return 16; }
+
 template <class I, typename = std::enable_if_t<std::is_integral_v<I>>>
 inline I randRange(I a, I b) {
   if (a > b) {
@@ -67,7 +69,7 @@ inline set<int32_t> getAvailablePids(const MemoryState &state) {
       existingPids.insert(block.pid());
     }
   }
-  for (int32_t pid = 0; pid < 256; ++pid) {
+  for (int32_t pid = 0; pid < maxPid(); ++pid) {
     if (auto p = existingPids.find(pid); p == existingPids.end()) {
       availabePids.insert(pid);
     }
@@ -189,11 +191,11 @@ inline optional<Request> genFreeMemory(const MemoryState &state,
     if (!usedBlocks.empty()) {
       auto block = randChoice(usedBlocks.begin(), usedBlocks.end());
       auto delta = randRange(1, 255);
-      auto newPid = (block.pid() + delta) % 256;
+      auto newPid = (block.pid() + delta) % maxPid();
 
       return FreeMemory(newPid, block.address());
     } else {
-      auto pid = randRange(0, 255);
+      auto pid = randRange(0, maxPid());
       auto address = randRange(0, 255);
 
       return FreeMemory(pid, address);
@@ -216,7 +218,7 @@ inline Utils::MemoryTask generate(uint32_t requestCount = 40) {
   vector<Request> requests;
 
   for (uint32_t i = 0; i < requestCount; ++i) {
-    bool validRequired = randRange(0, 256) % 8 > 0;
+    bool validRequired = i == 0 ? true : randRange(0, 256) % 8 > 0;
     vector<Request> validRequests, invalidRequests;
 
     for (auto gen : gens) {

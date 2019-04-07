@@ -1,0 +1,19 @@
+os: windows
+language: cpp
+
+install:
+  - chmod +x install-dependencies.sh
+  - ./install-dependencies.sh || true
+
+script:
+  - chmod +x build.sh
+  - ./build.sh
+
+deploy:
+  provider: releases
+  api_key: $GITHUB_TOKEN
+  file: ./build/gui/release/dispatcher.exe
+  skip_cleanup: true
+  draft: true
+  on:
+    branch: dev

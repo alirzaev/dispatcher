@@ -2,18 +2,24 @@ os: windows
 language: cpp
 
 install:
-  - chmod +x install-dependencies.sh
-  - ./install-dependencies.sh || true
+  - echo "Extracting Qt for MinGW (static build)"
+  - 7z x ./.deps/Qt-5.12.1-mingw-static.zip -y -otmp
+  - mkdir /c/Qt
+  - mv ./tmp/5.12.1-mingw-static/ /c/Qt/5.12.1-mingw-static
+  - mkdir -p "/c/Qt/Tools/mingw730_64/x86_64-w64-mingw32/lib/"
+  - cp ./.deps/libd2d1.a /c/Qt/Tools/mingw730_64/x86_64-w64-mingw32/lib/libd2d1.a
+  - cp ./.deps/libdwrite.a /c/Qt/Tools/mingw730_64/x86_64-w64-mingw32/lib/libdwrite.a
+  - echo "Installing GNU make"
+  - choco install make
 
 script:
-  - chmod +x build.sh
-  - ./build.sh
-
-deploy:
-  provider: releases
-  api_key: $GITHUB_TOKEN
-  file: ./build/gui/release/dispatcher.exe
-  skip_cleanup: true
-  draft: true
-  on:
-    branch: dev
+  - echo "Setting up Qt environment"
+  - export PATH="/c/Qt/5.12.1-mingw-static/bin:"$PATH
+  - echo "Preparing to build"
+  - mkdir build
+  - cd build
+  - echo "Building"
+  - qmake ../dispatcher.pro
+  - make -j 2
+  - echo "Running tests"
+  - ./tests/release/tests.exe

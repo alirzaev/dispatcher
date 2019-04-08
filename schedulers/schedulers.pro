@@ -1,5 +1,5 @@
 TEMPLATE = lib
-CONFIG += c++17
+CONFIG += c++1z
 CONFIG -= app_bundle
 CONFIG -= qt
 

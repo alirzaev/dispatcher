@@ -1,25 +1,28 @@
-os: windows
+dist: xenial
 language: cpp
 
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - make
+      - g++-7
+
+before_install:
+  - sudo add-apt-repository ppa:beineri/opt-qt-5.11.0-xenial -y
+  - sudo apt-get update -q
+  - sudo apt-get install qt511base -y
+  - mkdir -p ~/.config/qtchooser
+  - echo -e "/opt/qt511/bin\n/opt/qt511/lib" > ~/.config/qtchooser/default.conf
+  - qmake -v
+
 install:
-  - echo "Extracting Qt for MinGW (static build)"
-  - 7z x ./.deps/Qt-5.12.1-mingw-static.zip -y -otmp
-  - mkdir /c/Qt
-  - mv ./tmp/5.12.1-mingw-static/ /c/Qt/5.12.1-mingw-static
-  - mkdir -p "/c/Qt/Tools/mingw730_64/x86_64-w64-mingw32/lib/"
-  - cp ./.deps/libd2d1.a /c/Qt/Tools/mingw730_64/x86_64-w64-mingw32/lib/libd2d1.a
-  - cp ./.deps/libdwrite.a /c/Qt/Tools/mingw730_64/x86_64-w64-mingw32/lib/libdwrite.a
-  - echo "Installing GNU make"
-  - choco install make
+  - update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 10
 
 script:
-  - echo "Setting up Qt environment"
-  - export PATH="/c/Qt/5.12.1-mingw-static/bin:"$PATH
-  - echo "Preparing to build"
   - mkdir build
   - cd build
-  - echo "Building"
   - qmake ../dispatcher.pro
   - make -j 2
-  - echo "Running tests"
-  - ./tests/release/tests.exe
+  - ./tests/tests

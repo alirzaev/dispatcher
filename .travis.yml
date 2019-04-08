@@ -18,7 +18,7 @@ before_install:
   - qmake -v
 
 install:
-  - update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 10
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 10
 
 script:
   - mkdir build

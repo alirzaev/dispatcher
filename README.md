@@ -1,7 +1,6 @@
 # Модель диспетчера задач операционной системы
 
 [![Build Status](https://travis-ci.org/alirzaev/dispatcher.svg?branch=master)](https://travis-ci.org/alirzaev/dispatcher)
-
 [![Build status](https://ci.appveyor.com/api/projects/status/k043jd35wesnah6b?svg=true)](https://ci.appveyor.com/project/alirzaev/dispatcher)
 
 Программная модель диспетчера задач для лабораторной работы по дисциплине "Операционные системы"

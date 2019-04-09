@@ -8,6 +8,7 @@ addons:
     packages:
       - make
       - g++-7
+      - libgl1-mesa-dev
 
 before_install:
   - sudo add-apt-repository ppa:beineri/opt-qt-5.11.0-xenial -y

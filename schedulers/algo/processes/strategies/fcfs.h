@@ -14,6 +14,9 @@
 #include "abstract.h"
 
 namespace ProcessesManagement {
+/**
+ *  @brief Стратегия "FCFS".
+ */
 class FcfsStrategy final : public AbstractStrategy {
 public:
   std::string toString() const override { return "FCFS"; }
@@ -23,7 +26,6 @@ public:
   }
 
 protected:
-  // <pid, queue>
   std::optional<std::pair<int32_t, int32_t>>
   schedule(const ProcessesState &state) const override {
     auto [processes, queues] = state;

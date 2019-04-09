@@ -10,8 +10,8 @@
 
 namespace ProcessesManagement {
 
-/*
- * Класс заявки на создание нового процесса
+/**
+ *  Класс заявки на создание нового процесса.
  */
 class CreateProcessReq {
 private:
@@ -28,16 +28,18 @@ private:
   int32_t _workTime;
 
 public:
-  /*
-   * Заявка на создание нового процесса
+  /**
+   *  @brief Создает заявку на создание нового процесса.
    *
-   * @param pid идентификатор процесса
-   * @param ppid идентификатор родительского процесса
-   * @param priority текущий приоритет
-   * @param basePriority базовый приоритет
-   * @param timer время работы
-   * @param workTime заявленное время работы
+   *  @param pid Идентификатор процесса.
+   *  @param ppid Идентификатор родительского процесса.
+   *  @param priority Приоритет процесса.
+   *  @param basePriority Базовый приоритет процесса.
+   *  @param timer Время работы.
+   *  @param workTime Заявленное время работы.
    *
+   *  @throws ProcessesManagement::RequestException Исключение возникает, если
+   *  переданные параметры не соответствуют заданным ограничениям.
    */
   CreateProcessReq(int32_t pid, int32_t ppid = -1, int32_t priority = 0,
                    int32_t basePriority = 0, int32_t timer = 0,
@@ -76,6 +78,9 @@ public:
 
   int32_t pid() const { return _pid; }
 
+  /**
+   *  Возвращает заявку в виде JSON-объекта.
+   */
   nlohmann::json dump() const {
     return {{"type", "CREATE_PROCESS"},
             {"pid", _pid},
@@ -86,6 +91,9 @@ public:
             {"workTime", _workTime}};
   }
 
+  /**
+   *  Возвращает дескриптор процесса, описанного в заявке.
+   */
   Process toProcess() const {
     return Process{}
         .pid(pid())
@@ -97,19 +105,21 @@ public:
   }
 };
 
-/*
- * Класс заявки на завершение существующего процесса
+/**
+ *  Класс заявки на завершение существующего процесса.
  */
 class TerminateProcessReq {
 private:
   int32_t _pid;
 
 public:
-  /*
-   * Заявка на завершение существующего процесса
+  /**
+   *  @brief Создает заявку на завершение существующего процесса.
    *
-   * @param pid идентификатор процесса
+   *  @param pid Идентификатор процесса.
    *
+   *  @throws ProcessesManagement::RequestException Исключение возникает, если
+   *  переданные параметры не соответствуют заданным ограничениям.
    */
   TerminateProcessReq(int32_t pid) : _pid(pid) {
     if (pid < 0 || pid > 255) {
@@ -119,24 +129,29 @@ public:
 
   int32_t pid() const { return _pid; }
 
+  /**
+   *  Возвращает заявку в виде JSON-объекта.
+   */
   nlohmann::json dump() const {
     return {{"type", "TERMINATE_PROCESS"}, {"pid", _pid}};
   }
 };
 
-/*
- * Класс заявки на инициализацию ввода/вывода
+/**
+ *  Класс заявки на инициализацию ввода/вывода.
  */
 class InitIO {
 private:
   int32_t _pid;
 
 public:
-  /*
-   * Заявка на инициализацию ввода/вывода
+  /**
+   *  @brief Создает заявку на инициализацию ввода/вывода.
    *
-   * @param pid идентификатор процесса
+   *  @param pid Идентификатор процесса.
    *
+   *  @throws ProcessesManagement::RequestException Исключение возникает, если
+   *  переданные параметры не соответствуют заданным ограничениям.
    */
   InitIO(int32_t pid) : _pid(pid) {
     if (pid < 0 || pid > 255) {
@@ -146,22 +161,27 @@ public:
 
   int32_t pid() const { return _pid; }
 
+  /**
+   *  Возвращает заявку в виде JSON-объекта.
+   */
   nlohmann::json dump() const { return {{"type", "INIT_IO"}, {"pid", _pid}}; }
 };
 
-/*
- * Класс заявки на завершение ввода/вывода
+/**
+ *  Класс заявки на завершение ввода/вывода.
  */
 class TerminateIO {
 private:
   int32_t _pid;
 
 public:
-  /*
-   * Заявка на завершение ввода/вывода
+  /**
+   *  @brief Создает заявку на завершение ввода/вывода.
    *
-   * @param pid идентификатор процесса
+   *  @param pid Идентификатор процесса.
    *
+   *  @throws ProcessesManagement::RequestException Исключение возникает, если
+   *  переданные параметры не соответствуют заданным ограничениям.
    */
   TerminateIO(int32_t pid) : _pid(pid) {
     if (pid < 0 || pid > 255) {
@@ -171,24 +191,29 @@ public:
 
   int32_t pid() const { return _pid; }
 
+  /**
+   *  Возвращает заявку в виде JSON-объекта.
+   */
   nlohmann::json dump() const {
     return {{"type", "TERMINATE_IO"}, {"pid", _pid}};
   }
 };
 
-/*
- * Класс заявки на передачу управления операционной системе
+/**
+ *  Класс заявки на передачу управления операционной системе.
  */
 class TransferControl {
 private:
   int32_t _pid;
 
 public:
-  /*
-   * Заявка на завершение ввода/вывода
+  /**
+   *  @brief Создает заявку передачу управления операционной системе.
    *
-   * @param pid идентификатор процесса
+   *  @param pid Идентификатор процесса.
    *
+   *  @throws ProcessesManagement::RequestException Исключение возникает, если
+   *  переданные параметры не соответствуют заданным ограничениям.
    */
   TransferControl(int32_t pid) : _pid(pid) {
     if (pid < 0 || pid > 255) {
@@ -198,18 +223,24 @@ public:
 
   int32_t pid() const { return _pid; }
 
+  /**
+   *  Возвращает заявку в виде JSON-объекта.
+   */
   nlohmann::json dump() const {
     return {{"type", "TRANSFER_CONTROL"}, {"pid", _pid}};
   }
 };
 
-/*
- * Истек квант вермени
+/**
+ *  Заявка на обработку события "Истек квант вермени".
  */
 class TimeQuantumExpired {
 public:
   TimeQuantumExpired() {}
 
+  /**
+   *  Возвращает заявку в виде JSON-объекта.
+   */
   nlohmann::json dump() const { return {{"type", "TIME_QUANTUM_EXPIRED"}}; }
 };
 

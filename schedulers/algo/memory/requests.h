@@ -11,8 +11,8 @@
 
 namespace MemoryManagement {
 
-/*
- * Класс заявки на создание нового процесса
+/**
+ *  Класс заявки на создание нового процесса.
  */
 class CreateProcessReq {
 private:
@@ -31,6 +31,9 @@ public:
 
   int32_t pages() const { return _pages; }
 
+  /**
+   *  Возвращает заявку в виде JSON-объекта.
+   */
   nlohmann::json dump() const {
     return {{"type", "CREATE_PROCESS"},
             {"pid", _pid},
@@ -38,13 +41,15 @@ public:
             {"pages", _pages}};
   }
 
-  /*
-   * Заявка на создание нового процесса
+  /**
+   *  @brief Создает заявку на создание нового процесса.
    *
-   * @param pid идентификатор процесса
-   * @param bytes количество байт для выделения процессу в памяти
-   * @param pages количества страниц для выделения процессу в памяти
+   *  @param pid Идентификатор процесса.
+   *  @param bytes Количество байт для выделения процессу в памяти.
+   *  @param pages Количества страниц для выделения процессу в памяти.
    *
+   *  @throws MemoryManagement::RequestException Исключение возникает, если
+   *  переданные параметры не соответствуют заданным ограничениям.
    */
   CreateProcessReq(int32_t pid, int32_t bytes, int32_t pages)
       : _pid(pid), _bytes(bytes), _pages(pages) {
@@ -63,8 +68,8 @@ public:
   }
 };
 
-/*
- * Класс заявки на завершение существующего процесса
+/**
+ *  Класс заявки на завершение существующего процесса.
  */
 class TerminateProcessReq {
 private:
@@ -75,15 +80,20 @@ public:
 
   TerminateProcessReq &operator=(const TerminateProcessReq &rhs) = default;
 
+  /**
+   *  Возвращает заявку в виде JSON-объекта.
+   */
   nlohmann::json dump() const {
     return {{"type", "TERMINATE_PROCESS"}, {"pid", _pid}};
   }
 
-  /*
-   * Заявка на завершение существующего процесса
+  /**
+   *  @brief Создает заявку на завершение существующего процесса.
    *
-   * @param pid идентификатор процесса
+   *  @param pid Идентификатор процесса.
    *
+   *  @throws MemoryManagement::RequestException Исключение возникает, если
+   *  переданные параметры не соответствуют заданным ограничениям.
    */
   TerminateProcessReq(int32_t pid) : _pid(pid) {
     if (pid < -1 || pid > 255) {
@@ -92,8 +102,8 @@ public:
   }
 };
 
-/*
- * Класс заявки на выделение существующему процессу памяти
+/**
+ *  Класс заявки на выделение существующему процессу памяти.
  */
 class AllocateMemory {
 private:
@@ -112,6 +122,9 @@ public:
 
   AllocateMemory &operator=(const AllocateMemory &rhs) = default;
 
+  /**
+   *  Возвращает заявку в виде JSON-объекта.
+   */
   nlohmann::json dump() const {
     return {{"type", "ALLOCATE_MEMORY"},
             {"pid", _pid},
@@ -119,13 +132,15 @@ public:
             {"pages", _pages}};
   }
 
-  /*
-   * Заявка на выделение существующему процессу памяти
+  /**
+   *  @brief Создает заявку на выделение существующему процессу памяти.
    *
-   * @param pid идентификатор процесса
-   * @param bytes количество байт для выделения процессу в памяти
-   * @param pages количества страниц для выделения процессу в памяти
+   *  @param pid Идентификатор процесса.
+   *  @param bytes Количество байт для выделения процессу в памяти.
+   *  @param pages Количества страниц для выделения процессу в памяти.
    *
+   *  @throws MemoryManagement::RequestException Исключение возникает, если
+   *  переданные параметры не соответствуют заданным ограничениям.
    */
   AllocateMemory(int32_t pid, int32_t bytes, int32_t pages)
       : _pid(pid), _bytes(bytes), _pages(pages) {
@@ -144,8 +159,8 @@ public:
   }
 };
 
-/*
- * Класс заявки на освобождение памяти
+/**
+ *  Класс заявки на освобождение памяти.
  */
 class FreeMemory {
 private:
@@ -160,16 +175,21 @@ public:
 
   FreeMemory &operator=(const FreeMemory &rhs) = default;
 
+  /**
+   *  Возвращает заявку в виде JSON-объекта.
+   */
   nlohmann::json dump() const {
     return {{"type", "FREE_MEMORY"}, {"pid", _pid}, {"address", _address}};
   }
 
-  /*
-   * Заявка на освобождение памяти
+  /**
+   *  @brief Создает заявку на освобождение памяти.
    *
-   * @param pid идентификатор процесса
-   * @param address адрес начала блока памяти, который нужно освободить
+   *  @param pid Идентификатор процесса.
+   *  @param address Адрес начала блока памяти, который нужно освободить.
    *
+   *  @throws MemoryManagement::RequestException Исключение возникает, если
+   *  переданные параметры не соответствуют заданным ограничениям.
    */
   FreeMemory(int32_t pid, int32_t address) : _pid(pid), _address(address) {
     if (pid < -1 || pid > 255) {

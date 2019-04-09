@@ -12,6 +12,18 @@
 namespace Utils::details {
 using Utils::TaskException;
 
+/**
+ *  @brief Создает объект задания "Диспетчеризация памяти" из JSON-объекта.
+ *
+ *  @param obj JSON-объект.
+ *
+ *  @return Объект задания.
+ *
+ *  @throws Utils::TaskException Исключение возникает в следующих случаях:
+ *
+ *  "UNKNOWN_STRATEGY" - неизвестный тип стратегии выбора блока памяти;
+ *  "UNKNOWN_REQUEST" - неизвестный тип заявки.
+ */
 inline MemoryTask loadMemoryTask(const nlohmann::json &obj) {
   using namespace MemoryManagement;
   StrategyPtr strategy;
@@ -59,6 +71,19 @@ inline MemoryTask loadMemoryTask(const nlohmann::json &obj) {
                             requests);
 }
 
+/**
+ *  @brief Создает объект задания "Диспетчеризация процессов" из JSON-объекта.
+ *
+ *  @param obj JSON-объект.
+ *
+ *  @return Объект задания.
+ *
+ *  @throws Utils::TaskException Исключение возникает в следующих случаях:
+ *
+ *  "UNKNOWN_STRATEGY" - неизвестный тип планировщика;
+ *  "UNKNOWN_REQUEST" - неизвестный тип заявки;
+ *  "UNKNOWN_PROCSTATE" - неизвестное состояние процесса.
+ */
 inline ProcessesTask loadProcessesTask(const nlohmann::json &obj) {
   using namespace ProcessesManagement;
   StrategyPtr strategy;
@@ -127,6 +152,18 @@ inline ProcessesTask loadProcessesTask(const nlohmann::json &obj) {
 } // namespace Utils::details
 
 namespace Utils {
+/**
+ *  @brief Загружает задания из файла.
+ *
+ *  @param is Дескриптор файла.
+ *
+ *  @return Массив из объектов заданий.
+ *
+ *  @throws Utils::TaskException Исключение возникает в
+ *  следующих случаях:
+ *
+ *  "UNKNOWN_TASK" - неизвестный тип задания.
+ */
 inline std::vector<Task> loadTasks(std::istream &is) {
   nlohmann::json obj;
   is >> obj;
@@ -145,6 +182,13 @@ inline std::vector<Task> loadTasks(std::istream &is) {
   return tasks;
 }
 
+/**
+ * @brief Сохраняет задания в файл.
+ *
+ * @param tasks Массив из объектов заданий.
+ *
+ * @param os Дескриптор файла.
+ */
 inline void saveTasks(const std::vector<Task> &tasks, std::ostream &os) {
   auto obj = nlohmann::json::array();
 

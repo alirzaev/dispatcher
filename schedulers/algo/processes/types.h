@@ -15,6 +15,9 @@ namespace ProcessesManagement {
 
 enum class ProcState { ACTIVE, EXECUTING, WAITING };
 
+/**
+ *  @brief Дескриптор процесса.
+ */
 class Process {
 private:
   int32_t _pid;
@@ -32,6 +35,9 @@ private:
   ProcState _state;
 
 public:
+  /**
+   *  @brief Создает дескриптор процесса с параметрами по умолчанию.
+   */
   Process()
       : _pid(0), _ppid(-1), _priority(0), _basePriority(0), _timer(0),
         _workTime(0), _state(ProcState::ACTIVE) {}
@@ -76,6 +82,16 @@ public:
 
   ProcState state() const { return _state; }
 
+  /**
+   *  @brief Изменяет идентификатор родительского процесса.
+   *
+   *  @param ppid Идентификатор нового родительского процесса.
+   *
+   *  @return Дескриптор измененного процесса.
+   *
+   *  @throws ProcessesManagement::TypeException Исключение возникает, если
+   *  переданные параметры не соответствуют заданным ограничениям.
+   */
   Process ppid(int32_t ppid) const {
     if (ppid < -1 || ppid > 255) {
       throw TypeException("INVALID_PPID");
@@ -87,6 +103,16 @@ public:
     return other;
   }
 
+  /**
+   *  @brief Изменяет приоритет процесса.
+   *
+   *  @param priority Новый приоритет процесса.
+   *
+   *  @return Дескриптор измененного процесса.
+   *
+   *  @throws ProcessesManagement::TypeException Исключение возникает, если
+   *  переданные параметры не соответствуют заданным ограничениям.
+   */
   Process priority(int32_t priority) const {
     if (priority < 0 || priority > 15) {
       throw TypeException("INVALID_PRIORITY");
@@ -98,6 +124,16 @@ public:
     return other;
   }
 
+  /**
+   *  @brief Изменяет базовый приоритет процесса.
+   *
+   *  @param basePriority Новый базовый приоритет процесса.
+   *
+   *  @return Дескриптор измененного процесса.
+   *
+   *  @throws ProcessesManagement::TypeException Исключение возникает, если
+   *  переданные параметры не соответствуют заданным ограничениям.
+   */
   Process basePriority(int32_t basePriority) const {
     if (basePriority < 0 || basePriority > 15 || basePriority > _priority) {
       throw TypeException("INVALID_BASE_PRIORITY");
@@ -109,6 +145,16 @@ public:
     return other;
   }
 
+  /**
+   *  @brief Изменяет время работы процесса.
+   *
+   *  @param timer Новое время работы процесса.
+   *
+   *  @return Дескриптор измененного процесса.
+   *
+   *  @throws ProcessesManagement::TypeException Исключение возникает, если
+   *  переданные параметры не соответствуют заданным ограничениям.
+   */
   Process timer(int32_t timer) const {
     if (timer < 0) {
       throw TypeException("INVALID_TIMER");
@@ -120,6 +166,16 @@ public:
     return other;
   }
 
+  /**
+   *  @brief Изменяет заявленное время работы процесса.
+   *
+   *  @param workTime Новое заявленное время работы процесса.
+   *
+   *  @return Дескриптор измененного процесса.
+   *
+   *  @throws ProcessesManagement::TypeException Исключение возникает, если
+   *  переданные параметры не соответствуют заданным ограничениям.
+   */
   Process workTime(int32_t workTime) const {
     if (workTime < 0) {
       throw TypeException("INVALID_WORK_TIME");
@@ -131,6 +187,16 @@ public:
     return other;
   }
 
+  /**
+   *  @brief Изменяет идентификатор процесса.
+   *
+   *  @param pid Новый идентификатор процесса.
+   *
+   *  @return Дескриптор измененного процесса.
+   *
+   *  @throws ProcessesManagement::TypeException Исключение возникает, если
+   *  переданные параметры не соответствуют заданным ограничениям.
+   */
   Process pid(int32_t pid) const {
     if (pid < 0 || pid > 255) {
       throw TypeException("INVALID_PID");
@@ -142,6 +208,16 @@ public:
     return other;
   }
 
+  /**
+   *  @brief Изменяет состояние процесса.
+   *
+   *  @param state Новое состояние процесса.
+   *
+   *  @return Дескриптор измененного процесса.
+   *
+   *  @throws ProcessesManagement::TypeException Исключение возникает, если
+   *  переданные параметры не соответствуют заданным ограничениям.
+   */
   Process state(ProcState state) const {
     Process other = *this;
     other._state = state;
@@ -149,6 +225,9 @@ public:
     return other;
   }
 
+  /**
+   *  Возвращает дескриптор в виде JSON-объекта.
+   */
   nlohmann::json dump() const {
     std::string state;
     switch (_state) {
@@ -169,12 +248,27 @@ public:
   }
 };
 
+/**
+ *  @brief Дескриптор состояния процессов.
+ *
+ *  Процессам в данной модели могут присваиваться идентификаторы (PID) от 0 до
+ *  255 включительно.
+ *
+ *  Программная модель разработана исходя из того, что перед обработкой первой
+ *  заявки очереди пусты и ни один процесс не создан.
+ */
 class ProcessesState {
 public:
   std::vector<Process> processes;
 
   std::array<std::deque<int32_t>, 16> queues;
 
+  /**
+   *  @brief Создает дескриптор состояния процессов с заданными параметрами.
+   *
+   *  @param processes Список дескрипторов процессов.
+   *  @param queues Список очередй.
+   */
   ProcessesState(const std::vector<Process> &processes,
                  const std::array<std::deque<int32_t>, 16> &queues)
       : processes(processes), queues(queues) {}
@@ -197,6 +291,9 @@ public:
     return !(*this == state);
   }
 
+  /**
+   *  Возвращает дескриптор в виде JSON-объекта.
+   */
   nlohmann::json dump() const {
     auto jsonProcesses = nlohmann::json::array();
     auto jsonQueues = nlohmann::json::array();
@@ -211,6 +308,9 @@ public:
     return {{"processes", jsonProcesses}, {"queues", jsonQueues}};
   }
 
+  /**
+   *  Возвращает дескриптор с начальным состоянием.
+   */
   static ProcessesState initial() { return {{}, {}}; }
 };
 } // namespace ProcessesManagement

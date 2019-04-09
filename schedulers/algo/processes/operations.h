@@ -10,14 +10,19 @@
 #include "types.h"
 
 namespace ProcessesManagement {
-/*
- * Операция изменения состояния процесса
+/**
+ *  @brief Операция изменения состояния процесса.
  *
- * @param state состояние процессов
- * @param pid идентификатор процесса
- * @param newState новое состояние процесса
+ *  @param state Дескриптор состояния процессов.
+ *  @param pid Идентификатор процесса.
+ *  @param newState Новое состояние процесса.
  *
- * @return новое состояние процессов
+ *  @return Новое состояние процессов.
+ *
+ *  @throws ProcessesManagement::OperationException Исключение возникает в
+ *  следующих случаях:
+ *
+ *  "NO_SUCH_PROCESS" - процесса с таким @a pid не существует.
  */
 inline ProcessesState changeProcessState(const ProcessesState &state,
                                          int32_t pid, ProcState newState) {
@@ -34,14 +39,20 @@ inline ProcessesState changeProcessState(const ProcessesState &state,
   }
 }
 
-/*
- * Операция добавления процесса в очередь
+/**
+ *  @brief Операция добавления процесса в очередь.
  *
- * @param state состояние процессов
- * @param queueIndex индекс очереди (0..15)
- * @param pid идентификатор процесса
+ *  @param state Дескриптор состояния процессов.
+ *  @param queueIndex Индекс очереди.
+ *  @param pid Идентификатор процесса.
  *
- * @return новое состояние процессов
+ *  @return Новое состояние процессов.
+ *
+ *  @throws ProcessesManagement::OperationException Исключение возникает в
+ *  следующих случаях:
+ *
+ *  "NO_SUCH_PROCESS" - процесса с таким @a pid не существует;
+ *  "ALREADY_IN_QUEUE" - процесс уже добавлен в одну из очередей.
  */
 inline ProcessesState pushToQueue(const ProcessesState &state,
                                   int32_t queueIndex, int32_t pid) {
@@ -65,13 +76,20 @@ inline ProcessesState pushToQueue(const ProcessesState &state,
   }
 }
 
-/*
- * Операция извлечения процесса из очереди
+/**
+ *  @brief Операция извлечения процесса из очереди.
  *
- * @param state состояние процессов
- * @param queueIndex индекс очереди (0..15)
+ *  @param state Дескриптор состояния процессов.
+ *  @param queueIndex Индекс очереди.
  *
- * @return новое состояние процессов
+ *  @return Новое состояние процессов.
+ *
+ *  @throws ProcessesManagement::OperationException Исключение возникает в
+ *  следующих случаях:
+ *
+ *  "EMPTY_QUEUE" - очередь с индексом @a queueIndex пуста;
+ *  "NO_SUCH_PROCESS" - процесса с @a pid нет в очереди с индексом @a
+ *  queueIndex.
  */
 inline ProcessesState popFromQueue(const ProcessesState &state,
                                    int32_t queueIndex) {
@@ -92,13 +110,20 @@ inline ProcessesState popFromQueue(const ProcessesState &state,
   return {processes, queues};
 }
 
-/*
- * Операция переключения системы на другой процесс
+/**
+ *  @brief Операция переключения системы на другой процесс.
  *
- * @param state состояние процессов
- * @param nextPid идентификатор процесса
+ *  @param state Дескриптор состояния процессов.
+ *  @param nextPid Идентификатор процесса, на который нужно переключиться.
  *
- * @return новое состояние процессов
+ *  @return Новое состояние процессов.
+ *
+ *  @throws ProcessesManagement::OperationException Исключение возникает в
+ *  следующих случаях:
+ *
+ *  "NO_SUCH_PROCESS" - процесса с таким @a newPid не существует;
+ *  "INVALID_STATE" - процесс с @a newPid не находится в состоянии
+ *  ProcState::ACTIVE.
  */
 inline ProcessesState switchTo(const ProcessesState &state, int32_t nextPid) {
   auto [processes, queues] = state;
@@ -128,13 +153,18 @@ inline ProcessesState switchTo(const ProcessesState &state, int32_t nextPid) {
   return {processes, queues};
 }
 
-/*
- * Операция завершения процесса (в т.ч. и дочерних)
+/**
+ *  @brief Операция завершения процесса (в т.ч. и дочерних).
  *
- * @param state состояние процессов
- * @param pid идентификатор процесса
+ *  @param state Дескриптор состояния процессов.
+ *  @param pid Идентификатор процесса.
  *
- * @return новое состояние процессов
+ *  @return Новое состояние процессов.
+ *
+ *  @throws ProcessesManagement::OperationException Исключение возникает в
+ *  следующих случаях:
+ *
+ *  "NO_SUCH_PROCESS" - процесса с таким @a pid не существует.
  */
 inline ProcessesState terminateProcess(const ProcessesState &state,
                                        int32_t pid) {
@@ -184,13 +214,19 @@ inline ProcessesState terminateProcess(const ProcessesState &state,
   return {newProcesses, newQueues};
 }
 
-/*
- * Операция добавления нового процесса в список процессов
+/**
+ *  @brief Операция добавления нового процесса в список процессов.
  *
- * @param state состояние процессов
- * @param process дескриптор процесса
+ *  @param state Дескриптор состояния процессов.
+ *  @param process Дескриптор процесса.
  *
- * @return новое состояние процессов
+ *  @return Новое состояние процессов.
+ *
+ *  @throws ProcessesManagement::OperationException Исключение возникает в
+ *  следующих случаях:
+ *
+ *  "PROCESS_EXISTS" - процесс с таким идентификатором уже есть;
+ *  "NO_SUCH_PPID" - родительского процесса не существует.
  */
 inline ProcessesState addProcess(const ProcessesState &state, Process process) {
   auto [processes, queues] = state;
@@ -218,12 +254,12 @@ inline ProcessesState addProcess(const ProcessesState &state, Process process) {
   return {processes, queues};
 }
 
-/*
- * Операция обновления таймера
+/**
+ *  @brief Операция обновления таймера.
  *
- * @param state состояние процессов
+ *  @param state Дескриптор состояния процессов.
  *
- * @return новое состояние процессов
+ *  @return Новое состояние процессов.
  */
 inline ProcessesState updateTimer(const ProcessesState &state) {
   auto [processes, queues] = state;

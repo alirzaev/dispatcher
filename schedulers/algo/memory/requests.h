@@ -53,7 +53,7 @@ public:
    */
   CreateProcessReq(int32_t pid, int32_t bytes, int32_t pages)
       : _pid(pid), _bytes(bytes), _pages(pages) {
-    if (pid < -1 || pid > 255) {
+    if (pid < 0 || pid > 255) {
       throw RequestException("INVALID_PID");
     }
     if (bytes < 1 || bytes > 256 * 4096) {
@@ -96,7 +96,7 @@ public:
    *  переданные параметры не соответствуют заданным ограничениям.
    */
   TerminateProcessReq(int32_t pid) : _pid(pid) {
-    if (pid < -1 || pid > 255) {
+    if (pid < 0 || pid > 255) {
       throw RequestException("INVALID_PID");
     }
   }
@@ -144,7 +144,7 @@ public:
    */
   AllocateMemory(int32_t pid, int32_t bytes, int32_t pages)
       : _pid(pid), _bytes(bytes), _pages(pages) {
-    if (pid < -1 || pid > 255) {
+    if (pid < 0 || pid > 255) {
       throw RequestException("INVALID_PID");
     }
     if (bytes < 1 || bytes > 256 * 4096) {
@@ -192,7 +192,7 @@ public:
    *  переданные параметры не соответствуют заданным ограничениям.
    */
   FreeMemory(int32_t pid, int32_t address) : _pid(pid), _address(address) {
-    if (pid < -1 || pid > 255) {
+    if (pid < 0 || pid > 255) {
       throw RequestException("INVALID_PID");
     }
     if (address < 0 || address > 255) {

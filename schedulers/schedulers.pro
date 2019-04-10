@@ -24,7 +24,8 @@ HEADERS += \
     algo/processes/strategies.h \
     algo/processes/strategies/abstract.h \
     algo/processes/strategies/roundrobin.h \
-    algo/processes/strategies/fcfs.h
+    algo/processes/strategies/fcfs.h \
+    algo/processes/helpers.h
 
 # The following keeps the generated files at least somewhat separate
 # from the source files.

@@ -4,9 +4,12 @@
 #include <cstdint>
 #include <functional>
 #include <map>
+#include <optional>
 #include <set>
+#include <vector>
 
 #include "exceptions.h"
+#include "helpers.h"
 #include "types.h"
 
 namespace ProcessesManagement {
@@ -28,14 +31,11 @@ inline ProcessesState changeProcessState(const ProcessesState &state,
                                          int32_t pid, ProcState newState) {
   auto [processes, queues] = state;
 
-  auto it =
-      std::find_if(processes.begin(), processes.end(),
-                   [pid](const auto &process) { return process.pid() == pid; });
-  if (it == processes.end()) {
-    throw OperationException("NO_SUCH_PROCESS");
-  } else {
+  if (auto it = getByPid(processes, pid); it != processes.end()) {
     *it = it->state(newState);
     return {processes, queues};
+  } else {
+    throw OperationException("NO_SUCH_PROCESS");
   }
 }
 
@@ -58,13 +58,7 @@ inline ProcessesState pushToQueue(const ProcessesState &state,
                                   int32_t queueIndex, int32_t pid) {
   auto [processes, queues] = state;
 
-  auto it =
-      std::find_if(processes.begin(), processes.end(),
-                   [pid](const auto &process) { return process.pid() == pid; });
-
-  if (it == processes.end()) {
-    throw OperationException("NO_SUCH_PROCESS");
-  } else {
+  if (auto it = getByPid(processes, pid); it != processes.end()) {
     for (const auto &queue : queues) {
       if (std::find(queue.begin(), queue.end(), pid) != queue.end()) {
         throw OperationException("ALREADY_IN_QUEUE");
@@ -73,6 +67,8 @@ inline ProcessesState pushToQueue(const ProcessesState &state,
     queues.at(static_cast<size_t>(queueIndex)).push_back(pid);
     *it = it->priority(queueIndex);
     return {processes, queues};
+  } else {
+    throw OperationException("NO_SUCH_PROCESS");
   }
 }
 
@@ -99,11 +95,10 @@ inline ProcessesState popFromQueue(const ProcessesState &state,
   if (queue.empty()) {
     throw OperationException("EMPTY_QUEUE");
   }
+
   auto pid = queue.front();
-  auto it =
-      std::find_if(processes.begin(), processes.end(),
-                   [pid](const auto &process) { return process.pid() == pid; });
-  if (it == processes.end()) {
+
+  if (auto it = getByPid(processes, pid); it == processes.end()) {
     throw OperationException("NO_SUCH_PROCESS");
   }
   queue.pop_front();
@@ -128,13 +123,8 @@ inline ProcessesState popFromQueue(const ProcessesState &state,
 inline ProcessesState switchTo(const ProcessesState &state, int32_t nextPid) {
   auto [processes, queues] = state;
 
-  auto prev =
-      std::find_if(processes.begin(), processes.end(), [](const auto &process) {
-        return process.state() == ProcState::EXECUTING;
-      });
-  auto next = std::find_if(
-      processes.begin(), processes.end(),
-      [nextPid](const auto &process) { return process.pid() == nextPid; });
+  auto prev = getByState(processes, ProcState::EXECUTING);
+  auto next = getByPid(processes, nextPid);
 
   if (next == processes.end()) {
     throw OperationException("NO_SUCH_PROCESS");
@@ -170,9 +160,7 @@ inline ProcessesState terminateProcess(const ProcessesState &state,
                                        int32_t pid) {
   auto [processes, queues] = state;
 
-  auto it =
-      std::find_if(processes.begin(), processes.end(),
-                   [pid](const auto &process) { return process.pid() == pid; });
+  auto it = getByPid(processes, pid);
 
   if (it == processes.end()) {
     throw OperationException("NO_SUCH_PROCESS");
@@ -231,19 +219,13 @@ inline ProcessesState terminateProcess(const ProcessesState &state,
 inline ProcessesState addProcess(const ProcessesState &state, Process process) {
   auto [processes, queues] = state;
 
-  auto it = std::find_if(processes.begin(), processes.end(),
-                         [&process](const auto &current) {
-                           return current.pid() == process.pid();
-                         });
+  auto it = getByPid(processes, process.pid());
 
   if (it != processes.end()) {
     throw OperationException("PROCESS_EXISTS");
   }
 
-  auto parent = std::find_if(processes.begin(), processes.end(),
-                             [&process](const auto &current) {
-                               return current.pid() == process.ppid();
-                             });
+  auto parent = getByPid(processes, process.ppid());
   if (process.ppid() != -1 && parent == processes.end()) {
     throw OperationException("NO_SUCH_PPID");
   }
@@ -264,10 +246,7 @@ inline ProcessesState addProcess(const ProcessesState &state, Process process) {
 inline ProcessesState updateTimer(const ProcessesState &state) {
   auto [processes, queues] = state;
 
-  auto it =
-      std::find_if(processes.begin(), processes.end(), [](const auto &current) {
-        return current.state() == ProcState::EXECUTING;
-      });
+  auto it = getByState(processes, ProcState::EXECUTING);
 
   if (it != processes.end()) {
     *it = it->timer(it->timer() + 1);

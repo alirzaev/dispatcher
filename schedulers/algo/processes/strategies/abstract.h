@@ -22,7 +22,7 @@ enum class StrategyType { ROUNDROBIN, FCFS };
  */
 class AbstractStrategy {
 public:
-  virtual ~AbstractStrategy(){};
+  virtual ~AbstractStrategy() = default;
 
   AbstractStrategy(StrategyType type) : type(type) {}
 
@@ -136,15 +136,11 @@ protected:
    * @return Дескриптор процесса или std::nullopt, если такового нет.
    */
   std::optional<Process> getCurrent(const ProcessesState &state) const {
-    auto current =
-        std::find_if(state.processes.begin(), state.processes.end(),
-                     [](const auto &process) {
-                       return process.state() == ProcState::EXECUTING;
-                     });
-    if (current == state.processes.end()) {
-      return std::nullopt;
+    if (auto it = getByState(state.processes, ProcState::EXECUTING);
+        it != state.processes.end()) {
+      return *it;
     } else {
-      return {*current};
+      return std::nullopt;
     };
   }
 
@@ -158,11 +154,8 @@ protected:
    */
   std::optional<Process> getProcessByPid(const ProcessesState &state,
                                          int32_t pid) const {
-    if (auto it = std::find_if(
-            state.processes.begin(), state.processes.end(),
-            [&pid](const auto &process) { return process.pid() == pid; });
-        it != state.processes.end()) {
-      return {*it};
+    if (auto it = getByPid(state.processes, pid); it != state.processes.end()) {
+      return *it;
     } else {
       return std::nullopt;
     }

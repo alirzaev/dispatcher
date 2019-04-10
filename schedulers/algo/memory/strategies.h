@@ -25,7 +25,7 @@ enum class StrategyType {
  */
 class AbstractStrategy {
 public:
-  virtual ~AbstractStrategy(){};
+  virtual ~AbstractStrategy() = default;
 
   AbstractStrategy(StrategyType type) : type(type) {}
 

@@ -58,7 +58,7 @@ public:
                       rhs._state};
   }
 
-  bool operator!=(const Process &rhs) const { return *this != rhs; }
+  bool operator!=(const Process &rhs) const { return !(*this == rhs); }
 
   bool operator<(const Process &rhs) const {
     return std::tuple{_pid,   _ppid,     _priority, _basePriority,

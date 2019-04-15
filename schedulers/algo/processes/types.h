@@ -3,6 +3,7 @@
 #include <array>
 #include <cstdint>
 #include <deque>
+#include <map>
 #include <string>
 #include <tuple>
 #include <variant>
@@ -273,6 +274,19 @@ public:
                  const std::array<std::deque<int32_t>, 16> &queues)
       : processes(processes), queues(queues) {}
 
+  /**
+   *  @brief Создает дескриптор состояния процессов с заданными параметрами.
+   *  @param processes Список дескрипторов процессов.
+   *  @param queues Отображение вида <индекс очереди> -> <список PID'ов>.
+   */
+  ProcessesState(const std::vector<Process> &processes,
+                 const std::map<int32_t, std::deque<int32_t>> &queues)
+      : processes(processes), queues() {
+    for (const auto &queue : queues) {
+      this->queues.at(queue.first) = queue.second;
+    }
+  }
+
   ProcessesState() : ProcessesState(ProcessesState::initial()) {}
 
   ProcessesState(const ProcessesState &state) = default;
@@ -311,6 +325,8 @@ public:
   /**
    *  Возвращает дескриптор с начальным состоянием.
    */
-  static ProcessesState initial() { return {{}, {}}; }
+  static ProcessesState initial() {
+    return {{}, std::array<std::deque<int32_t>, 16>{}};
+  }
 };
 } // namespace ProcessesManagement

@@ -3,6 +3,7 @@
 #include <vector>
 
 #include <QAction>
+#include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
 
@@ -52,6 +53,7 @@ void MainWindow::openTasks() {
     auto tasks = Utils::loadTasks(file);
     loadTasks(tasks);
   } catch (const std::exception &ex) {
+    qDebug() << ex.what();
     QMessageBox::critical(this, "Ошибка",
                           "Невозможно загрузить задания: файл поврежден");
   }

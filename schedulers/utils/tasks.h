@@ -57,6 +57,7 @@ public:
   static MemoryTask create(Memory::StrategyPtr strategy, uint32_t completed,
                            const Memory::MemoryState &state,
                            const std::vector<Memory::Request> requests) {
+    validate(strategy, completed, state, requests);
     return {strategy, completed, state, requests};
   }
 
@@ -74,8 +75,14 @@ public:
   static void validate(Memory::StrategyPtr strategy, uint32_t completed,
                        const Memory::MemoryState &state,
                        const std::vector<Memory::Request> requests) {
+    try {
+      Memory::MemoryState::validate(state.blocks, state.freeBlocks);
+    } catch (Memory::BaseException &ex) {
+      throw TaskException(ex.what());
+    }
+
     if (requests.size() < completed) {
-      throw TaskException("COMPLETED_OOR");
+      throw TaskException("INVALID_TASK");
     }
     auto currentState = Memory::MemoryState::initial();
     try {

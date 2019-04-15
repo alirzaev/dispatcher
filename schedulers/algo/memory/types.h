@@ -1,6 +1,9 @@
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
+#include <map>
+#include <set>
 #include <tuple>
 #include <vector>
 
@@ -50,6 +53,11 @@ public:
 
   bool operator==(const MemoryBlock &rhs) const {
     return _pid == rhs._pid && _address == rhs._address && _size == rhs._size;
+  }
+
+  bool operator<(const MemoryBlock &rhs) const {
+    return std::tuple{pid(), address(), size()} <
+           std::tuple{rhs.pid(), rhs.address(), rhs.size()};
   }
 
   /**
@@ -165,6 +173,60 @@ public:
    */
   static MemoryState initial() {
     return {{MemoryBlock{-1, 0, 256}}, {MemoryBlock{-1, 0, 256}}};
+  }
+
+  /**
+   *  @brief Проверяет параметры конструктора.
+   *
+   *  @param blocks Массив из дескрипторов всех доступных блоков памяти.
+   *  @param freeBlocks Массив из дескрипторов свободных блоков памяти,
+   *  упорядоченных согласно стратегии.
+   *
+   *  @throws MemoryManagement::TypeException Исключение возникает, если
+   *  переданные параметры не соответствуют заданным ограничениям.
+   */
+  static void validate(const std::vector<MemoryBlock> &blocks,
+                       const std::vector<MemoryBlock> &freeBlocks) {
+    if (blocks.size() == 0 && freeBlocks.size() == 0) {
+      throw TypeException("INVALID_STATE");
+    }
+
+    // Проверяем, что множество свободных блоков freeBlocks и подмножество
+    // свободных блоков в массиве blocks совпадают.
+    std::set<MemoryBlock> set1(freeBlocks.begin(), freeBlocks.end()), set2;
+
+    for (const auto &block : blocks) {
+      if (block.pid() == -1) {
+        set2.insert(block);
+      }
+    }
+
+    if (set1 != set2) {
+      throw TypeException("INVALID_STATE");
+    }
+
+    // Проверяем, что блоки памяти полностью покрывают адресное пространство.
+    // Первый блок памяти должен начинаться с адреса 0.
+    if (blocks.at(0).address() != 0) {
+      throw TypeException("INVALID_STATE");
+    }
+
+    // Каждый блок, кроме последнего, должен заканчиваться там, где начинается
+    // следующий.
+    for (size_t i = 0; i < blocks.size() - 1; ++i) {
+      auto &cur = blocks.at(i);
+      auto &next = blocks.at(i + 1);
+      if (cur.address() + cur.size() != next.address()) {
+        throw TypeException("INVALID_STATE");
+      }
+    }
+
+    // Последний блок должен полностью покрыть оставшееся пространство, при этом
+    // не выходя за его границы.
+    auto &last = blocks.back();
+    if (last.address() + last.size() > 256) {
+      throw TypeException("INVALID_STATE");
+    }
   }
 };
 } // namespace MemoryManagement

@@ -4,6 +4,7 @@
 
 #include <QAction>
 #include <QFileDialog>
+#include <QMessageBox>
 
 #include <generators/memory_task.h>
 #include <generators/processes_task.h>
@@ -43,10 +44,17 @@ void MainWindow::openTasks() {
   }
 
   std::ifstream file(fileName.toStdString());
+  if (!file) {
+    QMessageBox::critical(this, "Ошибка", "Невозможно открыть файл задания");
+  }
 
-  auto tasks = Utils::loadTasks(file);
-
-  loadTasks(tasks);
+  try {
+    auto tasks = Utils::loadTasks(file);
+    loadTasks(tasks);
+  } catch (const std::exception &ex) {
+    QMessageBox::critical(this, "Ошибка",
+                          "Невозможно загрузить задания: файл поврежден");
+  }
 }
 
 void MainWindow::loadTasks(const std::vector<Utils::Task> &tasks) {

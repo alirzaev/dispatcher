@@ -204,7 +204,45 @@ public:
                               uint32_t completed,
                               const Processes::ProcessesState &state,
                               const std::vector<Processes::Request> requests) {
+    validate(strategy, completed, state, requests);
     return {strategy, completed, state, requests};
+  }
+
+  /**
+   *  @brief Проверяет параметры конструктора.
+   *
+   *  @param strategy Стратегия выбора блока памяти.
+   *  @param completed Количество обработанных заявок.
+   *  @param state Дескриптор состояния памяти.
+   *  @param requests Список заявок для обработки.
+   *
+   *  @throws Utils::TaskException Исключение возникает, если
+   *  переданные параметры не соответствуют заданным ограничениям.
+   */
+  static void validate(Processes::StrategyPtr strategy, uint32_t completed,
+                       const Processes::ProcessesState &state,
+                       const std::vector<Processes::Request> requests) {
+    try {
+      Processes::ProcessesState::validate(state.processes, state.queues);
+    } catch (Processes::BaseException &ex) {
+      throw TaskException(ex.what());
+    }
+
+    if (requests.size() < completed) {
+      throw TaskException("INVALID_TASK");
+    }
+    auto currentState = Processes::ProcessesState::initial();
+    try {
+      for (auto req = requests.begin(); req != requests.begin() + completed;
+           ++req) {
+        currentState = strategy->processRequest(*req, currentState);
+      }
+      if (currentState != state) {
+        throw TaskException("STATE_MISMATCH");
+      }
+    } catch (Memory::BaseException &ex) {
+      throw TaskException(ex.what());
+    }
   }
 
   /**

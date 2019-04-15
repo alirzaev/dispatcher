@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <deque>
 #include <map>
+#include <set>
 #include <string>
 #include <tuple>
 #include <variant>
@@ -327,6 +328,76 @@ public:
    */
   static ProcessesState initial() {
     return {{}, std::array<std::deque<int32_t>, 16>{}};
+  }
+
+  /**
+   *  @brief Проверяет параметры конструктора.
+   *
+   *  @param processes Список дескрипторов процессов.
+   *  @param queues Список очередй.
+   *
+   *  @throws ProcessesManagement::TypeException Исключение возникает, если
+   *  переданные параметры не соответствуют заданным ограничениям.
+   */
+  static void validate(const std::vector<Process> &processes,
+                       const std::array<std::deque<int32_t>, 16> &queues) {
+    std::set<int32_t> pidsInQueues, pidsOfProcesses, activePids;
+    std::map<int32_t, std::set<int32_t>> queuesMap;
+
+    // В списке процессов не должно быть двух процессов с одинаковым PID.
+    for (const auto &process : processes) {
+      if (pidsOfProcesses.find(process.pid()) != pidsOfProcesses.end()) {
+        throw TypeException("INVALID_STATE");
+      } else {
+        pidsOfProcesses.insert(process.pid());
+      }
+    }
+
+    // Собираем список процессов в состоянии ACTIVE.
+    for (const auto &process : processes) {
+      if (process.state() == ProcState::ACTIVE) {
+        activePids.insert(process.pid());
+      }
+    }
+
+    // Проверяем на существование родительских процессов.
+    for (const auto &process : processes) {
+      if (process.ppid() != -1 &&
+          pidsOfProcesses.find(process.ppid()) == pidsOfProcesses.end()) {
+        throw TypeException("INVALID_STATE");
+      }
+    }
+
+    // Собираем множество процессов, находящихся в очередях.
+    for (size_t i = 0; i < queues.size(); ++i) {
+      const auto &queue = queues[i];
+      for (const auto &pid : queue) {
+        // Каждый процесс должен находится только в одной очереди.
+        if (pidsInQueues.find(pid) != pidsInQueues.end()) {
+          throw TypeException("INVALID_STATE");
+        } else {
+          pidsInQueues.insert(pid);
+        }
+        queuesMap[i].insert(pid);
+      }
+    }
+
+    // Только процессы с состоянием ACTIVE могут находится в очередях.
+    if (activePids != pidsInQueues) {
+      throw TypeException("INVALID_STATE");
+    }
+
+    // Проверяем процессы на соответствие приоритета и индекса очереди.
+    for (const auto &process : processes) {
+      if (process.state() != ProcState::ACTIVE) {
+        continue;
+      }
+      auto priority = process.priority();
+      const auto &queueSet = queuesMap[priority];
+      if (queueSet.find(process.pid()) == queueSet.end()) {
+        throw TypeException("INVALID_STATE");
+      }
+    }
   }
 };
 } // namespace ProcessesManagement

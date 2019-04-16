@@ -15,7 +15,27 @@
 using namespace ProcessesManagement;
 using namespace Utils::Literals;
 
-using Item = QTableWidgetItem;
+using TextItem = QTableWidgetItem;
+
+class NumberItem : public QTableWidgetItem {
+public:
+  NumberItem() : NumberItem(0) {}
+
+  NumberItem(int32_t number) : QTableWidgetItem("%1"_qs.arg(number)) {}
+
+  virtual bool operator<(const QTableWidgetItem &rhs) const {
+    bool okLeft, okRight;
+    int32_t left, right;
+    left = text().toInt(&okLeft);
+    right = rhs.text().toInt(&okRight);
+
+    if (okLeft && okRight) {
+      return left < right;
+    } else {
+      return QTableWidgetItem::operator<(rhs);
+    }
+  }
+};
 
 ProcessesTableWidget::ProcessesTableWidget(QWidget *parent)
     : QTableWidget(parent) {
@@ -33,6 +53,7 @@ ProcessesTableWidget::ProcessesTableWidget(QWidget *parent)
 
 void ProcessesTableWidget::setProcesses(const ProcessesList &processes) {
   setRowCount(static_cast<int>(processes.size()));
+  setSortingEnabled(false);
 
   std::map<ProcState, QString> stateMap = {{ProcState::ACTIVE, "A"_qs},
                                            {ProcState::WAITING, "W"_qs},
@@ -42,15 +63,17 @@ void ProcessesTableWidget::setProcesses(const ProcessesList &processes) {
     const auto &p = processes[i];
     auto row = static_cast<int>(i);
 
-    setItem(row, 0, new Item("%1"_qs.arg(p.pid())));
-    setItem(row, 1, new Item("%1"_qs.arg(p.ppid())));
-    setItem(row, 2, new Item(stateMap[p.state()]));
-    setItem(row, 3, new Item("%1"_qs.arg(p.priority())));
-    setItem(row, 4, new Item("%1"_qs.arg(p.basePriority())));
-    setItem(row, 5, new Item("%1"_qs.arg(p.timer())));
-    setItem(row, 6, new Item("%1"_qs.arg(p.workTime())));
-    setItem(row, 7, new Item("%1"_qs.arg(p.workTime() - p.timer())));
+    setItem(row, 0, new NumberItem(p.pid()));
+    setItem(row, 1, new NumberItem(p.ppid()));
+    setItem(row, 2, new TextItem(stateMap[p.state()]));
+    setItem(row, 3, new NumberItem(p.priority()));
+    setItem(row, 4, new NumberItem(p.basePriority()));
+    setItem(row, 5, new NumberItem(p.timer()));
+    setItem(row, 6, new NumberItem(p.workTime()));
+    setItem(row, 7, new NumberItem(p.workTime() - p.timer()));
   }
+
+  setSortingEnabled(true);
 }
 
 ProcessesTableWidget::~ProcessesTableWidget() {}

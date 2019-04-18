@@ -39,7 +39,8 @@ SOURCES += \
     processestask.cpp \
     widgets/processestablewidget.cpp \
     menus/processmenu.cpp \
-    dialogs/createprocessdialog.cpp
+    dialogs/createprocessdialog.cpp \
+    widgets/queuelistwidget.cpp
 
 HEADERS += \
     mainwindow.h \
@@ -52,7 +53,8 @@ HEADERS += \
     literals.h \
     widgets/processestablewidget.h \
     menus/processmenu.h \
-    dialogs/createprocessdialog.h
+    dialogs/createprocessdialog.h \
+    widgets/queuelistwidget.h
 
 FORMS += \
     mainwindow.ui \

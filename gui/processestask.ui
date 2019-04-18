@@ -112,16 +112,6 @@
          </property>
         </widget>
        </item>
-       <item row="4" column="1">
-        <widget class="QListWidget" name="listQueue1">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Ignored" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-        </widget>
-       </item>
        <item row="2" column="2">
         <widget class="QPushButton" name="pushButtonQueue2Pop">
          <property name="text">
@@ -216,12 +206,30 @@
          </property>
         </widget>
        </item>
+       <item row="4" column="1">
+        <widget class="QueueListWidget" name="listQueue1" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Ignored" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
     </layout>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QueueListWidget</class>
+   <extends>QWidget</extends>
+   <header>widgets/queuelistwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

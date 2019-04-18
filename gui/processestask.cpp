@@ -25,6 +25,7 @@
 #include "dialogs/createprocessdialog.h"
 #include "menus/processmenu.h"
 #include "widgets/processestablewidget.h"
+#include "widgets/queuelistwidget.h"
 
 #include "processestask.h"
 #include "ui_processestask.h"
@@ -95,6 +96,10 @@ void ProcessesTask::connectAll() {
   });
   connect(_processes, &ProcessesTableWidget::customContextMenuRequested, this,
           &ProcessesTask::provideContextMenu);
+  connect(ui->listQueue1, &QueueListWidget::itemsOrderChanged, this, [=]() {
+    _model.state = collectState();
+    refresh();
+  });
 }
 
 void ProcessesTask::provideContextMenu(const QPoint &pos) {
@@ -135,18 +140,12 @@ ProcessesState ProcessesTask::collectState() {
   auto [processes, queues] = _model.state;
 
   auto queue1Index = static_cast<size_t>(ui->spinBoxQueue1->value());
-  auto queue2Index = static_cast<size_t>(ui->spinBoxQueue2->value());
   auto queue1Size = static_cast<size_t>(ui->listQueue1->count());
-  auto queue2Size = static_cast<size_t>(ui->listQueue2->count());
 
   queues[queue1Index].resize(queue1Size);
-  queues[queue2Index].resize(queue2Size);
 
   for (size_t i = 0; i < queue1Size; ++i) {
     queues[queue1Index][i] = ui->listQueue1->item(i)->text().toInt();
-  }
-  for (size_t i = 0; i < queue2Size; ++i) {
-    queues[queue2Index][i] = ui->listQueue2->item(i)->text().toInt();
   }
 
   return {processes, queues};

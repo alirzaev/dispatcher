@@ -218,15 +218,24 @@
        </item>
       </layout>
      </item>
+     <item row="1" column="0">
+      <widget class="ProcessesTableWidget" name="processesTable" native="true"/>
+     </item>
     </layout>
    </item>
   </layout>
  </widget>
  <customwidgets>
   <customwidget>
+<<<<<<< HEAD
    <class>QueueListWidget</class>
    <extends>QWidget</extends>
    <header>widgets/queuelistwidget.h</header>
+=======
+   <class>ProcessesTableWidget</class>
+   <extends>QWidget</extends>
+   <header>widgets/processestablewidget.h</header>
+>>>>>>> Упростил подключение ProcessesTableWidget
    <container>1</container>
   </customwidget>
  </customwidgets>

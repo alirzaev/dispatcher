@@ -35,12 +35,10 @@ using namespace ProcessesManagement;
 using namespace Utils::Literals;
 
 ProcessesTask::ProcessesTask(Models::ProcessesModel model, QWidget *parent)
-    : QWidget(parent), ui(new Ui::ProcessesTask), _model(model),
-      _processes(new ProcessesTableWidget()) {
+    : QWidget(parent), ui(new Ui::ProcessesTask), _model(model) {
   ui->setupUi(this);
 
-  ui->gridLayout->addWidget(_processes, 1, 0, 1, 1);
-  _processes->setContextMenuPolicy(Qt::CustomContextMenu);
+  ui->processesTable->setContextMenuPolicy(Qt::CustomContextMenu);
 
   ui->lineEditQueue1Push->setValidator(new QIntValidator(0, 255));
   ui->lineEditQueue2Push->setValidator(new QIntValidator(0, 255));
@@ -105,8 +103,10 @@ void ProcessesTask::connectAll() {
 void ProcessesTask::provideContextMenu(const QPoint &pos) {
   qDebug() << "ContextMenu";
 
-  auto globalPos = _processes->mapToGlobal(pos);
-  auto *item = _processes->itemAt(pos);
+  auto *processes = ui->processesTable;
+
+  auto globalPos = processes->mapToGlobal(pos);
+  auto *item = processes->itemAt(pos);
   auto row = item ? item->row() : -1;
 
   qDebug() << "ContextMenu: row " << row;
@@ -264,7 +264,7 @@ void ProcessesTask::nextRequest() {
 }
 
 void ProcessesTask::setProcessesList(const ProcessesList &processes) {
-  _processes->setProcesses(processes);
+  ui->processesTable->setProcesses(processes);
 }
 
 void ProcessesTask::setQueuesLists(const QueuesLists &queues) {

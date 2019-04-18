@@ -36,8 +36,6 @@ private:
 
   Models::ProcessesModel _model;
 
-  ProcessesTableWidget *_processes;
-
   void connectAll();
 
   void provideContextMenu(const QPoint &pos);

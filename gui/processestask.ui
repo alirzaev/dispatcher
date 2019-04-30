@@ -227,15 +227,14 @@
  </widget>
  <customwidgets>
   <customwidget>
-<<<<<<< HEAD
    <class>QueueListWidget</class>
    <extends>QWidget</extends>
    <header>widgets/queuelistwidget.h</header>
-=======
+  </customwidget>
+  <customwidget>
    <class>ProcessesTableWidget</class>
    <extends>QWidget</extends>
    <header>widgets/processestablewidget.h</header>
->>>>>>> Упростил подключение ProcessesTableWidget
    <container>1</container>
   </customwidget>
  </customwidgets>

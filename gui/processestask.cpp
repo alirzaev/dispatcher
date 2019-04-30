@@ -92,8 +92,8 @@ void ProcessesTask::connectAll() {
 
     popFromQueue(queue, ui->lineEditQueue2Pop);
   });
-  connect(_processes, &ProcessesTableWidget::customContextMenuRequested, this,
-          &ProcessesTask::provideContextMenu);
+  connect(ui->processesTable, &ProcessesTableWidget::customContextMenuRequested,
+          this, &ProcessesTask::provideContextMenu);
   connect(ui->listQueue1, &QueueListWidget::itemsOrderChanged, this, [=]() {
     _model.state = collectState();
     refresh();

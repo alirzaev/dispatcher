@@ -53,7 +53,8 @@ inline auto randChoice(BidIt first, BidIt last) -> decltype(*first) {
 inline std::pair<StrategyPtr, GeneratorPtr> randStrategy() {
   vector<std::pair<StrategyPtr, GeneratorPtr>> strategies = {
       {RoundRobinStrategy::create(), make_shared<RoundRobinTaskGenerator>()},
-      {FcfsStrategy::create(), make_shared<FcfsTaskGenerator>()}};
+      {FcfsStrategy::create(), make_shared<FcfsTaskGenerator>()},
+      {SjtStrategy::create(), make_shared<SjtTaskGenerator>()}};
 
   return randChoice(strategies.begin(), strategies.end());
 }

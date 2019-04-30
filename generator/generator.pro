@@ -17,6 +17,7 @@ HEADERS += \
     generators/processes_task/task_roundrobin_generator.h \
     generators/processes_task/task_abstract_generator.h \
     generators/processes_task/task_fcfs_generator.h \
+    generators/processes_task/task_sjt_generator.h \
     generators/rand_utils.h
 
 # The following keeps the generated files at least somewhat separate

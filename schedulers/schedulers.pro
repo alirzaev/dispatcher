@@ -15,6 +15,7 @@ HEADERS += \
     algo/memory/types.h \
     algo/processes/requests.h \
     algo/processes/exceptions.h \
+    algo/processes/strategies/sjt.h \
     algo/processes/types.h \
     utils/exceptions.h \
     utils/io.h \

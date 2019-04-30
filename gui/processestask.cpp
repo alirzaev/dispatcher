@@ -1,5 +1,6 @@
 #include <cstddef>
 #include <exception>
+#include <map>
 #include <string>
 #include <variant>
 
@@ -320,12 +321,12 @@ void ProcessesTask::setRequest(const Request &request) {
 
 void ProcessesTask::setStrategy(StrategyType type) {
   auto *label = ui->strategyLabel;
+  std::map<StrategyType, QString> strategyMap = {
+      {StrategyType::ROUNDROBIN, "Стратегия: Round Robin"_qs},
+      {StrategyType::FCFS, "Стратегия: FCFS"_qs},
+      {StrategyType::SJT, "Стратегия: SJT"_qs}};
 
-  if (type == StrategyType::ROUNDROBIN) {
-    label->setText("Стратегия: Round Robin"_qs);
-  } else if (type == StrategyType::FCFS) {
-    label->setText("Стратегия: FCFS"_qs);
-  }
+  label->setText(strategyMap[type]);
 }
 
 void ProcessesTask::pushToQueue(int queue, int pid) {

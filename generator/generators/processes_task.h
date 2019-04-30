@@ -58,12 +58,6 @@ inline std::pair<StrategyPtr, GeneratorPtr> randStrategy() {
 
   return randChoice(strategies.begin(), strategies.end());
 }
-
-inline GeneratorPtr randGenerator() {
-  vector<GeneratorPtr> generators = {make_shared<RoundRobinTaskGenerator>()};
-
-  return randChoice(generators.begin(), generators.end());
-}
 } // namespace Generators::ProcessesTask::Details
 
 namespace Generators::ProcessesTask {

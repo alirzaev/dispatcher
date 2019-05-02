@@ -283,40 +283,9 @@ void ProcessesTask::setQueuesLists(const QueuesLists &queues) {
 }
 
 void ProcessesTask::setRequest(const Request &request) {
-  auto *label = ui->labelRequestDescr;
-
-  std::visit(
-      overload{
-          [label](const CreateProcessReq &req) {
-            if (req.ppid() == -1) {
-              label->setText("Возник новый процесс PID = %1"_qs.arg(req.pid()));
-            } else {
-              label->setText(
-                  "Процесс PID = %1 породил дочерний процесс PID = %2"_qs
-                      .arg(req.ppid())
-                      .arg(req.pid()));
-            }
-          },
-          [label](const TerminateProcessReq &req) {
-            label->setText("Завершен процесс PID = %1"_qs.arg(req.pid()));
-          },
-          [label](const InitIO &req) {
-            label->setText("Процесс PID = %1 выдал запрос на ввод/вывод"_qs.arg(
-                req.pid()));
-          },
-          [label](const TerminateIO &req) {
-            label->setText(
-                "Ввод/вывод для процесса PID = %1 завершен"_qs.arg(req.pid()));
-          },
-          [label](const TransferControl &req) {
-            label->setText(
-                "Процесс PID = %1 передал управление операционной системе"_qs
-                    .arg(req.pid()));
-          },
-          [label](const TimeQuantumExpired &) {
-            label->setText("Истек квант времени"_qs);
-          }},
-      request);
+  auto description = QString::fromStdString(
+      _model.task.strategy()->getRequestDescription(request));
+  ui->labelRequestDescr->setText(description);
 }
 
 void ProcessesTask::setStrategy(StrategyType type) {

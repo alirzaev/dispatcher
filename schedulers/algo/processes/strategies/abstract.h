@@ -5,10 +5,12 @@
 #include <exception>
 #include <memory>
 #include <optional>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <variant>
 
+#include "../../../utils/overload.h"
 #include "../operations.h"
 #include "../requests.h"
 #include "../types.h"
@@ -47,6 +49,60 @@ public:
         [this, state](const auto &req) {
           return updateTimer(this->processRequest(req, state));
         },
+        request);
+  }
+
+  /**
+   *  @brief Возвращает текстовое описание заявки.
+   *
+   *  @param request Заявки
+   *
+   *  @return Описание заявки.
+   */
+  virtual std::string getRequestDescription(const Request &request) const {
+    using namespace std::string_literals;
+    using ss = std::stringstream;
+
+    return std::visit(
+        overload{
+            [](const CreateProcessReq &req) {
+              if (req.ppid() == -1) {
+                return static_cast<const ss &>(
+                           ss() << "Возник новый процесс PID = " << req.pid())
+                    .str();
+              } else {
+                return static_cast<const ss &>(
+                           ss()
+                           << "Процесс PID = " << req.ppid()
+                           << " породил дочерний процесс PID = " << req.pid())
+                    .str();
+              }
+            },
+            [](const TerminateProcessReq &req) {
+              return static_cast<const ss &>(ss() << "Завершен процесс PID = "
+                                                  << req.pid())
+                  .str();
+            },
+            [](const InitIO &req) {
+              return static_cast<const ss &>(ss()
+                                             << "Процесс PID = " << req.pid()
+                                             << " выдал запрос на ввод/вывод")
+                  .str();
+            },
+            [](const TerminateIO &req) {
+              return static_cast<const ss &>(ss()
+                                             << "Ввод/вывод для процесса PID = "
+                                             << req.pid() << " завершен")
+                  .str();
+            },
+            [](const TransferControl &req) {
+              return static_cast<const ss &>(ss()
+                                             << "Процесс PID = " << req.pid()
+                                             << " передал управление "
+                                                "операционной системе")
+                  .str();
+            },
+            [](const TimeQuantumExpired &) { return "Истек квант времени"s; }},
         request);
   }
 

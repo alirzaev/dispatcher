@@ -5,10 +5,12 @@
 #include <exception>
 #include <memory>
 #include <optional>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <variant>
 
+#include "../../../utils/overload.h"
 #include "../exceptions.h"
 #include "../operations.h"
 #include "abstract.h"
@@ -23,6 +25,23 @@ public:
 
   static std::shared_ptr<SjtStrategy> create() {
     return std::shared_ptr<SjtStrategy>(new SjtStrategy());
+  }
+
+  std::string getRequestDescription(const Request &request) const override {
+    using namespace std::string_literals;
+    using ss = std::stringstream;
+
+    auto base = AbstractStrategy::getRequestDescription(request);
+
+    if (std::holds_alternative<CreateProcessReq>(request)) {
+      auto req = std::get<CreateProcessReq>(request);
+      return static_cast<const ss &>(ss() << base << ". "
+                                          << "Предполагаемое время выполнения: "
+                                          << req.workTime())
+          .str();
+    } else {
+      return base;
+    }
   }
 
 protected:

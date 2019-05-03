@@ -59,7 +59,8 @@ randStrategy(bool preemptive = false) {
         {RoundRobinStrategy::create(), make_shared<RoundRobinTaskGenerator>()}};
   } else {
     strategies = {{FcfsStrategy::create(), make_shared<FcfsTaskGenerator>()},
-                  {SjtStrategy::create(), make_shared<SjtTaskGenerator>()}};
+                  {SjtStrategy::create(), make_shared<SjtTaskGenerator>()},
+                  {SrtStrategy::create(), make_shared<SrtTaskGenerator>()}};
   }
 
   return randChoice(strategies.begin(), strategies.end());

@@ -293,7 +293,8 @@ void ProcessesTask::setStrategy(StrategyType type) {
   std::map<StrategyType, QString> strategyMap = {
       {StrategyType::ROUNDROBIN, "Стратегия: Round Robin"_qs},
       {StrategyType::FCFS, "Стратегия: FCFS"_qs},
-      {StrategyType::SJT, "Стратегия: SJT"_qs}};
+      {StrategyType::SJT, "Стратегия: SJT"_qs},
+      {StrategyType::SRT, "Стратегия: SRT"_qs}};
 
   label->setText(strategyMap[type]);
 }

@@ -1,78 +1,65 @@
 #pragma once
 
+#include <cstdint>
+#include <string>
+
 #include <QPoint>
 #include <QWidget>
 
-#include "views.h"
+#include <algo/memory/requests.h>
+#include <algo/memory/strategies.h>
 #include <algo/memory/types.h>
+
+#include "models.h"
 
 namespace Ui {
 class MemoryTask;
 }
 
-class MemoryTask : public QWidget, public Views::MemoryTaskView {
+class MemoryTask : public QWidget {
   Q_OBJECT
 
 public:
-  explicit MemoryTask(QWidget *parent = nullptr);
+  explicit MemoryTask(Models::MemoryModel model, QWidget *parent = nullptr);
 
-  void onAllocateAction(OnAllocateActionListener listener) override;
-
-  void onFreeAction(OnFreeActionListener listener) override;
-
-  void onDefragmentAction(OnDefragmentActionListener listener) override;
-
-  void onCompressAction(OnCompressActionListener listener) override;
-
-  void onNextRequestListener(OnNextRequestListener listener) override;
-
-  void onResetStateListener(OnResetStateListener listener) override;
-
-  void setMemoryBlocks(
-      const std::vector<MemoryManagement::Types::MemoryBlock> &blocks) override;
-
-  void setFreeMemoryBlocks(
-      const std::vector<MemoryManagement::Types::MemoryBlock> &blocks) override;
-
-  void setRequest(MemoryManagement::Requests::RequestPtr request) override;
-
-  void setStrategy(MemoryManagement::Strategies::StrategyType type) override;
-
-  void showErrorMessage(const std::string &message) override;
-
-  void showInfoMessage(const std::string &message) override;
+  Models::MemoryModel model() const;
 
   ~MemoryTask() override;
 
 private:
   Ui::MemoryTask *ui;
 
-  OnAllocateActionListener allocateActionListener;
-
-  OnFreeActionListener freeActionListener;
-
-  OnDefragmentActionListener defragmentActionListener;
-
-  OnCompressActionListener compressActionListener;
-
-  OnNextRequestListener nextRequestListener;
-
-  OnResetStateListener resetStateListener;
+  Models::MemoryModel _model;
 
   void provideContextMenu(const QPoint &pos);
 
-  MemoryManagement::Types::MemoryState collectState();
+  MemoryManagement::MemoryState collectState();
 
-  void processActionAllocate(const MemoryManagement::Types::MemoryBlock &block,
-                             int row);
+  void processActionAllocate(const MemoryManagement::MemoryBlock &block,
+                             uint32_t blockIndex);
 
-  void processActionFree(const MemoryManagement::Types::MemoryBlock &block,
-                         int row);
+  void processActionFree(const MemoryManagement::MemoryBlock &block,
+                         uint32_t blockIndex);
+
+  void processActionDefragment();
+
+  void processActionCompress(uint32_t blockIndex);
+
+  void refresh();
+
+  void nextRequest();
 
   void
-  processActionDefragment(const MemoryManagement::Types::MemoryBlock &block,
-                          int row);
+  setMemoryBlocks(const std::vector<MemoryManagement::MemoryBlock> &blocks);
 
-  void processActionCompress(const MemoryManagement::Types::MemoryBlock &block,
-                             int row);
+  void
+  setFreeMemoryBlocks(const std::vector<MemoryManagement::MemoryBlock> &blocks);
+
+  void setRequest(const MemoryManagement::Request &request);
+
+  void setStrategy(MemoryManagement::StrategyType type);
+
+  void showErrorMessage(const std::string &message);
+
+  void showInfoMessage(const std::string &message);
 };

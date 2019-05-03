@@ -1,42 +1,34 @@
 #pragma once
 
-#include <QMainWindow>
+#include <vector>
 
-#include "views.h"
+#include <QMainWindow>
+#include <QWidget>
+
+#include <utils/tasks.h>
+
+#include "models.h"
 
 namespace Ui {
 class MainWindow;
 }
 
-class MainWindow : public QMainWindow, public Views::MainWindowView {
+class MainWindow : public QMainWindow {
   Q_OBJECT
 
 public:
   explicit MainWindow(QWidget *parent = nullptr);
-
-  void onOpenTaskListener(OnOpenListener listener) override;
-
-  void onSaveTaskListener(OnSaveListener listener) override;
-
-  void onGenerateTaskListener(OnGenerateListener listener);
-
-  std::vector<Views::TaskView>
-  createTaskViews(const std::vector<Utils::Tasks::Task> &tasks) override;
 
   ~MainWindow() override;
 
 private:
   Ui::MainWindow *ui;
 
-  OnOpenListener openTaskListener;
+  void openTasks();
 
-  OnSaveListener saveTaskListener;
+  void loadTasks(const std::vector<Utils::Task> &tasks);
 
-  OnGenerateListener generateTaskListener;
+  void saveTasks();
 
-  void openTaskDialog();
-
-  void saveTaskDialog();
-
-  void generateTaskDialog();
+  void createTasks();
 };

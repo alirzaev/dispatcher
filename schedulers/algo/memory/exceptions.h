@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace MemoryManagement::Exceptions {
+namespace MemoryManagement {
 class BaseException : public std::logic_error {
 public:
   BaseException(const std::string &what_arg) : std::logic_error(what_arg) {}
@@ -28,4 +28,4 @@ class TypeException : public BaseException {
 public:
   TypeException(const std::string &what_arg) : BaseException(what_arg) {}
 };
-} // namespace MemoryManagement::Exceptions
+} // namespace MemoryManagement

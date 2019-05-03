@@ -16,6 +16,13 @@
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <widget class="QLabel" name="strategyLabel">
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
      <property name="text">
       <string/>
      </property>
@@ -30,6 +37,11 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>9</pointsize>
+        </font>
        </property>
        <property name="text">
         <string>Описание заявки</string>
@@ -46,15 +58,27 @@
        </property>
        <item>
         <widget class="QPushButton" name="acceptRequest">
+         <property name="toolTip">
+          <string>Проверить действия пользователя и перейти к следующей заявке (Alt+Enter)</string>
+         </property>
          <property name="text">
           <string>Подтвердить</string>
+         </property>
+         <property name="shortcut">
+          <string>Alt+Return</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="resetState">
+         <property name="toolTip">
+          <string>Отменить все действия пользователя для текущей заявки (Ctrl+Z)</string>
+         </property>
          <property name="text">
           <string>Сбросить</string>
+         </property>
+         <property name="shortcut">
+          <string>Ctrl+Z</string>
          </property>
         </widget>
        </item>

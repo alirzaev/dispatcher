@@ -35,22 +35,41 @@ SOURCES += \
     memorytask.cpp \
     dialogs/allocatememorydialog.cpp \
     listitems/memoryblockitem.cpp \
-    menus/memoryblockmenu.cpp
+    menus/memoryblockmenu.cpp \
+    processestask.cpp \
+    widgets/processestablewidget.cpp \
+    menus/processmenu.cpp \
+    dialogs/createprocessdialog.cpp \
+    widgets/queuelistwidget.cpp
 
 HEADERS += \
     mainwindow.h \
-    presenters.h \
-    views.h \
     memorytask.h \
     models.h \
     dialogs/allocatememorydialog.h \
     listitems/memoryblockitem.h \
-    menus/memoryblockmenu.h
+    menus/memoryblockmenu.h \
+    processestask.h \
+    literals.h \
+    widgets/processestablewidget.h \
+    menus/processmenu.h \
+    dialogs/createprocessdialog.h \
+    widgets/queuelistwidget.h
 
 FORMS += \
     mainwindow.ui \
     memorytask.ui \
-    dialogs/allocatememorydialog.ui
+    dialogs/allocatememorydialog.ui \
+    processestask.ui \
+    dialogs/createprocessdialog.ui
+
+TARGET = dispatcher
+
+# The following keeps the generated files at least somewhat separate
+# from the source files.
+UI_DIR = uics
+MOC_DIR = mocs
+OBJECTS_DIR = objs
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

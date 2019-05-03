@@ -12,43 +12,79 @@
 #include "../algo/memory/exceptions.h"
 #include "../algo/memory/requests.h"
 #include "../algo/memory/strategies.h"
+#include "../algo/processes/exceptions.h"
+#include "../algo/processes/requests.h"
+#include "../algo/processes/strategies.h"
 #include "exceptions.h"
 
-namespace Utils::Tasks {
-using namespace MemoryManagement::Strategies;
-using namespace MemoryManagement::Types;
-using namespace MemoryManagement::Requests;
-using namespace Exceptions;
+namespace Utils {
+namespace Memory = MemoryManagement;
+namespace Processes = ProcessesManagement;
 
+/**
+ *  @brief Задание "Диспетчеризация памяти".
+ */
 class MemoryTask {
 private:
-  StrategyPtr _strategy;
+  Memory::StrategyPtr _strategy;
 
   uint32_t _completed;
 
-  MemoryState _state;
+  Memory::MemoryState _state;
 
-  std::vector<RequestPtr> _requests;
+  std::vector<Memory::Request> _requests;
 
-  MemoryTask(StrategyPtr strategy, uint32_t completed, const MemoryState &state,
-             const std::vector<RequestPtr> requests)
+  /**
+   *  @brief Создает объект задания "Диспетчеризация памяти".
+   *
+   *  @param strategy Стратегия выбора блока памяти.
+   *  @param completed Количество обработанных заявок.
+   *  @param state Дескриптор состояния памяти.
+   *  @param requests Список заявок для обработки.
+   */
+  MemoryTask(Memory::StrategyPtr strategy, uint32_t completed,
+             const Memory::MemoryState &state,
+             const std::vector<Memory::Request> requests)
       : _strategy(strategy), _completed(completed), _state(state),
         _requests(requests) {}
 
 public:
-  static MemoryTask create(StrategyPtr strategy, uint32_t completed,
-                           const MemoryState &state,
-                           const std::vector<RequestPtr> requests) {
+  /**
+   *  @brief Создает объект задания "Диспетчеризация памяти".
+   *
+   *  @see Utils::MemoryTask::MemoryTask().
+   */
+  static MemoryTask create(Memory::StrategyPtr strategy, uint32_t completed,
+                           const Memory::MemoryState &state,
+                           const std::vector<Memory::Request> requests) {
+    validate(strategy, completed, state, requests);
     return {strategy, completed, state, requests};
   }
 
-  static void validate(StrategyPtr strategy, uint32_t completed,
-                       const MemoryState &state,
-                       const std::vector<RequestPtr> requests) {
-    if (requests.size() < completed) {
-      throw TaskException("COMPLETED_OOR");
+  /**
+   *  @brief Проверяет параметры конструктора.
+   *
+   *  @param strategy Стратегия выбора блока памяти.
+   *  @param completed Количество обработанных заявок.
+   *  @param state Дескриптор состояния памяти.
+   *  @param requests Список заявок для обработки.
+   *
+   *  @throws Utils::TaskException Исключение возникает, если
+   *  переданные параметры не соответствуют заданным ограничениям.
+   */
+  static void validate(Memory::StrategyPtr strategy, uint32_t completed,
+                       const Memory::MemoryState &state,
+                       const std::vector<Memory::Request> requests) {
+    try {
+      Memory::MemoryState::validate(state.blocks, state.freeBlocks);
+    } catch (Memory::BaseException &ex) {
+      throw TaskException(ex.what());
     }
-    auto currentState = MemoryState::initial();
+
+    if (requests.size() < completed) {
+      throw TaskException("INVALID_TASK");
+    }
+    auto currentState = Memory::MemoryState::initial();
     try {
       for (auto req = requests.begin(); req != requests.begin() + completed;
            ++req) {
@@ -57,20 +93,22 @@ public:
       if (currentState != state) {
         throw TaskException("STATE_MISMATCH");
       }
-    } catch (MemoryManagement::Exceptions::BaseException &ex) {
+    } catch (Memory::BaseException &ex) {
       throw TaskException(ex.what());
     }
   }
 
-  StrategyPtr strategy() const { return _strategy; }
+  Memory::StrategyPtr strategy() const { return _strategy; }
 
-  // кол-во выполненных заданий
   uint32_t completed() const { return _completed; }
 
-  const MemoryState &state() const { return _state; }
+  const Memory::MemoryState &state() const { return _state; }
 
-  const std::vector<RequestPtr> &requests() const { return _requests; }
+  const std::vector<Memory::Request> &requests() const { return _requests; }
 
+  /**
+   *  Возвращает задание в виде JSON-объекта.
+   */
   nlohmann::json dump() const {
     nlohmann::json obj;
 
@@ -82,20 +120,36 @@ public:
 
     obj["state"] = state().dump();
 
-    auto jsonRequests = nlohmann::json::array();
+    obj["requests"] = nlohmann::json::array();
 
     for (auto request : requests()) {
-      jsonRequests.push_back(request->dump());
+      std::visit(
+          [&obj](const auto &request) {
+            obj["requests"].push_back(request.dump());
+          },
+          request);
     }
-
-    obj["requests"] = jsonRequests;
 
     return obj;
   }
 
+  /**
+   *  Проверяет, выполнено ли задание полностью.
+   */
   bool done() const { return _completed == _requests.size(); }
 
-  std::optional<MemoryTask> next(const MemoryState &state) const {
+  /**
+   *  @brief Проверяет, правильно ли обработана текущая заявка.
+   *
+   *  @param state Дескриптор состояния памяти после обработки заявки.
+   *
+   *  @return Новый объект задания или std::nullopt, если заявка обработана
+   *  неправильно.
+   *
+   *  Если заявка была обработана правильно, то @a _completed увеличивается
+   *  на 1.
+   */
+  std::optional<MemoryTask> next(const Memory::MemoryState &state) const {
     if (done()) {
       return *this;
     }
@@ -107,13 +161,159 @@ public:
       } else {
         return std::nullopt;
       }
-    } catch (const std::exception &ex) {
+    } catch (...) {
       return std::nullopt;
     }
   }
 };
 
-class ProcessesTask {};
+/**
+ *  @brief Задание "Диспетчеризация процессов".
+ */
+class ProcessesTask {
+private:
+  Processes::StrategyPtr _strategy;
+
+  uint32_t _completed;
+
+  Processes::ProcessesState _state;
+
+  std::vector<Processes::Request> _requests;
+
+  /**
+   *  @brief Создает объект задания "Диспетчеризация процессов".
+   *
+   *  @param strategy Планировщик.
+   *  @param completed Количество обработанных заявок.
+   *  @param state Дескриптор состояния процессов.
+   *  @param requests Список заявок для обработки.
+   */
+  ProcessesTask(Processes::StrategyPtr strategy, uint32_t completed,
+                const Processes::ProcessesState &state,
+                const std::vector<Processes::Request> requests)
+      : _strategy(strategy), _completed(completed), _state(state),
+        _requests(requests) {}
+
+public:
+  /**
+   *  @brief Создает объект задания "Диспетчеризация процессов".
+   *
+   *  @see Utils::ProcessesTask::ProcessesTask().
+   */
+  static ProcessesTask create(Processes::StrategyPtr strategy,
+                              uint32_t completed,
+                              const Processes::ProcessesState &state,
+                              const std::vector<Processes::Request> requests) {
+    validate(strategy, completed, state, requests);
+    return {strategy, completed, state, requests};
+  }
+
+  /**
+   *  @brief Проверяет параметры конструктора.
+   *
+   *  @param strategy Стратегия выбора блока памяти.
+   *  @param completed Количество обработанных заявок.
+   *  @param state Дескриптор состояния памяти.
+   *  @param requests Список заявок для обработки.
+   *
+   *  @throws Utils::TaskException Исключение возникает, если
+   *  переданные параметры не соответствуют заданным ограничениям.
+   */
+  static void validate(Processes::StrategyPtr strategy, uint32_t completed,
+                       const Processes::ProcessesState &state,
+                       const std::vector<Processes::Request> requests) {
+    try {
+      Processes::ProcessesState::validate(state.processes, state.queues);
+    } catch (Processes::BaseException &ex) {
+      throw TaskException(ex.what());
+    }
+
+    if (requests.size() < completed) {
+      throw TaskException("INVALID_TASK");
+    }
+    auto currentState = Processes::ProcessesState::initial();
+    try {
+      for (auto req = requests.begin(); req != requests.begin() + completed;
+           ++req) {
+        currentState = strategy->processRequest(*req, currentState);
+      }
+      if (currentState != state) {
+        throw TaskException("STATE_MISMATCH");
+      }
+    } catch (Memory::BaseException &ex) {
+      throw TaskException(ex.what());
+    }
+  }
+
+  /**
+   *  Возвращает задание в виде JSON-объекта.
+   */
+  nlohmann::json dump() const {
+    nlohmann::json obj;
+
+    obj["type"] = "PROCESSES_TASK";
+
+    obj["strategy"] = strategy()->toString();
+
+    obj["completed"] = completed();
+
+    obj["state"] = state().dump();
+
+    obj["requests"] = nlohmann::json::array();
+
+    for (auto request : requests()) {
+      std::visit(
+          [&obj](const auto &request) {
+            obj["requests"].push_back(request.dump());
+          },
+          request);
+    }
+
+    return obj;
+  }
+
+  Processes::StrategyPtr strategy() const { return _strategy; }
+
+  uint32_t completed() const { return _completed; }
+
+  const Processes::ProcessesState &state() const { return _state; }
+
+  const std::vector<Processes::Request> &requests() const { return _requests; }
+
+  /**
+   *  Проверяет, выполнено ли задание полностью.
+   */
+  bool done() const { return _completed == _requests.size(); }
+
+  /**
+   *  @brief Проверяет, правильно ли обработана текущая заявка.
+   *
+   *  @param state Дескриптор состояния процессов после обработки заявки.
+   *
+   *  @return Новый объект задания или std::nullopt, если заявка обработана
+   *  неправильно.
+   *
+   *  Если заявка была обработана правильно, то @a _completed увеличивается
+   *  на 1.
+   */
+  std::optional<ProcessesTask>
+  next(const Processes::ProcessesState &state) const {
+    if (done()) {
+      return *this;
+    }
+    try {
+      auto request = _requests[_completed];
+      auto expected = _strategy->processRequest(request, _state);
+      if (expected == state) {
+        return ProcessesTask{_strategy, _completed + 1, expected, _requests};
+      } else {
+        return std::nullopt;
+      }
+    } catch (...) {
+      return std::nullopt;
+    }
+  }
+};
 
 using Task = std::variant<MemoryTask, ProcessesTask>;
-} // namespace Utils::Tasks
+} // namespace Utils

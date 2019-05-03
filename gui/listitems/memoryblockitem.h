@@ -7,11 +7,11 @@
 
 class MemoryBlockItem : public QListWidgetItem {
 private:
-  MemoryManagement::Types::MemoryBlock _block;
+  MemoryManagement::MemoryBlock _block;
 
 public:
-  MemoryBlockItem(const MemoryManagement::Types::MemoryBlock &block,
+  MemoryBlockItem(const MemoryManagement::MemoryBlock &block,
                   bool highlightFree = false, QListWidget *parent = nullptr);
 
-  const MemoryManagement::Types::MemoryBlock &block() const;
+  const MemoryManagement::MemoryBlock &block() const;
 };

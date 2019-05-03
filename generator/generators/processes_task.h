@@ -50,23 +50,30 @@ inline auto randChoice(BidIt first, BidIt last) -> decltype(*first) {
   return *first;
 }
 
-inline std::pair<StrategyPtr, GeneratorPtr> randStrategy() {
-  vector<std::pair<StrategyPtr, GeneratorPtr>> strategies = {
-      {RoundRobinStrategy::create(), make_shared<RoundRobinTaskGenerator>()},
-      {FcfsStrategy::create(), make_shared<FcfsTaskGenerator>()},
-      {SjtStrategy::create(), make_shared<SjtTaskGenerator>()}};
+inline std::pair<StrategyPtr, GeneratorPtr>
+randStrategy(bool preemptive = false) {
+  vector<std::pair<StrategyPtr, GeneratorPtr>> strategies;
+
+  if (preemptive) {
+    strategies = {
+        {RoundRobinStrategy::create(), make_shared<RoundRobinTaskGenerator>()}};
+  } else {
+    strategies = {{FcfsStrategy::create(), make_shared<FcfsTaskGenerator>()},
+                  {SjtStrategy::create(), make_shared<SjtTaskGenerator>()}};
+  }
 
   return randChoice(strategies.begin(), strategies.end());
 }
 } // namespace Generators::ProcessesTask::Details
 
 namespace Generators::ProcessesTask {
-inline Utils::ProcessesTask generate(uint32_t requestCount = 40) {
+inline Utils::ProcessesTask generate(uint32_t requestCount = 40,
+                                     bool preemptive = false) {
   using namespace Details;
   using namespace ProcessesManagement;
   using std::vector;
 
-  auto [strategy, generator] = randStrategy();
+  auto [strategy, generator] = randStrategy(preemptive);
   auto state = ProcessesState::initial();
   vector<Request> requests;
 

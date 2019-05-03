@@ -111,6 +111,7 @@ void MainWindow::saveTasks() {
 }
 
 void MainWindow::createTasks() {
-  loadTasks({Generators::MemoryTask::generate(),
-             Generators::ProcessesTask::generate()});
+  loadTasks({Generators::MemoryTask::generate(40),
+             Generators::ProcessesTask::generate(40, false),
+             Generators::ProcessesTask::generate(40, true)});
 }

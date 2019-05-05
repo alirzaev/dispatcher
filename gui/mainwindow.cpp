@@ -24,7 +24,6 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
-  ui->tabWidget->clear();
 
   connect(ui->actionOpenTask, &QAction::triggered, this,
           &MainWindow::openTasks);

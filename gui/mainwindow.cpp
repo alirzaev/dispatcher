@@ -15,6 +15,7 @@
 
 #include "models.h"
 
+#include "aboutwindow.h"
 #include "memorytask.h"
 #include "processestask.h"
 
@@ -32,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
   connect(ui->actionGenerateTask, &QAction::triggered, this,
           &MainWindow::createTasks);
   connect(ui->actionQuit, &QAction::triggered, this, &QMainWindow::close);
+  connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::showHelp);
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -113,4 +115,9 @@ void MainWindow::createTasks() {
   loadTasks({Generators::MemoryTask::generate(40),
              Generators::ProcessesTask::generate(40, false),
              Generators::ProcessesTask::generate(40, true)});
+}
+
+void MainWindow::showHelp() {
+  auto window = AboutWindow(this);
+  window.exec();
 }

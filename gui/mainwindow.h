@@ -31,4 +31,6 @@ private:
   void saveTasks();
 
   void createTasks();
+
+  void showHelp();
 };

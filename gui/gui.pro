@@ -40,7 +40,8 @@ SOURCES += \
     widgets/processestablewidget.cpp \
     menus/processmenu.cpp \
     dialogs/createprocessdialog.cpp \
-    widgets/queuelistwidget.cpp
+    widgets/queuelistwidget.cpp \
+    aboutwindow.cpp
 
 HEADERS += \
     mainwindow.h \
@@ -54,14 +55,16 @@ HEADERS += \
     widgets/processestablewidget.h \
     menus/processmenu.h \
     dialogs/createprocessdialog.h \
-    widgets/queuelistwidget.h
+    widgets/queuelistwidget.h \
+    aboutwindow.h
 
 FORMS += \
     mainwindow.ui \
     memorytask.ui \
     dialogs/allocatememorydialog.ui \
     processestask.ui \
-    dialogs/createprocessdialog.ui
+    dialogs/createprocessdialog.ui \
+    aboutwindow.ui
 
 TARGET = dispatcher
 

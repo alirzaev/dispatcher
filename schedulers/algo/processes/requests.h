@@ -174,28 +174,37 @@ class TerminateIO {
 private:
   int32_t _pid;
 
+  int32_t _augment;
+
 public:
   /**
    *  @brief Создает заявку на завершение ввода/вывода.
    *
    *  @param pid Идентификатор процесса.
+   *  @param augment Прибавка к текущему приоритету (только для WinNT).
    *
    *  @throws ProcessesManagement::RequestException Исключение возникает, если
    *  переданные параметры не соответствуют заданным ограничениям.
    */
-  TerminateIO(int32_t pid) : _pid(pid) {
+  TerminateIO(int32_t pid, int32_t augment = 1) : _pid(pid), _augment(augment) {
     if (pid < 0 || pid > 255) {
       throw RequestException("INVALID_PID");
+    }
+
+    if (augment < 1 || augment > 15) {
+      throw RequestException("INVALID_AUGMENT");
     }
   }
 
   int32_t pid() const { return _pid; }
 
+  int32_t augment() const { return _augment; }
+
   /**
    *  Возвращает заявку в виде JSON-объекта.
    */
   nlohmann::json dump() const {
-    return {{"type", "TERMINATE_IO"}, {"pid", _pid}};
+    return {{"type", "TERMINATE_IO"}, {"pid", _pid}, {"augment", _augment}};
   }
 };
 

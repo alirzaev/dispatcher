@@ -114,7 +114,7 @@ inline ProcessesTask loadProcessesTask(const nlohmann::json &obj) {
     } else if (req["type"] == "INIT_IO") {
       requests.push_back(InitIO(req["pid"]));
     } else if (req["type"] == "TERMINATE_IO") {
-      requests.push_back(TerminateIO(req["pid"]));
+      requests.push_back(TerminateIO(req["pid"], req["augment"]));
     } else if (req["type"] == "TRANSFER_CONTROL") {
       requests.push_back(TransferControl(req["pid"]));
     } else if (req["type"] == "TIME_QUANTUM_EXPIRED") {

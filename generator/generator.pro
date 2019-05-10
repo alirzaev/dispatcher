@@ -19,7 +19,8 @@ HEADERS += \
     generators/processes_task/task_fcfs_generator.h \
     generators/processes_task/task_sjt_generator.h \
     generators/rand_utils.h \
-    generators/processes_task/task_srt_generator.h
+    generators/processes_task/task_srt_generator.h \
+    generators/processes_task/task_winnt_generator.h
 
 # The following keeps the generated files at least somewhat separate
 # from the source files.

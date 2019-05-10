@@ -56,7 +56,8 @@ randStrategy(bool preemptive = false) {
 
   if (preemptive) {
     strategies = {
-        {RoundRobinStrategy::create(), make_shared<RoundRobinTaskGenerator>()}};
+        {RoundRobinStrategy::create(), make_shared<RoundRobinTaskGenerator>()},
+        {WinNtStrategy::create(), make_shared<WinNtTaskGenerator>()}};
   } else {
     strategies = {{FcfsStrategy::create(), make_shared<FcfsTaskGenerator>()},
                   {SjtStrategy::create(), make_shared<SjtTaskGenerator>()},

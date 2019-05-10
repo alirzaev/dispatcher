@@ -26,9 +26,9 @@ class AbstractStrategy {
 public:
   virtual ~AbstractStrategy() = default;
 
-  AbstractStrategy(StrategyType type) : type(type) {}
+  AbstractStrategy() = default;
 
-  const StrategyType type;
+  virtual StrategyType type() const = 0;
 
   /**
    *  Возвращает строковое обозначение стратегии.

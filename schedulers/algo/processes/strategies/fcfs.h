@@ -19,6 +19,8 @@ namespace ProcessesManagement {
  */
 class FcfsStrategy final : public AbstractStrategy {
 public:
+  StrategyType type() const override { return StrategyType::FCFS; }
+
   std::string toString() const override { return "FCFS"; }
 
   static std::shared_ptr<FcfsStrategy> create() {
@@ -42,7 +44,7 @@ protected:
   }
 
 private:
-  FcfsStrategy() : AbstractStrategy(StrategyType::FCFS) {}
+  FcfsStrategy() : AbstractStrategy() {}
 
 protected:
   ProcessesState processRequest(const CreateProcessReq &request,

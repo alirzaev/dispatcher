@@ -19,6 +19,8 @@ namespace ProcessesManagement {
  */
 class RoundRobinStrategy final : public AbstractStrategy {
 public:
+  StrategyType type() const override { return StrategyType::ROUNDROBIN; }
+
   std::string toString() const override { return "ROUNDROBIN"; }
 
   static std::shared_ptr<RoundRobinStrategy> create() {
@@ -39,7 +41,7 @@ protected:
   }
 
 private:
-  RoundRobinStrategy() : AbstractStrategy(StrategyType::ROUNDROBIN) {}
+  RoundRobinStrategy() : AbstractStrategy() {}
 
 protected:
   ProcessesState processRequest(const CreateProcessReq &request,

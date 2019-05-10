@@ -19,9 +19,11 @@ namespace ProcessesManagement {
 /**
  *  @brief Стратегия "SJT".
  */
-class SjtStrategy final : public AbstractStrategy {
+class SjtStrategy : public AbstractStrategy {
 public:
-  std::string toString() const override { return "SJT"; }
+  virtual StrategyType type() const override { return StrategyType::SJT; }
+
+  virtual std::string toString() const override { return "SJT"; }
 
   static std::shared_ptr<SjtStrategy> create() {
     return std::shared_ptr<SjtStrategy>(new SjtStrategy());
@@ -57,10 +59,10 @@ protected:
     }
   }
 
-private:
-  SjtStrategy() : AbstractStrategy(StrategyType::SJT) {}
+  SjtStrategy() : AbstractStrategy() {}
 
-  ProcessesState sortQueues(const ProcessesState &state) const {
+private:
+  virtual ProcessesState sortQueues(const ProcessesState &state) const {
     auto [processes, queues] = state;
 
     std::deque<int32_t> queue;

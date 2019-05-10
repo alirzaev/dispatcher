@@ -242,7 +242,7 @@ void ProcessesTask::refresh() {
   auto [processes, queues] = _model.state;
   setProcessesList(processes);
   setQueuesLists(queues);
-  setStrategy(_model.task.strategy()->type);
+  setStrategy(_model.task.strategy()->type());
   if (_model.task.done()) {
     setRequest(_model.task.requests().back());
     showInfoMessage("Вы успешно выполнили данное задание");

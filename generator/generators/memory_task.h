@@ -19,6 +19,8 @@
 #include <algo/memory/types.h>
 #include <utils/tasks.h>
 
+#include "rand_utils.h"
+
 namespace Generators::MemoryTask::Details {
 using namespace MemoryManagement;
 using std::optional;
@@ -33,32 +35,13 @@ struct MemoryBlockCmp {
 
 inline constexpr int32_t maxPid() { return 16; }
 
-template <class I, typename = std::enable_if_t<std::is_integral_v<I>>>
-inline I randRange(I a, I b) {
-  if (a > b) {
-    std::swap(a, b);
-  }
-  static std::mt19937 e(static_cast<unsigned int>(std::time(nullptr)));
-  std::uniform_int_distribution<I> dist(a, b);
-  return dist(e);
-}
-
-template <class BidIt,
-          typename = std::enable_if_t<!std::is_fundamental_v<BidIt>>>
-inline auto randChoice(BidIt first, BidIt last) -> decltype(*first) {
-  auto size = std::distance(first, last);
-  auto index = randRange<decltype(size)>(0, size - 1);
-  std::advance(first, index);
-  return *first;
-}
-
 inline StrategyPtr randStrategy() {
   vector<MemoryManagement::StrategyPtr> strategies = {
       MemoryManagement::FirstAppropriateStrategy::create(),
       MemoryManagement::MostAppropriateStrategy::create(),
       MemoryManagement::LeastAppropriateStrategy::create()};
 
-  return randChoice(strategies.begin(), strategies.end());
+  return RandUtils::randChoice(strategies.begin(), strategies.end());
 }
 
 inline set<int32_t> getAvailablePids(const MemoryState &state) {
@@ -90,14 +73,16 @@ inline set<int32_t> getUsedPids(const MemoryState &state) {
 
 // <pages, bytes>
 inline std::pair<int32_t, int32_t> genRequestedMemory(int32_t availablePages) {
-  int32_t pages = randRange(1, availablePages);
+  int32_t pages = RandUtils::randRange(1, availablePages);
   int32_t min = (pages - 1) * 4096 + 1;
   int32_t max = pages * 4096;
-  return {pages, randRange(min, max)};
+  return {pages, RandUtils::randRange(min, max)};
 }
 
 inline optional<Request> genCreateProcess(const MemoryState &state,
                                           bool valid = true) {
+  using namespace RandUtils;
+
   auto [blocks, freeBlocks] = state;
   auto usedPids = getUsedPids(state), availabePids = getAvailablePids(state);
 
@@ -125,11 +110,11 @@ inline optional<Request> genTerminateProcess(const MemoryState &state,
                                              bool valid = true) {
   auto usedPids = getUsedPids(state), availabePids = getAvailablePids(state);
   if (valid && !usedPids.empty()) {
-    auto pid = randChoice(usedPids.begin(), usedPids.end());
+    auto pid = RandUtils::randChoice(usedPids.begin(), usedPids.end());
 
     return TerminateProcessReq(pid);
   } else if (!valid && !availabePids.empty()) {
-    auto pid = randChoice(availabePids.begin(), availabePids.end());
+    auto pid = RandUtils::randChoice(availabePids.begin(), availabePids.end());
 
     return TerminateProcessReq(pid);
   } else {
@@ -139,6 +124,8 @@ inline optional<Request> genTerminateProcess(const MemoryState &state,
 
 inline optional<Request> genAllocateMemory(const MemoryState &state,
                                            bool valid = true) {
+  using namespace RandUtils;
+
   auto [blocks, freeBlocks] = state;
   auto usedPids = getUsedPids(state), availabePids = getAvailablePids(state);
 
@@ -173,6 +160,8 @@ inline optional<Request> genAllocateMemory(const MemoryState &state,
 
 inline optional<Request> genFreeMemory(const MemoryState &state,
                                        bool valid = true) {
+  using namespace RandUtils;
+
   auto [blocks, freeBlocks] = state;
   auto usedPids = getUsedPids(state), availabePids = getAvailablePids(state);
 
@@ -207,6 +196,7 @@ inline optional<Request> genFreeMemory(const MemoryState &state,
 namespace Generators::MemoryTask {
 inline Utils::MemoryTask generate(uint32_t requestCount = 40) {
   using namespace Details;
+  using namespace RandUtils;
   using genPtr = std::function<optional<Request>(const MemoryState &, bool)>;
 
   vector<genPtr> gens = {&Details::genCreateProcess,
@@ -223,12 +213,12 @@ inline Utils::MemoryTask generate(uint32_t requestCount = 40) {
 
     for (auto gen : gens) {
       auto valid = gen(state, true);
-      if (valid.has_value()) {
+      if (valid) {
         validRequests.push_back(valid.value());
       }
 
       auto invalid = gen(state, false);
-      if (invalid.has_value()) {
+      if (invalid) {
         invalidRequests.push_back(invalid.value());
       }
     }

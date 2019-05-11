@@ -1,15 +1,9 @@
 #pragma once
 
-#include <algorithm>
-#include <cstdint>
 #include <optional>
-#include <set>
-#include <utility>
 
 #include <algo/processes/requests.h>
-#include <algo/processes/strategies.h>
 #include <algo/processes/types.h>
-#include <utils/tasks.h>
 
 #include "../rand_utils.h"
 
@@ -17,10 +11,9 @@
 
 namespace Generators::ProcessesTask::TaskGenerators {
 using namespace ProcessesManagement;
+using std::get;
 using std::nullopt;
 using std::optional;
-using std::set;
-using std::vector;
 
 class WinNtTaskGenerator : public AbstractTaskGenerator {
 public:
@@ -32,125 +25,30 @@ public:
 
   optional<Request> CreateProcessReq(const ProcessesState &state,
                                      bool valid = true) const override {
-    auto [processes, queues] = state;
-    auto usedPids = getUsedPids(state);
-    auto availablePids = getAvailablePids(state);
-    auto priority = RandUtils::randRange(0, 11);
+    auto base = AbstractTaskGenerator::CreateProcessReq(state, valid);
+    if (base) {
+      auto request = get<ProcessesManagement::CreateProcessReq>(*base);
 
-    if (valid && !availablePids.empty()) {
-      auto pid =
-          RandUtils::randChoice(availablePids.begin(), availablePids.end());
-      auto ppid = -1;
-
-      // 1 из 2 заявок - дочерний процесс (если возможно)
-      if (RandUtils::randRange(0, 256) % 2 == 0) {
-        usedPids.insert(-1);
-        auto parent = std::find_if(
-            processes.begin(), processes.end(), [](const auto &process) {
-              return process.state() == ProcState::EXECUTING;
-            });
-        ppid = parent != processes.end() ? parent->pid() : -1;
-      }
-      return ProcessesManagement::CreateProcessReq(pid, ppid, priority,
-                                                   priority);
-    } else if (!valid && !usedPids.empty()) {
-      auto pid = RandUtils::randChoice(usedPids.begin(), usedPids.end());
-      return ProcessesManagement::CreateProcessReq(pid, -1, priority, priority);
+      auto priority = RandUtils::randRange(0, 11);
+      return ProcessesManagement::CreateProcessReq(
+          request.pid(), request.ppid(), priority, priority, request.timer(),
+          request.workTime());
     } else {
-      return nullopt;
-    }
-  }
-
-  optional<Request> TerminateProcessReq(const ProcessesState &state,
-                                        bool valid = true) const override {
-    auto [processes, queues] = state;
-    auto usedPids = getUsedPids(state);
-    auto availablePids = getAvailablePids(state);
-
-    if (valid && !usedPids.empty()) {
-      auto pid = RandUtils::randChoice(usedPids.begin(), usedPids.end());
-      return ProcessesManagement::TerminateProcessReq(pid);
-    } else if (!valid && !availablePids.empty()) {
-      auto pid =
-          RandUtils::randChoice(availablePids.begin(), availablePids.end());
-      return ProcessesManagement::TerminateProcessReq(pid);
-    } else {
-      return nullopt;
-    }
-  }
-
-  optional<Request> InitIO(const ProcessesState &state,
-                           bool valid = true) const override {
-    auto [processes, queues] = state;
-    auto usedPids = getUsedPids(state);
-
-    auto it = std::find_if(processes.begin(), processes.end(),
-                           [](const auto &process) {
-                             return process.state() == ProcState::EXECUTING;
-                           });
-    if (it != processes.end()) {
-      usedPids.erase(it->pid());
-    }
-
-    if (valid && it != processes.end()) {
-      auto pid = it->pid();
-      return ProcessesManagement::InitIO(pid);
-    } else if (!valid && !usedPids.empty()) {
-      auto pid = RandUtils::randChoice(usedPids.begin(), usedPids.end());
-      return ProcessesManagement::InitIO(pid);
-    } else {
-      return nullopt;
+      return base;
     }
   }
 
   optional<Request> TerminateIO(const ProcessesState &state,
                                 bool valid = true) const override {
-    auto [processes, queues] = state;
-    set<int32_t> waitingPids, otherPids;
-    for (const auto &process : processes) {
-      if (process.state() == ProcState::WAITING) {
-        waitingPids.insert(process.pid());
-      }
-      if (process.state() == ProcState::ACTIVE ||
-          process.state() == ProcState::EXECUTING) {
-        otherPids.insert(process.pid());
-      }
-    }
+    auto base = AbstractTaskGenerator::TerminateIO(state, valid);
+    if (base) {
+      auto request = get<ProcessesManagement::TerminateIO>(*base);
 
-    if (valid && !waitingPids.empty()) {
-      auto pid = RandUtils::randChoice(waitingPids.begin(), waitingPids.end());
-      auto augment = RandUtils::randRange(1, 3);
-      return ProcessesManagement::TerminateIO(pid, augment);
-    } else if (!valid && !otherPids.empty()) {
-      auto pid = RandUtils::randChoice(otherPids.begin(), otherPids.end());
+      auto pid = request.pid();
       auto augment = RandUtils::randRange(1, 3);
       return ProcessesManagement::TerminateIO(pid, augment);
     } else {
-      return nullopt;
-    }
-  }
-
-  optional<Request> TransferControl(const ProcessesState &state,
-                                    bool valid = true) const override {
-    auto [processes, queues] = state;
-    auto usedPids = getUsedPids(state);
-
-    auto it = std::find_if(processes.begin(), processes.end(),
-                           [](const auto &process) {
-                             return process.state() == ProcState::EXECUTING;
-                           });
-    if (it != processes.end()) {
-      usedPids.erase(it->pid());
-    }
-
-    if (valid && it != processes.end()) {
-      auto pid = it->pid();
-      return ProcessesManagement::TransferControl(pid);
-    } else if (!valid && !usedPids.empty()) {
-      auto pid = RandUtils::randChoice(usedPids.begin(), usedPids.end());
-      return ProcessesManagement::TransferControl(pid);
-    } else {
-      return nullopt;
+      return base;
     }
   }
 };

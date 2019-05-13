@@ -13,13 +13,13 @@
 #include "../../../utils/overload.h"
 #include "../exceptions.h"
 #include "../operations.h"
-#include "sjt.h"
+#include "sjn.h"
 
 namespace ProcessesManagement {
 /**
  *  @brief Стратегия "SRT".
  */
-class SrtStrategy final : public SjtStrategy {
+class SrtStrategy final : public SjnStrategy {
 public:
   StrategyType type() const override { return StrategyType::SRT; }
 
@@ -30,7 +30,7 @@ public:
   }
 
 private:
-  SrtStrategy() : SjtStrategy() {}
+  SrtStrategy() : SjnStrategy() {}
 
   ProcessesState sortQueues(const ProcessesState &state) const override {
     auto [processes, queues] = state;

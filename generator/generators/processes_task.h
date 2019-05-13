@@ -33,7 +33,7 @@ inline pair<StrategyPtr, GeneratorPtr> randStrategy(bool preemptive = false) {
         {WinNtStrategy::create(), make_shared<WinNtTaskGenerator>()}};
   } else {
     strategies = {{FcfsStrategy::create(), make_shared<FcfsTaskGenerator>()},
-                  {SjtStrategy::create(), make_shared<SjtTaskGenerator>()},
+                  {SjnStrategy::create(), make_shared<SjnTaskGenerator>()},
                   {SrtStrategy::create(), make_shared<SrtTaskGenerator>()}};
   }
 

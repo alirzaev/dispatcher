@@ -129,7 +129,7 @@
 | Поле | Тип    | Описание |
 | ---- | ------ | -------- |
 | type | String | Тип задания. Значение: `PROCESSES_TASK` |
-| strategy | String | Название стратегии. Допустимые значения: `ROUNDROBIN`, `FCFS`, `SJT`, `SRT`, `WINNT` |
+| strategy | String | Название стратегии. Допустимые значения: `ROUNDROBIN`, `FCFS`, `SJN`, `SRT`, `WINNT` |
 | completed | Number | Количество обработанных заявок |
 | state | [ProcessesState](#processesstate) | Объект, описывающий состояние процессов |
 | requests | [[CreateProcessReq](#createprocessreq) \| [TerminateProcessReq](#terminateprocessreq) \| [InitIO](#initio) \| [TerminateIO](#terminateio)] \| [TransferControl](#transfercontrol) \| [TimeQuantumExpired](#timequantumexpired) | Массив заявок, которые диспетчер должен обработать |

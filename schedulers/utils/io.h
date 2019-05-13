@@ -93,8 +93,8 @@ inline ProcessesTask loadProcessesTask(const nlohmann::json &obj) {
     strategy = RoundRobinStrategy::create();
   } else if (strategyType == "FCFS") {
     strategy = FcfsStrategy::create();
-  } else if (strategyType == "SJT") {
-    strategy = SjtStrategy::create();
+  } else if (strategyType == "SJN") {
+    strategy = SjnStrategy::create();
   } else if (strategyType == "SRT") {
     strategy = SrtStrategy::create();
   } else if (strategyType == "WINNT") {

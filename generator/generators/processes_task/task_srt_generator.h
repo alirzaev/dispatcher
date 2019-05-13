@@ -1,7 +1,7 @@
 #pragma once
 
-#include "task_sjt_generator.h"
+#include "task_sjn_generator.h"
 
 namespace Generators::ProcessesTask::TaskGenerators {
-class SrtTaskGenerator : public SjtTaskGenerator {};
+class SrtTaskGenerator : public SjnTaskGenerator {};
 } // namespace Generators::ProcessesTask::TaskGenerators

@@ -19,14 +19,14 @@ namespace ProcessesManagement {
 /**
  *  @brief Стратегия "SJT".
  */
-class SjtStrategy : public AbstractStrategy {
+class SjnStrategy : public AbstractStrategy {
 public:
-  virtual StrategyType type() const override { return StrategyType::SJT; }
+  virtual StrategyType type() const override { return StrategyType::SJN; }
 
-  virtual std::string toString() const override { return "SJT"; }
+  virtual std::string toString() const override { return "SJN"; }
 
-  static std::shared_ptr<SjtStrategy> create() {
-    return std::shared_ptr<SjtStrategy>(new SjtStrategy());
+  static std::shared_ptr<SjnStrategy> create() {
+    return std::shared_ptr<SjnStrategy>(new SjnStrategy());
   }
 
   std::string getRequestDescription(const Request &request) const override {
@@ -59,7 +59,7 @@ protected:
     }
   }
 
-  SjtStrategy() : AbstractStrategy() {}
+  SjnStrategy() : AbstractStrategy() {}
 
 private:
   virtual ProcessesState sortQueues(const ProcessesState &state) const {

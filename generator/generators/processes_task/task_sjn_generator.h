@@ -15,13 +15,13 @@ using std::get;
 using std::nullopt;
 using std::optional;
 
-class SjtTaskGenerator : public AbstractTaskGenerator {
+class SjnTaskGenerator : public AbstractTaskGenerator {
 public:
-  SjtTaskGenerator() = default;
+  SjnTaskGenerator() = default;
 
   bool preemptive() const override { return false; }
 
-  ~SjtTaskGenerator() override = default;
+  ~SjnTaskGenerator() override = default;
 
   optional<Request> CreateProcessReq(const ProcessesState &state,
                                      bool valid = true) const override {

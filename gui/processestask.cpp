@@ -295,7 +295,8 @@ void ProcessesTask::setStrategy(StrategyType type) {
       {StrategyType::FCFS, "Стратегия: FCFS"_qs},
       {StrategyType::SJN, "Стратегия: SJN"_qs},
       {StrategyType::SRT, "Стратегия: SRT"_qs},
-      {StrategyType::WINDOWS, "Стратегия: Windows NT"_qs}};
+      {StrategyType::WINDOWS, "Стратегия: Windows NT"_qs},
+      {StrategyType::UNIX, "Стратегия: Unix"_qs}};
 
   label->setText(strategyMap[type]);
 }

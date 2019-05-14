@@ -28,7 +28,8 @@ HEADERS += \
     algo/processes/helpers.h \
     algo/processes/strategies/srt.h \
     algo/processes/strategies/winnt.h \
-    algo/processes/strategies/sjn.h
+    algo/processes/strategies/sjn.h \
+    algo/processes/strategies/unix.h
 
 # The following keeps the generated files at least somewhat separate
 # from the source files.

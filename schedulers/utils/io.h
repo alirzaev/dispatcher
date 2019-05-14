@@ -99,6 +99,8 @@ inline ProcessesTask loadProcessesTask(const nlohmann::json &obj) {
     strategy = SrtStrategy::create();
   } else if (strategyType == "WINNT") {
     strategy = WinNtStrategy::create();
+  } else if (strategyType == "UNIX") {
+    strategy = UnixStrategy::create();
   } else {
     throw TaskException("UNKNOWN_STRATEGY");
   }

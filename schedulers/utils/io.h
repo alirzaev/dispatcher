@@ -3,6 +3,7 @@
 #include <istream>
 #include <map>
 #include <ostream>
+#include <string>
 #include <variant>
 #include <vector>
 
@@ -26,18 +27,22 @@ using Utils::TaskException;
  */
 inline MemoryTask loadMemoryTask(const nlohmann::json &obj) {
   using namespace MemoryManagement;
-  StrategyPtr strategy;
+
+  auto toPair = [](auto strategy) -> std::pair<std::string, StrategyPtr> {
+    return {strategy->toString(), strategy};
+  };
+
+  std::map<std::string, StrategyPtr> strategies = {
+      toPair(FirstAppropriateStrategy::create()),
+      toPair(MostAppropriateStrategy::create()),
+      toPair(LeastAppropriateStrategy::create())};
 
   auto strategyType = obj["strategy"];
-  if (strategyType == "FIRST_APPROPRIATE") {
-    strategy = FirstAppropriateStrategy::create();
-  } else if (strategyType == "MOST_APPROPRIATE") {
-    strategy = MostAppropriateStrategy::create();
-  } else if (strategyType == "LEAST_APPROPRIATE") {
-    strategy = LeastAppropriateStrategy::create();
-  } else {
+  if (strategies.find(strategyType) == strategies.end()) {
     throw TaskException("UNKNOWN_STRATEGY");
   }
+
+  StrategyPtr strategy = strategies[strategyType];
 
   uint32_t completed = obj["completed"];
 
@@ -86,24 +91,22 @@ inline MemoryTask loadMemoryTask(const nlohmann::json &obj) {
  */
 inline ProcessesTask loadProcessesTask(const nlohmann::json &obj) {
   using namespace ProcessesManagement;
-  StrategyPtr strategy;
+
+  auto toPair = [](auto strategy) -> std::pair<std::string, StrategyPtr> {
+    return {strategy->toString(), strategy};
+  };
+
+  std::map<std::string, StrategyPtr> strategies = {
+      toPair(RoundRobinStrategy::create()), toPair(FcfsStrategy::create()),
+      toPair(SjnStrategy::create()),        toPair(SrtStrategy::create()),
+      toPair(WinNtStrategy::create()),      toPair(UnixStrategy::create())};
 
   auto strategyType = obj["strategy"];
-  if (strategyType == "ROUNDROBIN") {
-    strategy = RoundRobinStrategy::create();
-  } else if (strategyType == "FCFS") {
-    strategy = FcfsStrategy::create();
-  } else if (strategyType == "SJN") {
-    strategy = SjnStrategy::create();
-  } else if (strategyType == "SRT") {
-    strategy = SrtStrategy::create();
-  } else if (strategyType == "WINNT") {
-    strategy = WinNtStrategy::create();
-  } else if (strategyType == "UNIX") {
-    strategy = UnixStrategy::create();
-  } else {
+  if (strategies.find(strategyType) == strategies.end()) {
     throw TaskException("UNKNOWN_STRATEGY");
   }
+
+  StrategyPtr strategy = strategies[strategyType];
 
   uint32_t completed = obj["completed"];
 

@@ -38,7 +38,7 @@ inline pair<StrategyPtr, GeneratorPtr> randStrategy(bool preemptive = false) {
                   {SrtStrategy::create(), make_shared<SrtTaskGenerator>()}};
   }
 
-  return RandUtils::randChoice(strategies.begin(), strategies.end());
+  return RandUtils::randChoice(strategies);
 }
 } // namespace Generators::ProcessesTask::Details
 
@@ -64,17 +64,13 @@ inline Utils::ProcessesTask generate(uint32_t requestCount = 40,
                     invalidRequests = generator->generate(state, last, false);
 
     if (validRequired && !validRequests.empty()) {
-      requests.push_back(
-          randChoice(validRequests.begin(), validRequests.end()));
+      requests.push_back(randChoice(validRequests));
     } else if (!validRequired && !invalidRequests.empty()) {
-      requests.push_back(
-          randChoice(invalidRequests.begin(), invalidRequests.end()));
+      requests.push_back(randChoice(invalidRequests));
     } else if (validRequired && validRequests.empty()) {
-      requests.push_back(
-          randChoice(invalidRequests.begin(), invalidRequests.end()));
+      requests.push_back(randChoice(invalidRequests));
     } else {
-      requests.push_back(
-          randChoice(validRequests.begin(), validRequests.end()));
+      requests.push_back(randChoice(validRequests));
     }
 
     state = strategy->processRequest(requests.back(), state);

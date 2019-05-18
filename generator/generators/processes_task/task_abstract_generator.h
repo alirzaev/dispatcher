@@ -1,6 +1,8 @@
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
+#include <iterator>
 #include <optional>
 #include <set>
 #include <variant>
@@ -16,6 +18,29 @@ using namespace ProcessesManagement;
 
 template <class T> inline bool sameType(const Request &v1, const Request &v2) {
   return std::holds_alternative<T>(v1) && std::holds_alternative<T>(v2);
+}
+
+std::optional<Process> getCurrent(const std::vector<Process> &processes) {
+  auto it = std::find_if(processes.begin(), processes.end(),
+                         [](const Process &process) {
+                           return process.state() == ProcState::EXECUTING;
+                         });
+  if (it == processes.end()) {
+    return std::nullopt;
+  } else {
+    return *it;
+  }
+}
+
+template <class SequenceContainer, class Predicate>
+std::remove_reference_t<SequenceContainer> filter(SequenceContainer &&container,
+                                                  Predicate pred) {
+  std::remove_reference_t<SequenceContainer> copy;
+
+  std::copy_if(std::begin(container), std::end(container),
+               std::back_inserter(copy), pred);
+
+  return copy;
 }
 } // namespace Generators::ProcessesTask::Details
 
@@ -38,47 +63,46 @@ public:
   virtual vector<Request> generate(const ProcessesState &state,
                                    optional<Request> last,
                                    bool valid = true) const {
+    using Details::filter;
     using Details::sameType;
     namespace PM = ProcessesManagement;
 
-    vector<optional<Request>> requests = {
-        this->CreateProcessReq(state, valid),
-        this->CreateProcessReq(state, valid),
-        this->TerminateProcessReq(state, valid),
-        this->InitIO(state, valid),
-        this->InitIO(state, valid),
-        this->TerminateIO(state, valid),
-        this->TerminateIO(state, valid),
-        this->TransferControl(state, valid)};
+    auto optionals = vector{this->CreateProcessReq(state, valid),
+                            this->CreateProcessReq(state, valid),
+                            this->TerminateProcessReq(state, valid),
+                            this->InitIO(state, valid),
+                            this->InitIO(state, valid),
+                            this->TerminateIO(state, valid),
+                            this->TerminateIO(state, valid),
+                            this->TransferControl(state, valid)};
 
     if (preemptive()) {
-      requests.push_back(this->TimeQuantumExpired(state, valid));
+      optionals.push_back(this->TimeQuantumExpired(state, valid));
     }
 
-    vector<Request> filtered;
+    optionals = filter(optionals, [](const auto &request) { return request; });
+
+    vector<Request> requests;
+    for (const auto &opt : optionals) {
+      if (opt) {
+        requests.push_back(*opt);
+      }
+    }
+
     if (!last) {
       // первая заявка - только CreateProcessReq
-      for (const auto &request : requests) {
-        if (request &&
-            holds_alternative<PM::CreateProcessReq>(request.value())) {
-          filtered.push_back(request.value());
-        }
-      }
+      requests = filter(requests, [](const auto &request) {
+        return holds_alternative<PM::CreateProcessReq>(request);
+      });
     } else {
-      auto lastVal = last.value();
-
-      for (const auto &request : requests) {
-        // не должно быть двух подряд идущих заявок TimeQuantumExpired или
-        // TransferControl
-        bool ok = request &&
-                  !sameType<PM::TimeQuantumExpired>(request.value(), lastVal) &&
-                  !sameType<PM::TransferControl>(request.value(), lastVal);
-        if (ok) {
-          filtered.push_back(request.value());
-        }
-      }
+      // не должно быть двух подряд идущих заявок TimeQuantumExpired или
+      // TransferControl
+      requests = filter(requests, [&last](const auto &request) {
+        return !sameType<PM::TimeQuantumExpired>(request, *last) &&
+               !sameType<PM::TransferControl>(request, *last);
+      });
     }
-    return filtered;
+    return requests;
   }
 
   virtual optional<Request> CreateProcessReq(const ProcessesState &state,
@@ -88,25 +112,21 @@ public:
     auto availablePids = getAvailablePids(state);
 
     if (valid && !availablePids.empty()) {
-      auto pid =
-          RandUtils::randChoice(availablePids.begin(), availablePids.end());
+      auto pid = RandUtils::randChoice(availablePids);
       auto ppid = -1;
 
       // 1 из 2 заявок - дочерний процесс (если возможно)
       if (RandUtils::randRange(0, 256) % 2 == 0) {
         usedPids.insert(-1);
-        auto parent = std::find_if(
-            processes.begin(), processes.end(), [](const auto &process) {
-              return process.state() == ProcState::EXECUTING;
-            });
-        ppid = parent != processes.end() ? parent->pid() : -1;
+        auto parent = Details::getCurrent(processes);
+        ppid = parent ? parent->pid() : -1;
 
         return ProcessesManagement::CreateProcessReq(pid, ppid);
       } else {
         return ProcessesManagement::CreateProcessReq(pid, ppid);
       }
     } else if (!valid && !usedPids.empty()) {
-      auto pid = RandUtils::randChoice(usedPids.begin(), usedPids.end());
+      auto pid = RandUtils::randChoice(usedPids);
       return ProcessesManagement::CreateProcessReq(pid);
     } else {
       return nullopt;
@@ -120,11 +140,10 @@ public:
     auto availablePids = getAvailablePids(state);
 
     if (valid && !usedPids.empty()) {
-      auto pid = RandUtils::randChoice(usedPids.begin(), usedPids.end());
+      auto pid = RandUtils::randChoice(usedPids);
       return ProcessesManagement::TerminateProcessReq(pid);
     } else if (!valid && !availablePids.empty()) {
-      auto pid =
-          RandUtils::randChoice(availablePids.begin(), availablePids.end());
+      auto pid = RandUtils::randChoice(availablePids);
       return ProcessesManagement::TerminateProcessReq(pid);
     } else {
       return nullopt;
@@ -136,19 +155,16 @@ public:
     auto [processes, queues] = state;
     auto usedPids = getUsedPids(state);
 
-    auto it = std::find_if(processes.begin(), processes.end(),
-                           [](const auto &process) {
-                             return process.state() == ProcState::EXECUTING;
-                           });
-    if (it != processes.end()) {
-      usedPids.erase(it->pid());
+    auto current = Details::getCurrent(processes);
+    if (current) {
+      usedPids.erase(current->pid());
     }
 
-    if (valid && it != processes.end()) {
-      auto pid = it->pid();
+    if (valid && current) {
+      auto pid = current->pid();
       return ProcessesManagement::InitIO(pid);
     } else if (!valid && !usedPids.empty()) {
-      auto pid = RandUtils::randChoice(usedPids.begin(), usedPids.end());
+      auto pid = RandUtils::randChoice(usedPids);
       return ProcessesManagement::InitIO(pid);
     } else {
       return nullopt;
@@ -170,10 +186,10 @@ public:
     }
 
     if (valid && !waitingPids.empty()) {
-      auto pid = RandUtils::randChoice(waitingPids.begin(), waitingPids.end());
+      auto pid = RandUtils::randChoice(waitingPids);
       return ProcessesManagement::TerminateIO(pid);
     } else if (!valid && !otherPids.empty()) {
-      auto pid = RandUtils::randChoice(otherPids.begin(), otherPids.end());
+      auto pid = RandUtils::randChoice(otherPids);
       return ProcessesManagement::TerminateIO(pid);
     } else {
       return nullopt;
@@ -185,19 +201,16 @@ public:
     auto [processes, queues] = state;
     auto usedPids = getUsedPids(state);
 
-    auto it = std::find_if(processes.begin(), processes.end(),
-                           [](const auto &process) {
-                             return process.state() == ProcState::EXECUTING;
-                           });
-    if (it != processes.end()) {
-      usedPids.erase(it->pid());
+    auto current = Details::getCurrent(processes);
+    if (current) {
+      usedPids.erase(current->pid());
     }
 
-    if (valid && it != processes.end()) {
-      auto pid = it->pid();
+    if (valid && current) {
+      auto pid = current->pid();
       return ProcessesManagement::TransferControl(pid);
     } else if (!valid && !usedPids.empty()) {
-      auto pid = RandUtils::randChoice(usedPids.begin(), usedPids.end());
+      auto pid = RandUtils::randChoice(usedPids);
       return ProcessesManagement::TransferControl(pid);
     } else {
       return nullopt;

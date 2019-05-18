@@ -24,4 +24,9 @@ inline auto randChoice(BidIt first, BidIt last) -> decltype(*first) {
   std::advance(first, index);
   return *first;
 }
+
+template <class Container>
+inline decltype(auto) randChoice(Container &&container) {
+  return randChoice(std::cbegin(container), std::cend(container));
+}
 } // namespace Generators::RandUtils

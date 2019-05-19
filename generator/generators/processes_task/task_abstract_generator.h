@@ -5,6 +5,7 @@
 #include <iterator>
 #include <optional>
 #include <set>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -46,6 +47,8 @@ std::remove_reference_t<SequenceContainer> filter(SequenceContainer &&container,
 
 namespace Generators::ProcessesTask::TaskGenerators {
 using namespace ProcessesManagement;
+using std::get;
+using std::get_if;
 using std::holds_alternative;
 using std::nullopt;
 using std::optional;
@@ -60,23 +63,33 @@ public:
 
   virtual bool preemptive() const { return false; }
 
-  virtual vector<Request> generate(const ProcessesState &state,
-                                   optional<Request> last,
-                                   bool valid = true) const {
+  virtual vector<Request>
+  generate(const ProcessesState &state,
+           std::pair<optional<Request>, bool> lastRequestInfo,
+           bool valid = true) const {
     using Details::filter;
     using Details::sameType;
     namespace PM = ProcessesManagement;
 
     auto optionals = vector{this->CreateProcessReq(state, valid),
                             this->CreateProcessReq(state, valid),
+                            this->CreateProcessReq(state, valid),
+                            this->CreateProcessReq(state, valid),
+                            this->TerminateProcessReq(state, valid),
                             this->TerminateProcessReq(state, valid),
                             this->InitIO(state, valid),
                             this->InitIO(state, valid),
+                            this->InitIO(state, valid),
+                            this->InitIO(state, valid),
                             this->TerminateIO(state, valid),
                             this->TerminateIO(state, valid),
+                            this->TerminateIO(state, valid),
+                            this->TerminateIO(state, valid),
+                            this->TransferControl(state, valid),
                             this->TransferControl(state, valid)};
 
     if (preemptive()) {
+      optionals.push_back(this->TimeQuantumExpired(state, valid));
       optionals.push_back(this->TimeQuantumExpired(state, valid));
     }
 
@@ -89,19 +102,60 @@ public:
       }
     }
 
+    auto last = lastRequestInfo.first;
+    auto isLastValid = lastRequestInfo.second;
+
     if (!last) {
       // первая заявка - только CreateProcessReq
       requests = filter(requests, [](const auto &request) {
         return holds_alternative<PM::CreateProcessReq>(request);
       });
-    } else {
+    } else if (isLastValid) {
       // не должно быть двух подряд идущих заявок TimeQuantumExpired или
       // TransferControl
-      requests = filter(requests, [&last](const auto &request) {
-        return !sameType<PM::TimeQuantumExpired>(request, *last) &&
-               !sameType<PM::TransferControl>(request, *last);
+      requests = filter(requests, [&var = *last](const auto &request) {
+        return !sameType<PM::TimeQuantumExpired>(request, var) &&
+               !sameType<PM::TransferControl>(request, var);
+      });
+      // после CreateProcessReq не должны идти заявки TransferControl или
+      // TerminateProcessReq с таким же PID
+      requests = filter(requests, [&var = *last](const auto &request) {
+        auto *last = get_if<PM::CreateProcessReq>(&var);
+
+        if (!last) {
+          return true;
+        }
+
+        if (auto current = get_if<PM::TransferControl>(&request);
+            current && current->pid() == last->pid()) {
+          return false;
+        }
+
+        if (auto current = get_if<PM::TerminateProcessReq>(&request);
+            current && current->pid() == last->pid()) {
+          return false;
+        }
+
+        return true;
+      });
+      // после InitIO не должна идти заявка TerminateIO с таким же PID
+      requests = filter(requests, [&var = *last](const auto &request) {
+        auto *last = get_if<PM::InitIO>(&var);
+
+        if (!last) {
+          return true;
+        }
+
+        if (auto current = get_if<PM::TerminateIO>(&request);
+            current && current->pid() == last->pid()) {
+          return false;
+        }
+
+        return true;
       });
     }
+    // если предыдущая заявка была заведомо некорректной, то предусловия
+    // опустить
     return requests;
   }
 

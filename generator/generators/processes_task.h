@@ -55,22 +55,24 @@ inline Utils::ProcessesTask generate(uint32_t requestCount = 40,
   auto [strategy, generator] = randStrategy(preemptive);
   auto state = ProcessesState::initial();
   vector<Request> requests;
+  bool isLastValid = true;
 
   for (uint32_t i = 0; i < requestCount; ++i) {
     bool validRequired = i == 0 ? true : randRange(0, 256) % 8 > 0;
     optional<Request> last =
         requests.empty() ? nullopt : optional(requests.back());
-    vector<Request> validRequests = generator->generate(state, last, true),
-                    invalidRequests = generator->generate(state, last, false);
+    vector<Request> validRequests =
+                        generator->generate(state, {last, isLastValid}, true),
+                    invalidRequests =
+                        generator->generate(state, {last, isLastValid}, false);
 
-    if (validRequired && !validRequests.empty()) {
+    isLastValid = (validRequired && !validRequests.empty()) ||
+                  (!validRequired && invalidRequests.empty());
+
+    if (isLastValid) {
       requests.push_back(randChoice(validRequests));
-    } else if (!validRequired && !invalidRequests.empty()) {
-      requests.push_back(randChoice(invalidRequests));
-    } else if (validRequired && validRequests.empty()) {
-      requests.push_back(randChoice(invalidRequests));
     } else {
-      requests.push_back(randChoice(validRequests));
+      requests.push_back(randChoice(invalidRequests));
     }
 
     state = strategy->processRequest(requests.back(), state);

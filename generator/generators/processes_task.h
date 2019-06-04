@@ -58,7 +58,7 @@ inline Utils::ProcessesTask generate(uint32_t requestCount = 40,
   bool isLastValid = true;
 
   for (uint32_t i = 0; i < requestCount; ++i) {
-    bool validRequired = i == 0 ? true : randRange(0, 256) % 8 > 0;
+    bool validRequired = i == 0 ? true : randRange(0, 256) % 16 > 0;
     optional<Request> last =
         requests.empty() ? nullopt : optional(requests.back());
     vector<Request> validRequests =

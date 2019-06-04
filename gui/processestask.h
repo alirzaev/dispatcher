@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <string>
 
 #include <QLineEdit>
@@ -42,15 +43,17 @@ private:
 
   ProcessesManagement::ProcessesState collectState();
 
+  std::size_t mapRowToIndex(int row);
+
   void processActionCreate();
 
-  void processActionTerminate(int row);
+  void processActionTerminate(std::size_t index);
 
-  void processActionToExecuting(int row);
+  void processActionToExecuting(std::size_t index);
 
-  void processActionToWaiting(int row);
+  void processActionToWaiting(std::size_t index);
 
-  void processActionToActive(int row);
+  void processActionToActive(std::size_t index);
 
   void refresh();
 

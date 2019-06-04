@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstddef>
 #include <exception>
 #include <map>
@@ -124,16 +125,16 @@ void ProcessesTask::provideContextMenu(const QPoint &pos) {
     processActionCreate();
   } else if (action->text() == ProcessMenu::TERMINATE && row != -1) {
     qDebug() << "ContextMenu: terminate";
-    processActionTerminate(row);
+    processActionTerminate(mapRowToIndex(row));
   } else if (action->text() == ProcessMenu::TO_EXECUTING && row != -1) {
     qDebug() << "ContextMenu: to executing";
-    processActionToExecuting(row);
+    processActionToExecuting(mapRowToIndex(row));
   } else if (action->text() == ProcessMenu::TO_WAITING && row != -1) {
     qDebug() << "ContextMenu: to waiting";
-    processActionToWaiting(row);
+    processActionToWaiting(mapRowToIndex(row));
   } else if (action->text() == ProcessMenu::TO_ACTIVE && row != -1) {
     qDebug() << "ContextMenu: to active";
-    processActionToActive(row);
+    processActionToActive(mapRowToIndex(row));
   }
 }
 
@@ -152,6 +153,18 @@ ProcessesState ProcessesTask::collectState() {
   return {processes, queues};
 }
 
+std::size_t ProcessesTask::mapRowToIndex(int row) {
+  auto *processesTable = ui->processesTable;
+  const auto &processes = _model.state.processes;
+  auto pid = processesTable->item(row, 0)->text().toInt();
+
+  auto pos =
+      std::find_if(processes.begin(), processes.end(),
+                   [pid](const auto process) { return process.pid() == pid; });
+
+  return static_cast<std::size_t>(pos - _model.state.processes.begin());
+}
+
 void ProcessesTask::processActionCreate() {
   _model.state = collectState();
   auto dialog = CreateProcessDialog(_model.state.processes, this);
@@ -168,10 +181,10 @@ void ProcessesTask::processActionCreate() {
   }
 }
 
-void ProcessesTask::processActionTerminate(int row) {
+void ProcessesTask::processActionTerminate(std::size_t index) {
   try {
     _model.state = collectState();
-    auto pid = _model.state.processes[row].pid();
+    auto pid = _model.state.processes.at(index).pid();
     _model.state = terminateProcess(_model.state, pid);
     refresh();
   } catch (const OperationException &ex) {
@@ -185,10 +198,10 @@ void ProcessesTask::processActionTerminate(int row) {
   }
 }
 
-void ProcessesTask::processActionToExecuting(int row) {
+void ProcessesTask::processActionToExecuting(std::size_t index) {
   try {
     _model.state = collectState();
-    auto pid = _model.state.processes[row].pid();
+    auto pid = _model.state.processes.at(index).pid();
     _model.state = switchTo(_model.state, pid);
     refresh();
   } catch (const OperationException &ex) {
@@ -204,10 +217,10 @@ void ProcessesTask::processActionToExecuting(int row) {
   }
 }
 
-void ProcessesTask::processActionToWaiting(int row) {
+void ProcessesTask::processActionToWaiting(std::size_t index) {
   try {
     _model.state = collectState();
-    auto pid = _model.state.processes[row].pid();
+    auto pid = _model.state.processes.at(index).pid();
     _model.state = changeProcessState(_model.state, pid, ProcState::WAITING);
     refresh();
   } catch (const OperationException &ex) {
@@ -221,10 +234,10 @@ void ProcessesTask::processActionToWaiting(int row) {
   }
 }
 
-void ProcessesTask::processActionToActive(int row) {
+void ProcessesTask::processActionToActive(std::size_t index) {
   try {
     _model.state = collectState();
-    auto pid = _model.state.processes[row].pid();
+    auto pid = _model.state.processes.at(index).pid();
     _model.state = changeProcessState(_model.state, pid, ProcState::ACTIVE);
     refresh();
   } catch (const OperationException &ex) {

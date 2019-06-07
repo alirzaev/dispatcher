@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <exception>
 #include <memory>
@@ -181,7 +182,7 @@ protected:
    *  @return Кортеж из двух чисел: PID процесса и индекс очереди, в которой он
    *  находится; либо std::nullopt, если такового нет.
    */
-  virtual std::optional<std::pair<int32_t, int32_t>>
+  virtual std::optional<std::pair<int32_t, size_t>>
   schedule(const ProcessesState &state) const = 0;
 
   /**

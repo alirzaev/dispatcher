@@ -50,11 +50,9 @@ TEST_CASE("ProcessesManagement::Process") {
     REQUIRE_THROWS_AS(pm::Process{}.ppid(256), pm::TypeException);
 
     // Некорректный приоритет
-    REQUIRE_THROWS_AS(pm::Process{}.priority(-1), pm::TypeException);
     REQUIRE_THROWS_AS(pm::Process{}.priority(16), pm::TypeException);
 
     // Некорректный базовый приоритет
-    REQUIRE_THROWS_AS(pm::Process{}.basePriority(-1), pm::TypeException);
     REQUIRE_THROWS_AS(pm::Process{}.basePriority(16), pm::TypeException);
 
     // Текущий приоритет меньше базового

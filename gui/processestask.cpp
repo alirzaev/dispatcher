@@ -68,13 +68,13 @@ void ProcessesTask::connectAll() {
           [=](int) { this->setQueuesLists(_model.state.queues); });
   auto push1Handler = [=]() {
     auto pid = ui->lineEditQueue1Push->text().toInt();
-    auto queue = ui->spinBoxQueue1->value();
+    auto queue = static_cast<std::size_t>(ui->spinBoxQueue1->value());
 
     pushToQueue(queue, pid);
   };
   auto push2Handler = [=]() {
     auto pid = ui->lineEditQueue2Push->text().toInt();
-    auto queue = ui->spinBoxQueue2->value();
+    auto queue = static_cast<std::size_t>(ui->spinBoxQueue2->value());
 
     pushToQueue(queue, pid);
   };
@@ -85,12 +85,12 @@ void ProcessesTask::connectAll() {
   connect(ui->lineEditQueue2Push, &QLineEdit::returnPressed, this,
           push2Handler);
   connect(ui->pushButtonQueue1Pop, &QPushButton::clicked, this, [=]() {
-    auto queue = ui->spinBoxQueue1->value();
+    auto queue = static_cast<std::size_t>(ui->spinBoxQueue1->value());
 
     popFromQueue(queue, ui->lineEditQueue1Pop);
   });
   connect(ui->pushButtonQueue2Pop, &QPushButton::clicked, this, [=]() {
-    auto queue = ui->spinBoxQueue2->value();
+    auto queue = static_cast<std::size_t>(ui->spinBoxQueue2->value());
 
     popFromQueue(queue, ui->lineEditQueue2Pop);
   });
@@ -147,7 +147,8 @@ ProcessesState ProcessesTask::collectState() {
   queues[queue1Index].resize(queue1Size);
 
   for (size_t i = 0; i < queue1Size; ++i) {
-    queues[queue1Index][i] = ui->listQueue1->item(i)->text().toInt();
+    auto itemIndex = static_cast<int>(i);
+    queues[queue1Index][i] = ui->listQueue1->item(itemIndex)->text().toInt();
   }
 
   return {processes, queues};
@@ -282,8 +283,8 @@ void ProcessesTask::setProcessesList(const ProcessesList &processes) {
 }
 
 void ProcessesTask::setQueuesLists(const QueuesLists &queues) {
-  auto queue1 = static_cast<size_t>(ui->spinBoxQueue1->value());
-  auto queue2 = static_cast<size_t>(ui->spinBoxQueue2->value());
+  auto queue1 = static_cast<std::size_t>(ui->spinBoxQueue1->value());
+  auto queue2 = static_cast<std::size_t>(ui->spinBoxQueue2->value());
 
   ui->listQueue1->clear();
   for (auto pid : queues[queue1]) {
@@ -314,7 +315,7 @@ void ProcessesTask::setStrategy(StrategyType type) {
   label->setText(strategyMap[type]);
 }
 
-void ProcessesTask::pushToQueue(int queue, int pid) {
+void ProcessesTask::pushToQueue(std::size_t queue, int pid) {
   try {
     _model.state = collectState();
     _model.state = ProcessesManagement::pushToQueue(_model.state, queue, pid);
@@ -332,7 +333,7 @@ void ProcessesTask::pushToQueue(int queue, int pid) {
   }
 }
 
-void ProcessesTask::popFromQueue(int queue, QLineEdit *lineEdit) {
+void ProcessesTask::popFromQueue(std::size_t queue, QLineEdit *lineEdit) {
   try {
     _model.state = collectState();
     const auto &q = _model.state.queues[queue];

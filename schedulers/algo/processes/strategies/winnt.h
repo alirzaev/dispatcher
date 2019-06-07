@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <exception>
 #include <memory>
@@ -50,7 +51,7 @@ public:
   }
 
 protected:
-  std::optional<std::pair<int32_t, int32_t>>
+  std::optional<std::pair<int32_t, size_t>>
   schedule(const ProcessesState &state) const override {
     auto [processes, queues] = state;
 
@@ -165,8 +166,8 @@ protected:
       return newState;
     }
 
-    auto newPriority = std::min<int32_t>(
-        newState.queues.size() - 1, process->priority() + request.augment());
+    auto newPriority = std::min(newState.queues.size() - 1,
+                                process->priority() + request.augment());
 
     newState = pushToQueue(newState, newPriority, request.pid());
     newState = changeProcessState(newState, request.pid(), ProcState::ACTIVE);

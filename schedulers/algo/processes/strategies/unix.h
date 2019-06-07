@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <exception>
 #include <memory>
@@ -44,7 +45,7 @@ public:
   }
 
 protected:
-  std::optional<std::pair<int32_t, int32_t>>
+  std::optional<std::pair<int32_t, size_t>>
   schedule(const ProcessesState &state) const override {
     auto [processes, queues] = state;
 

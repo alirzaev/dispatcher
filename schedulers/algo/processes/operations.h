@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <map>
@@ -55,7 +56,7 @@ inline ProcessesState changeProcessState(const ProcessesState &state,
  *  "ALREADY_IN_QUEUE" - процесс уже добавлен в одну из очередей.
  */
 inline ProcessesState pushToQueue(const ProcessesState &state,
-                                  int32_t queueIndex, int32_t pid) {
+                                  size_t queueIndex, int32_t pid) {
   auto [processes, queues] = state;
 
   if (auto it = getByPid(processes, pid); it != processes.end()) {
@@ -64,7 +65,7 @@ inline ProcessesState pushToQueue(const ProcessesState &state,
         throw OperationException("ALREADY_IN_QUEUE");
       }
     }
-    queues.at(static_cast<size_t>(queueIndex)).push_back(pid);
+    queues.at(queueIndex).push_back(pid);
     *it = it->priority(queueIndex);
     return {processes, queues};
   } else {
@@ -88,10 +89,10 @@ inline ProcessesState pushToQueue(const ProcessesState &state,
  *  queueIndex.
  */
 inline ProcessesState popFromQueue(const ProcessesState &state,
-                                   int32_t queueIndex) {
+                                   size_t queueIndex) {
   auto [processes, queues] = state;
 
-  auto &queue = queues.at(static_cast<size_t>(queueIndex));
+  auto &queue = queues.at(queueIndex);
   if (queue.empty()) {
     throw OperationException("EMPTY_QUEUE");
   }

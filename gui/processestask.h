@@ -67,9 +67,9 @@ private:
 
   void setStrategy(ProcessesManagement::StrategyType type);
 
-  void pushToQueue(int queue, int pid);
+  void pushToQueue(std::size_t queue, int pid);
 
-  void popFromQueue(int queue, QLineEdit *lineEdit);
+  void popFromQueue(std::size_t queue, QLineEdit *lineEdit);
 
   void showErrorMessage(const std::string &message);
 

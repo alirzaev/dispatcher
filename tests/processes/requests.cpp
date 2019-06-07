@@ -48,11 +48,9 @@ TEST_CASE("ProcessesManagement::CreateProcessReq") {
     REQUIRE_THROWS_AS(pm::CreateProcessReq(0, 256), pm::RequestException);
 
     // Некорректный приоритет
-    REQUIRE_THROWS_AS(pm::CreateProcessReq(0, -1, -1), pm::RequestException);
     REQUIRE_THROWS_AS(pm::CreateProcessReq(0, -1, 16), pm::RequestException);
 
     // Некорректный базовый приоритет
-    REQUIRE_THROWS_AS(pm::CreateProcessReq(0, -1, 0, -1), pm::RequestException);
     REQUIRE_THROWS_AS(pm::CreateProcessReq(0, -1, 0, 16), pm::RequestException);
 
     // Текущий приоритет меньше базового

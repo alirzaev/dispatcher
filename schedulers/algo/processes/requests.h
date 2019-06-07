@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <variant>
 
@@ -19,9 +20,9 @@ private:
 
   int32_t _ppid;
 
-  int32_t _priority;
+  size_t _priority;
 
-  int32_t _basePriority;
+  size_t _basePriority;
 
   int32_t _timer;
 
@@ -41,8 +42,8 @@ public:
    *  @throws ProcessesManagement::RequestException Исключение возникает, если
    *  переданные параметры не соответствуют заданным ограничениям.
    */
-  CreateProcessReq(int32_t pid, int32_t ppid = -1, int32_t priority = 0,
-                   int32_t basePriority = 0, int32_t timer = 0,
+  CreateProcessReq(int32_t pid, int32_t ppid = -1, size_t priority = 0,
+                   size_t basePriority = 0, int32_t timer = 0,
                    int32_t workTime = 0)
       : _pid(pid), _ppid(ppid), _priority(priority),
         _basePriority(basePriority), _timer(timer), _workTime(workTime) {
@@ -52,10 +53,10 @@ public:
     if (ppid < -1 || ppid > 255) {
       throw RequestException("INVALID_PPID");
     }
-    if (priority < 0 || priority > 15) {
+    if (priority > 15) {
       throw RequestException("INVALID_PRIORITY");
     }
-    if (basePriority < 0 || basePriority > 15 || basePriority > priority) {
+    if (basePriority > 15 || basePriority > priority) {
       throw RequestException("INVALID_BASE_PRIORITY");
     }
     if (timer < 0) {
@@ -68,9 +69,9 @@ public:
 
   int32_t ppid() const { return _ppid; }
 
-  int32_t priority() const { return _priority; }
+  size_t priority() const { return _priority; }
 
-  int32_t basePriority() const { return _basePriority; }
+  size_t basePriority() const { return _basePriority; }
 
   int32_t timer() const { return _timer; }
 
@@ -174,7 +175,7 @@ class TerminateIO {
 private:
   int32_t _pid;
 
-  int32_t _augment;
+  size_t _augment;
 
 public:
   /**
@@ -186,7 +187,7 @@ public:
    *  @throws ProcessesManagement::RequestException Исключение возникает, если
    *  переданные параметры не соответствуют заданным ограничениям.
    */
-  TerminateIO(int32_t pid, int32_t augment = 1) : _pid(pid), _augment(augment) {
+  TerminateIO(int32_t pid, size_t augment = 1) : _pid(pid), _augment(augment) {
     if (pid < 0 || pid > 255) {
       throw RequestException("INVALID_PID");
     }
@@ -198,7 +199,7 @@ public:
 
   int32_t pid() const { return _pid; }
 
-  int32_t augment() const { return _augment; }
+  size_t augment() const { return _augment; }
 
   /**
    *  Возвращает заявку в виде JSON-объекта.

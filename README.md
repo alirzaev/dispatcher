@@ -31,7 +31,7 @@
 ## Используемые сторонние библиотеки
 
 - [Catch2 2.4.1](https://github.com/catchorg/Catch2)
-- [nlohmann::json 3.3.0](https://github.com/nlohmann/json)
+- [nlohmann::json 3.6.1](https://github.com/nlohmann/json)
 
 ## Сборка
 

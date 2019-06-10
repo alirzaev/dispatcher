@@ -4,6 +4,7 @@
 
 #include <QAction>
 #include <QDebug>
+#include <QDir>
 #include <QFileDialog>
 #include <QMessageBox>
 
@@ -112,9 +113,26 @@ void MainWindow::saveTasks() {
 }
 
 void MainWindow::createTasks() {
-  loadTasks({Generators::MemoryTask::generate(40),
-             Generators::ProcessesTask::generate(40, false),
-             Generators::ProcessesTask::generate(40, true)});
+  std::vector<Utils::Task> tasks = {
+      Generators::MemoryTask::generate(40),
+      Generators::ProcessesTask::generate(40, false),
+      Generators::ProcessesTask::generate(40, true)};
+
+  dumpTasks(tasks);
+  loadTasks(tasks);
+}
+
+void MainWindow::dumpTasks(const std::vector<Utils::Task> &tasks) {
+  try {
+    auto tempFilePath =
+        QDir::toNativeSeparators(QDir::tempPath() + "/dispatcher.json");
+
+    qDebug() << tempFilePath;
+
+    std::ofstream file(tempFilePath.toStdString());
+    Utils::saveTasks(tasks, file);
+  } catch (...) {
+  }
 }
 
 void MainWindow::showHelp() {

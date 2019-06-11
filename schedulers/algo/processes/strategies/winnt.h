@@ -170,7 +170,7 @@ protected:
       return newState;
     }
 
-    auto newPriority = std::min(newState.queues.size() - 1, 
+    auto newPriority = std::min(newState.queues.size() - 1,
                                 process.priority() + request.augment());
 
     newState = pushToQueue(newState, newPriority, request.pid());
@@ -212,7 +212,9 @@ protected:
       return newState;
     }
 
-    auto newPriority = std::max(process.basePriority(), process.priority() - 1);
+    auto newPriority =
+        std::max(process.basePriority(),
+                 process.priority() == 0 ? 0 : process.priority() - 1);
 
     newState = pushToQueue(newState, newPriority, request.pid());
 
@@ -231,7 +233,8 @@ protected:
     auto current = getCurrent(newState);
     if (current) {
       auto newPriority =
-          std::max(current->basePriority(), current->priority() - 1);
+          std::max(current->basePriority(),
+                   current->priority() == 0 ? 0 : current->priority() - 1);
       newState = pushToQueue(newState, newPriority, current->pid());
     }
     auto next = schedule(newState);

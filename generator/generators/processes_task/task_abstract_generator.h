@@ -9,6 +9,7 @@
 #include <variant>
 #include <vector>
 
+#include <algo/processes/helpers.h>
 #include <algo/processes/requests.h>
 #include <algo/processes/types.h>
 
@@ -19,18 +20,6 @@ using namespace ProcessesManagement;
 
 template <class T> inline bool sameType(const Request &v1, const Request &v2) {
   return std::holds_alternative<T>(v1) && std::holds_alternative<T>(v2);
-}
-
-std::optional<Process> getCurrent(const std::vector<Process> &processes) {
-  auto it = std::find_if(processes.begin(), processes.end(),
-                         [](const Process &process) {
-                           return process.state() == ProcState::EXECUTING;
-                         });
-  if (it == processes.end()) {
-    return std::nullopt;
-  } else {
-    return *it;
-  }
 }
 
 template <class SequenceContainer, class Predicate>
@@ -172,8 +161,8 @@ public:
       // 1 из 2 заявок - дочерний процесс (если возможно)
       if (RandUtils::randRange(0, 256) % 2 == 0) {
         usedPids.insert(-1);
-        auto parent = Details::getCurrent(processes);
-        ppid = parent ? parent->pid() : -1;
+        auto parentIndex = getIndexByState(processes, ProcState::EXECUTING);
+        ppid = parentIndex ? processes.at(*parentIndex).pid() : -1;
 
         return ProcessesManagement::CreateProcessReq(pid, ppid);
       } else {
@@ -209,13 +198,13 @@ public:
     auto [processes, queues] = state;
     auto usedPids = getUsedPids(state);
 
-    auto current = Details::getCurrent(processes);
-    if (current) {
-      usedPids.erase(current->pid());
+    auto currentIndex = getIndexByState(processes, ProcState::EXECUTING);
+    if (currentIndex) {
+      usedPids.erase(processes.at(*currentIndex).pid());
     }
 
-    if (valid && current) {
-      auto pid = current->pid();
+    if (valid && currentIndex) {
+      auto pid = processes.at(*currentIndex).pid();
       return ProcessesManagement::InitIO(pid);
     } else if (!valid && !usedPids.empty()) {
       auto pid = RandUtils::randChoice(usedPids);
@@ -255,13 +244,13 @@ public:
     auto [processes, queues] = state;
     auto usedPids = getUsedPids(state);
 
-    auto current = Details::getCurrent(processes);
-    if (current) {
-      usedPids.erase(current->pid());
+    auto currentIndex = getIndexByState(processes, ProcState::EXECUTING);
+    if (currentIndex) {
+      usedPids.erase(processes.at(*currentIndex).pid());
     }
 
-    if (valid && current) {
-      auto pid = current->pid();
+    if (valid && currentIndex) {
+      auto pid = processes.at(*currentIndex).pid();
       return ProcessesManagement::TransferControl(pid);
     } else if (!valid && !usedPids.empty()) {
       auto pid = RandUtils::randChoice(usedPids);

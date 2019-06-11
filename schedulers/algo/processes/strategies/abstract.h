@@ -193,29 +193,12 @@ protected:
    * @return Дескриптор процесса или std::nullopt, если такового нет.
    */
   std::optional<Process> getCurrent(const ProcessesState &state) const {
-    if (auto it = getByState(state.processes, ProcState::EXECUTING);
-        it != state.processes.end()) {
-      return *it;
+    if (auto index = getIndexByState(state.processes, ProcState::EXECUTING);
+        index.has_value()) {
+      return state.processes.at(*index);
     } else {
       return std::nullopt;
     };
-  }
-
-  /**
-   * @brief Возвращает дескриптор процесса по его идентификатору.
-   *
-   * @param state Дескриптор состояния процессов.
-   * @param pid Идентификатор процесса.
-   *
-   * @return Дескриптор процесса или std::nullopt, если такового нет.
-   */
-  std::optional<Process> getProcessByPid(const ProcessesState &state,
-                                         int32_t pid) const {
-    if (auto it = getByPid(state.processes, pid); it != state.processes.end()) {
-      return *it;
-    } else {
-      return std::nullopt;
-    }
   }
 };
 

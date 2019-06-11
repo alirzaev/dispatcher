@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <cstddef>
 #include <exception>
 #include <map>
@@ -15,6 +14,7 @@
 #include <QString>
 
 #include <algo/processes/exceptions.h>
+#include <algo/processes/helpers.h>
 #include <algo/processes/operations.h>
 #include <algo/processes/requests.h>
 #include <algo/processes/strategies.h>
@@ -155,15 +155,9 @@ ProcessesState ProcessesTask::collectState() {
 }
 
 std::size_t ProcessesTask::mapRowToIndex(int row) {
-  auto *processesTable = ui->processesTable;
-  const auto &processes = _model.state.processes;
-  auto pid = processesTable->item(row, 0)->text().toInt();
+  auto pid = ui->processesTable->item(row, 0)->text().toInt();
 
-  auto pos =
-      std::find_if(processes.begin(), processes.end(),
-                   [pid](const auto process) { return process.pid() == pid; });
-
-  return static_cast<std::size_t>(pos - _model.state.processes.begin());
+  return *getIndexByPid(_model.state.processes, pid);
 }
 
 void ProcessesTask::processActionCreate() {

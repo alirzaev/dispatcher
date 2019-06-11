@@ -20,13 +20,13 @@ public:
 
   ProcessesManagement::Process data;
 
-  explicit CreateProcessDialog(const ProcessesList &pids,
+  explicit CreateProcessDialog(const ProcessesList &processes,
                                QWidget *parent = nullptr);
 
   ~CreateProcessDialog() override;
 
 private:
-  std::vector<int32_t> pids;
+  ProcessesList processes;
 
   Ui::CreateProcessDialog *ui;
 

@@ -11,6 +11,7 @@
 #include <variant>
 
 #include "../exceptions.h"
+#include "../helpers.h"
 #include "../operations.h"
 #include "abstract.h"
 
@@ -53,15 +54,16 @@ protected:
     auto newState = state;
     auto process = request.toProcess();
 
-    if (getProcessByPid(newState, process.pid())) {
+    if (getIndexByPid(newState, process.pid())) {
       return newState;
     }
-    auto parent = getProcessByPid(newState, process.ppid());
+    auto parentIndex = getIndexByPid(newState, process.ppid());
     if (process.ppid() != -1) {
-      if (!parent.has_value()) {
+      if (!parentIndex.has_value()) {
         return newState;
       }
-      if (parent->state() != ProcState::EXECUTING) {
+      if (auto parent = newState.processes.at(*parentIndex);
+          parent.state() != ProcState::EXECUTING) {
         return newState;
       }
     }
@@ -83,7 +85,7 @@ protected:
                                 const ProcessesState &state) const override {
     auto newState = state;
 
-    if (!getProcessByPid(newState, request.pid())) {
+    if (!getIndexByPid(newState, request.pid())) {
       return newState;
     }
 
@@ -101,12 +103,13 @@ protected:
   ProcessesState processRequest(const InitIO &request,
                                 const ProcessesState &state) const override {
     auto newState = state;
-    auto process = getProcessByPid(newState, request.pid());
+    auto processIndex = getIndexByPid(newState, request.pid());
 
-    if (!process) {
+    if (!processIndex) {
       return newState;
     }
-    if (process->state() != ProcState::EXECUTING) {
+    if (auto process = newState.processes.at(*processIndex);
+        process.state() != ProcState::EXECUTING) {
       return newState;
     }
 
@@ -123,12 +126,13 @@ protected:
   ProcessesState processRequest(const TerminateIO &request,
                                 const ProcessesState &state) const override {
     auto newState = state;
-    auto process = getProcessByPid(newState, request.pid());
+    auto processIndex = getIndexByPid(newState, request.pid());
 
-    if (!process) {
+    if (!processIndex) {
       return newState;
     }
-    if (process->state() != ProcState::WAITING) {
+    if (auto process = newState.processes.at(*processIndex);
+        process.state() != ProcState::WAITING) {
       return newState;
     }
 
@@ -147,12 +151,13 @@ protected:
   ProcessesState processRequest(const TransferControl &request,
                                 const ProcessesState &state) const override {
     auto newState = state;
-    auto process = getProcessByPid(newState, request.pid());
+    auto processIndex = getIndexByPid(newState, request.pid());
 
-    if (!process) {
+    if (!processIndex) {
       return newState;
     }
-    if (process->state() != ProcState::EXECUTING) {
+    if (auto process = newState.processes.at(*processIndex);
+        process.state() != ProcState::EXECUTING) {
       return newState;
     }
 

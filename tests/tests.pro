@@ -14,6 +14,7 @@ SOURCES += \
     memory/operations.cpp \
     memory/types.cpp \
     memory/strategies.cpp \
+    processes/helpers.cpp \
     processes/requests.cpp \
     processes/operations.cpp \
     processes/types.cpp

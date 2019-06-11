@@ -73,15 +73,16 @@ protected:
     auto newState = state;
     auto process = request.toProcess();
 
-    if (getProcessByPid(newState, process.pid())) {
+    if (getIndexByPid(newState, process.pid())) {
       return newState;
     }
-    auto parent = getProcessByPid(newState, process.ppid());
+    auto parentIndex = getIndexByPid(newState, process.ppid());
     if (process.ppid() != -1) {
-      if (!parent.has_value()) {
+      if (!parentIndex.has_value()) {
         return newState;
       }
-      if (parent->state() != ProcState::EXECUTING) {
+      if (auto parent = newState.processes.at(*parentIndex);
+          parent.state() != ProcState::EXECUTING) {
         return newState;
       }
     }
@@ -94,12 +95,13 @@ protected:
 
     if (next) {
       auto [pid, queue] = next.value();
-      auto process = getProcessByPid(newState, pid);
+      auto processIndex = getIndexByPid(newState, pid);
+      auto process = newState.processes.at(*processIndex);
 
       if (!current) {
         newState = popFromQueue(newState, queue);
         newState = switchTo(newState, pid);
-      } else if (current && process->priority() > current->priority()) {
+      } else if (current && process.priority() > current->priority()) {
         newState = pushToQueue(newState, current->priority(), current->pid());
         newState = popFromQueue(newState, queue);
         newState = switchTo(newState, pid);
@@ -115,7 +117,7 @@ protected:
                                 const ProcessesState &state) const override {
     auto newState = state;
 
-    if (!getProcessByPid(newState, request.pid())) {
+    if (!getIndexByPid(newState, request.pid())) {
       return newState;
     }
 
@@ -134,12 +136,13 @@ protected:
   ProcessesState processRequest(const InitIO &request,
                                 const ProcessesState &state) const override {
     auto newState = state;
-    auto process = getProcessByPid(newState, request.pid());
+    auto processIndex = getIndexByPid(newState, request.pid());
 
-    if (!process) {
+    if (!processIndex) {
       return newState;
     }
-    if (process->state() != ProcState::EXECUTING) {
+    if (auto process = newState.processes.at(*processIndex);
+        process.state() != ProcState::EXECUTING) {
       return newState;
     }
 
@@ -157,17 +160,18 @@ protected:
   ProcessesState processRequest(const TerminateIO &request,
                                 const ProcessesState &state) const override {
     auto newState = state;
-    auto process = getProcessByPid(newState, request.pid());
+    auto processIndex = getIndexByPid(newState, request.pid());
 
-    if (!process) {
+    if (!processIndex) {
       return newState;
     }
-    if (process->state() != ProcState::WAITING) {
+    auto process = newState.processes.at(*processIndex);
+    if (process.state() != ProcState::WAITING) {
       return newState;
     }
 
-    auto newPriority = std::min(newState.queues.size() - 1,
-                                process->priority() + request.augment());
+    auto newPriority = std::min(newState.queues.size() - 1, 
+                                process.priority() + request.augment());
 
     newState = pushToQueue(newState, newPriority, request.pid());
     newState = changeProcessState(newState, request.pid(), ProcState::ACTIVE);
@@ -177,12 +181,13 @@ protected:
 
     if (next) {
       auto [pid, queue] = next.value();
-      auto process = getProcessByPid(newState, pid);
+      auto processIndex = getIndexByPid(newState, pid);
+      auto process = newState.processes.at(*processIndex);
 
       if (!current) {
         newState = popFromQueue(newState, queue);
         newState = switchTo(newState, pid);
-      } else if (current && process->priority() > current->priority()) {
+      } else if (current && process.priority() > current->priority()) {
         newState = pushToQueue(newState, current->priority(), current->pid());
         newState = popFromQueue(newState, queue);
         newState = switchTo(newState, pid);
@@ -197,17 +202,17 @@ protected:
   ProcessesState processRequest(const TransferControl &request,
                                 const ProcessesState &state) const override {
     auto newState = state;
-    auto process = getProcessByPid(newState, request.pid());
+    auto processIndex = getIndexByPid(newState, request.pid());
 
-    if (!process) {
+    if (!processIndex) {
       return newState;
     }
-    if (process->state() != ProcState::EXECUTING) {
+    auto process = newState.processes.at(*processIndex);
+    if (process.state() != ProcState::EXECUTING) {
       return newState;
     }
 
-    auto newPriority =
-        std::max(process->basePriority(), process->priority() - 1);
+    auto newPriority = std::max(process.basePriority(), process.priority() - 1);
 
     newState = pushToQueue(newState, newPriority, request.pid());
 

@@ -6,6 +6,7 @@
 #include <QIntValidator>
 #include <QMessageBox>
 
+#include <algo/processes/helpers.h>
 #include <algo/processes/types.h>
 
 #include "createprocessdialog.h"
@@ -13,8 +14,7 @@
 
 CreateProcessDialog::CreateProcessDialog(
     const CreateProcessDialog::ProcessesList &processes, QWidget *parent)
-    : QDialog(parent), pids(processes.size(), -1),
-      ui(new Ui::CreateProcessDialog) {
+    : QDialog(parent), processes(processes), ui(new Ui::CreateProcessDialog) {
   ui->setupUi(this);
   ui->lineEditPID->setValidator(new QIntValidator(0, 255));
   ui->lineEditPPID->setValidator(new QIntValidator(-1, 255));
@@ -23,18 +23,19 @@ CreateProcessDialog::CreateProcessDialog(
   ui->lineEditWorkTime->setValidator(
       new QIntValidator(0, std::numeric_limits<int>::max()));
 
+  ui->lineEditPriority->setDisabled(true);
+
   connect(ui->buttonBox, &QDialogButtonBox::accepted, this,
           &CreateProcessDialog::tryAccept);
   connect(ui->buttonBox, &QDialogButtonBox::rejected, this,
           &CreateProcessDialog::reject);
-
-  std::transform(processes.begin(), processes.end(), pids.begin(),
-                 [](const auto &p) { return p.pid(); });
 }
 
 CreateProcessDialog::~CreateProcessDialog() { delete ui; }
 
 void CreateProcessDialog::tryAccept() {
+  using ProcessesManagement::getIndexByPid;
+
   bool valid = ui->lineEditPID->hasAcceptableInput()             //
                && ui->lineEditPPID->hasAcceptableInput()         //
                && ui->lineEditPriority->hasAcceptableInput()     //
@@ -51,11 +52,11 @@ void CreateProcessDialog::tryAccept() {
   int32_t basePriority = ui->lineEditBasePriority->text().toInt();
   int32_t workTime = ui->lineEditWorkTime->text().toInt();
 
-  if (std::find(pids.begin(), pids.end(), pid) != pids.end()) {
+  if (getIndexByPid(processes, pid)) {
     QMessageBox::critical(this, "Ошибка", "Процесс с таким PID уже существует");
     return;
   }
-  if (ppid != -1 && std::find(pids.begin(), pids.end(), ppid) == pids.end()) {
+  if (ppid != -1 && !getIndexByPid(processes, ppid)) {
     QMessageBox::critical(this, "Ошибка",
                           "Родительский процесс с таким PID не существует");
     return;

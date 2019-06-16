@@ -58,6 +58,8 @@ TEST_CASE("ProcessesManagement::Process") {
     // Текущий приоритет меньше базового
     REQUIRE_THROWS_AS(pm::Process{}.priority(0).basePriority(1),
                       pm::TypeException);
+    REQUIRE_THROWS_AS(pm::Process{}.priority(2).basePriority(1).priority(0),
+                      pm::TypeException);
 
     // Некорректное время работы
     REQUIRE_THROWS_AS(pm::Process{}.timer(-1),

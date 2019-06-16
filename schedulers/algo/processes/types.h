@@ -117,7 +117,7 @@ public:
    *  переданные параметры не соответствуют заданным ограничениям.
    */
   Process priority(size_t priority) const {
-    if (priority > 15) {
+    if (priority > 15 || _basePriority > priority) {
       throw TypeException("INVALID_PRIORITY");
     }
 

@@ -5,6 +5,7 @@
 #include <variant>
 
 #include <QDebug>
+#include <QFlags>
 #include <QIntValidator>
 #include <QLineEdit>
 #include <QMessageBox>
@@ -161,8 +162,22 @@ std::size_t ProcessesTask::mapRowToIndex(int row) {
 }
 
 void ProcessesTask::processActionCreate() {
+  using Field = CreateProcessDialog::EditableField;
+
   _model.state = collectState();
-  auto dialog = CreateProcessDialog(_model.state.processes, this);
+
+  std::map<StrategyType, QFlags<Field>> flagsMap = {
+      {StrategyType::ROUNDROBIN, {Field::Pid, Field::Ppid}},
+      {StrategyType::FCFS, {Field::Pid, Field::Ppid}},
+      {StrategyType::SJN, {Field::Pid, Field::Ppid, Field::WorkTime}},
+      {StrategyType::SRT, {Field::Pid, Field::Ppid, Field::WorkTime}},
+      {StrategyType::UNIX, {Field::Pid, Field::Ppid, Field::Priority}},
+      {StrategyType::WINDOWS,
+       {Field::Pid, Field::Ppid, Field::Priority, Field::BasePriority}}};
+
+  auto dialog =
+      CreateProcessDialog(_model.state.processes,
+                          flagsMap.at(_model.task.strategy()->type()), this);
   auto res = dialog.exec();
 
   if (res == QDialog::Accepted) {

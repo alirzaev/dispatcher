@@ -3,6 +3,7 @@
 #include <limits>
 
 #include <QDialogButtonBox>
+#include <QFlags>
 #include <QIntValidator>
 #include <QMessageBox>
 
@@ -13,7 +14,8 @@
 #include "ui_createprocessdialog.h"
 
 CreateProcessDialog::CreateProcessDialog(
-    const CreateProcessDialog::ProcessesList &processes, QWidget *parent)
+    const ProcessesList &processes, const QFlags<EditableField> &editableFields,
+    QWidget *parent)
     : QDialog(parent), processes(processes), ui(new Ui::CreateProcessDialog) {
   ui->setupUi(this);
   ui->lineEditPID->setValidator(new QIntValidator(0, 255));
@@ -23,7 +25,14 @@ CreateProcessDialog::CreateProcessDialog(
   ui->lineEditWorkTime->setValidator(
       new QIntValidator(0, std::numeric_limits<int>::max()));
 
-  ui->lineEditPriority->setDisabled(true);
+  ui->lineEditPID->setEnabled(editableFields.testFlag(EditableField::Pid));
+  ui->lineEditPPID->setEnabled(editableFields.testFlag(EditableField::Ppid));
+  ui->lineEditPriority->setEnabled(
+      editableFields.testFlag(EditableField::Priority));
+  ui->lineEditBasePriority->setEnabled(
+      editableFields.testFlag(EditableField::BasePriority));
+  ui->lineEditWorkTime->setEnabled(
+      editableFields.testFlag(EditableField::WorkTime));
 
   connect(ui->buttonBox, &QDialogButtonBox::accepted, this,
           &CreateProcessDialog::tryAccept);

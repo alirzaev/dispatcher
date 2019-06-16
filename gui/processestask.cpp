@@ -268,7 +268,6 @@ void ProcessesTask::refresh() {
   setStrategy(_model.task.strategy()->type());
   if (_model.task.done()) {
     setRequest(_model.task.requests().back());
-    showInfoMessage("Вы успешно выполнили данное задание");
   } else {
     auto index = _model.task.completed();
     setRequest(_model.task.requests()[index]);
@@ -277,11 +276,14 @@ void ProcessesTask::refresh() {
 
 void ProcessesTask::nextRequest() {
   auto state = updateTimer(collectState());
-  auto task = _model.task.next(state);
-  if (task) {
+
+  if (auto task = _model.task.next(state); task.has_value()) {
     _model.task = task.value();
     _model.state = _model.task.state();
     refresh();
+    if (_model.task.done()) {
+      showInfoMessage("Вы успешно выполнили данное задание");
+    }
   } else {
     showErrorMessage("Заявка обработана неверно");
   }

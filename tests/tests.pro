@@ -4,6 +4,8 @@ CONFIG -= app_bundle
 CONFIG -= qt
 CONFIG += object_parallel_to_source
 
+QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.14
+
 INCLUDEPATH += \
     ../3rdparty \
     ../schedulers

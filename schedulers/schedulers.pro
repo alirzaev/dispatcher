@@ -3,6 +3,8 @@ CONFIG += c++1z
 CONFIG -= app_bundle
 CONFIG -= qt
 
+QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.14
+
 #QMAKE_CXXFLAGS += -Wa,-mbig-obj
 
 INCLUDEPATH += "../3rdparty"

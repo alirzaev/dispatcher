@@ -3,6 +3,8 @@ CONFIG += console c++1z
 CONFIG -= app_bundle
 CONFIG -= qt
 
+QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.14
+
 INCLUDEPATH += \
     ../3rdparty \
     ../schedulers

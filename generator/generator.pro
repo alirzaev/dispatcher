@@ -1,13 +1,12 @@
+include(../common.pri)
+
 TEMPLATE = app
-CONFIG += console c++1z
+
+CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
-QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.14
-
-INCLUDEPATH += \
-    ../3rdparty \
-    ../schedulers
+INCLUDEPATH += ../schedulers
 
 SOURCES += \
     main.cpp
@@ -24,9 +23,3 @@ HEADERS += \
     generators/processes_task/task_winnt_generator.h \
     generators/processes_task/task_sjn_generator.h \
     generators/processes_task/task_unix_generator.h
-
-# The following keeps the generated files at least somewhat separate
-# from the source files.
-UI_DIR = uics
-MOC_DIR = mocs
-OBJECTS_DIR = objs

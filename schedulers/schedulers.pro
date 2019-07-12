@@ -1,13 +1,9 @@
+include(../common.pri)
+
 TEMPLATE = lib
-CONFIG += c++1z
+
 CONFIG -= app_bundle
 CONFIG -= qt
-
-QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.14
-
-#QMAKE_CXXFLAGS += -Wa,-mbig-obj
-
-INCLUDEPATH += "../3rdparty"
 
 HEADERS += \
     algo/memory/exceptions.h \
@@ -32,11 +28,5 @@ HEADERS += \
     algo/processes/strategies/winnt.h \
     algo/processes/strategies/sjn.h \
     algo/processes/strategies/unix.h
-
-# The following keeps the generated files at least somewhat separate
-# from the source files.
-UI_DIR = uics
-MOC_DIR = mocs
-OBJECTS_DIR = objs
 
 requires(false)

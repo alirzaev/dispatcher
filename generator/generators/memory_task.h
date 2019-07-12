@@ -162,9 +162,18 @@ inline optional<Request> genFreeMemory(const MemoryState &state,
   auto [blocks, freeBlocks] = state;
   auto usedPids = getUsedPids(state), availabePids = getAvailablePids(state);
 
+  std::map<int32_t, size_t> blocksCount;
   set<MemoryBlock, MemoryBlockCmp> usedBlocks;
   for (const auto &block : blocks) {
     if (block.pid() != -1) {
+      blocksCount[block.pid()] += 1;
+    }
+  }
+
+  // При освобождении последнего блока памяти должна создаваться заявка на
+  // завершение процесса
+  for (const auto &block : blocks) {
+    if (block.pid() != -1 && blocksCount[block.pid()] > 1) {
       usedBlocks.insert(block);
     }
   }

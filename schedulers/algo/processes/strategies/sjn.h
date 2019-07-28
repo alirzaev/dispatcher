@@ -80,7 +80,8 @@ private:
       }
     }
 
-    std::stable_sort(queue.begin(), queue.end(),
+    std::stable_sort(queue.begin(),
+                     queue.end(),
                      [&processesMap](int32_t left, int32_t right) {
                        auto leftTime = processesMap[left].workTime();
                        auto rightTime = processesMap[right].workTime();

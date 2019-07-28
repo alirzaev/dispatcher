@@ -77,7 +77,7 @@ inline Utils::ProcessesTask generate(uint32_t requestCount = 40,
 
     state = strategy->processRequest(requests.back(), state);
   }
-  return Utils::ProcessesTask::create(strategy, 0, ProcessesState::initial(),
-                                      requests);
+  return Utils::ProcessesTask::create(
+      strategy, 0, ProcessesState::initial(), requests);
 }
 } // namespace Generators::ProcessesTask

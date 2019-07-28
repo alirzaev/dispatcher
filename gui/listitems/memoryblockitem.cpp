@@ -7,7 +7,8 @@
 using namespace Utils::Literals;
 
 MemoryBlockItem::MemoryBlockItem(const MemoryManagement::MemoryBlock &block,
-                                 bool highlightFree, QListWidget *parent)
+                                 bool highlightFree,
+                                 QListWidget *parent)
     : QListWidgetItem(parent), _block(block) {
   auto blockRepr = "address: %1; size: %2; pid: %3"_qs.arg(block.address(), 3)
                        .arg(block.size(), 3)

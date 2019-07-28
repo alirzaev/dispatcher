@@ -37,10 +37,12 @@ MemoryTask::MemoryTask(Models::MemoryModel model, QWidget *parent)
 
   ui->listMemBlocks->setContextMenuPolicy(Qt::CustomContextMenu);
 
-  connect(ui->listMemBlocks, &QListWidget::customContextMenuRequested, this,
+  connect(ui->listMemBlocks,
+          &QListWidget::customContextMenuRequested,
+          this,
           &MemoryTask::provideContextMenu);
-  connect(ui->acceptRequest, &QPushButton::clicked, this,
-          &MemoryTask::nextRequest);
+  connect(
+      ui->acceptRequest, &QPushButton::clicked, this, &MemoryTask::nextRequest);
   connect(ui->resetState, &QPushButton::clicked, this, [=]() {
     _model.state = _model.task.state();
     refresh();

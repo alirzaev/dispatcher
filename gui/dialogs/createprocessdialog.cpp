@@ -14,7 +14,8 @@
 #include "ui_createprocessdialog.h"
 
 CreateProcessDialog::CreateProcessDialog(
-    const ProcessesList &processes, const QFlags<EditableField> &editableFields,
+    const ProcessesList &processes,
+    const QFlags<EditableField> &editableFields,
     QWidget *parent)
     : QDialog(parent), processes(processes), ui(new Ui::CreateProcessDialog) {
   ui->setupUi(this);
@@ -34,9 +35,13 @@ CreateProcessDialog::CreateProcessDialog(
   ui->lineEditWorkTime->setEnabled(
       editableFields.testFlag(EditableField::WorkTime));
 
-  connect(ui->buttonBox, &QDialogButtonBox::accepted, this,
+  connect(ui->buttonBox,
+          &QDialogButtonBox::accepted,
+          this,
           &CreateProcessDialog::tryAccept);
-  connect(ui->buttonBox, &QDialogButtonBox::rejected, this,
+  connect(ui->buttonBox,
+          &QDialogButtonBox::rejected,
+          this,
           &CreateProcessDialog::reject);
 }
 
@@ -66,13 +71,13 @@ void CreateProcessDialog::tryAccept() {
     return;
   }
   if (ppid != -1 && !getIndexByPid(processes, ppid)) {
-    QMessageBox::critical(this, "Ошибка",
-                          "Родительский процесс с таким PID не существует");
+    QMessageBox::critical(
+        this, "Ошибка", "Родительский процесс с таким PID не существует");
     return;
   }
   if (priority < basePriority) {
-    QMessageBox::critical(this, "Ошибка",
-                          "Текущий приоритет не может быть меньше базового");
+    QMessageBox::critical(
+        this, "Ошибка", "Текущий приоритет не может быть меньше базового");
     return;
   }
 

@@ -23,7 +23,8 @@ inline std::optional<std::size_t>
 getIndexByPid(const std::vector<Process> &processes, int32_t pid) {
 
   auto pos =
-      std::find_if(processes.begin(), processes.end(),
+      std::find_if(processes.begin(),
+                   processes.end(),
                    [pid](const auto &process) { return process.pid() == pid; });
 
   if (pos == processes.end()) {
@@ -61,8 +62,9 @@ inline std::optional<std::size_t> getIndexByPid(const ProcessesState &state,
 inline std::optional<std::size_t>
 getIndexByState(const std::vector<Process> &processes, ProcState state) {
   auto pos = std::find_if(
-      processes.begin(), processes.end(),
-      [state](const auto &process) { return process.state() == state; });
+      processes.begin(), processes.end(), [state](const auto &process) {
+        return process.state() == state;
+      });
 
   if (pos == processes.end()) {
     return std::nullopt;

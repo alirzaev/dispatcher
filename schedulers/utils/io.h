@@ -68,12 +68,12 @@ inline MemoryTask loadMemoryTask(const nlohmann::json &obj) {
     blocks.emplace_back(block["pid"], block["address"], block["size"]);
   }
   for (auto blockObj : obj["state"]["free_blocks"]) {
-    freeBlocks.emplace_back(blockObj["pid"], blockObj["address"],
-                            blockObj["size"]);
+    freeBlocks.emplace_back(
+        blockObj["pid"], blockObj["address"], blockObj["size"]);
   }
 
-  return MemoryTask::create(strategy, completed, {blocks, freeBlocks},
-                            requests);
+  return MemoryTask::create(
+      strategy, completed, {blocks, freeBlocks}, requests);
 }
 
 /**
@@ -97,9 +97,12 @@ inline ProcessesTask loadProcessesTask(const nlohmann::json &obj) {
   };
 
   std::map<std::string, StrategyPtr> strategies = {
-      toPair(RoundRobinStrategy::create()), toPair(FcfsStrategy::create()),
-      toPair(SjnStrategy::create()),        toPair(SrtStrategy::create()),
-      toPair(WinNtStrategy::create()),      toPair(UnixStrategy::create())};
+      toPair(RoundRobinStrategy::create()),
+      toPair(FcfsStrategy::create()),
+      toPair(SjnStrategy::create()),
+      toPair(SrtStrategy::create()),
+      toPair(WinNtStrategy::create()),
+      toPair(UnixStrategy::create())};
 
   auto strategyType = obj["strategy"];
   if (strategies.find(strategyType) == strategies.end()) {
@@ -113,9 +116,12 @@ inline ProcessesTask loadProcessesTask(const nlohmann::json &obj) {
   std::vector<Request> requests;
   for (auto req : obj["requests"]) {
     if (req["type"] == "CREATE_PROCESS") {
-      requests.push_back(CreateProcessReq(req["pid"], req["ppid"],
-                                          req["priority"], req["basePriority"],
-                                          req["timer"], req["workTime"]));
+      requests.push_back(CreateProcessReq(req["pid"],
+                                          req["ppid"],
+                                          req["priority"],
+                                          req["basePriority"],
+                                          req["timer"],
+                                          req["workTime"]));
     } else if (req["type"] == "TERMINATE_PROCESS") {
       requests.push_back(TerminateProcessReq(req["pid"]));
     } else if (req["type"] == "INIT_IO") {
@@ -157,8 +163,8 @@ inline ProcessesTask loadProcessesTask(const nlohmann::json &obj) {
     }
   }
 
-  return ProcessesTask::create(strategy, completed, {processes, queues},
-                               requests);
+  return ProcessesTask::create(
+      strategy, completed, {processes, queues}, requests);
 }
 } // namespace Utils::details
 

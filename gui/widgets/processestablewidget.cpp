@@ -43,8 +43,13 @@ ProcessesTableWidget::ProcessesTableWidget(QWidget *parent)
   setSelectionMode(QAbstractItemView::SingleSelection);
   setEditTriggers({QTableWidget::NoEditTriggers});
 
-  setHorizontalHeaderLabels({"PID"_qs, "PPID"_qs, "Состояние"_qs,
-                             "Приториет"_qs, "Б. приоритет"_qs, "t"_qs, "T"_qs,
+  setHorizontalHeaderLabels({"PID"_qs,
+                             "PPID"_qs,
+                             "Состояние"_qs,
+                             "Приториет"_qs,
+                             "Б. приоритет"_qs,
+                             "t"_qs,
+                             "T"_qs,
                              "T-t"_qs});
   setSortingEnabled(true);
   resizeColumnsToContents();

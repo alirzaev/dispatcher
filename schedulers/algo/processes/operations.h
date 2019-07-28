@@ -29,7 +29,8 @@ namespace ProcessesManagement {
  *  "NO_SUCH_PROCESS" - процесса с таким @a pid не существует.
  */
 inline ProcessesState changeProcessState(const ProcessesState &state,
-                                         int32_t pid, ProcState newState) {
+                                         int32_t pid,
+                                         ProcState newState) {
   auto [processes, queues] = state;
 
   if (auto index = getIndexByPid(processes, pid); index.has_value()) {
@@ -55,8 +56,8 @@ inline ProcessesState changeProcessState(const ProcessesState &state,
  *  "NO_SUCH_PROCESS" - процесса с таким @a pid не существует;
  *  "ALREADY_IN_QUEUE" - процесс уже добавлен в одну из очередей.
  */
-inline ProcessesState pushToQueue(const ProcessesState &state,
-                                  size_t queueIndex, int32_t pid) {
+inline ProcessesState
+pushToQueue(const ProcessesState &state, size_t queueIndex, int32_t pid) {
   auto [processes, queues] = state;
 
   if (auto index = getIndexByPid(processes, pid); index.has_value()) {
@@ -177,13 +178,13 @@ inline ProcessesState terminateProcess(const ProcessesState &state,
     }
   }
   std::set<int32_t> toTerminate;
-  std::function<void(int32_t)> rec = [&rec, &toTerminate,
-                                      &parents](int32_t pid) {
-    toTerminate.insert(pid);
-    for (const auto &child : parents[pid]) {
-      rec(child);
-    }
-  };
+  std::function<void(int32_t)> rec =
+      [&rec, &toTerminate, &parents](int32_t pid) {
+        toTerminate.insert(pid);
+        for (const auto &child : parents[pid]) {
+          rec(child);
+        }
+      };
   rec(pid);
 
   decltype(processes) newProcesses;

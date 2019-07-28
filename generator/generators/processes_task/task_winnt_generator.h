@@ -30,9 +30,12 @@ public:
       auto request = get<ProcessesManagement::CreateProcessReq>(*base);
 
       auto priority = RandUtils::randRange(0u, 11u);
-      return ProcessesManagement::CreateProcessReq(
-          request.pid(), request.ppid(), priority, priority, request.timer(),
-          request.workTime());
+      return ProcessesManagement::CreateProcessReq(request.pid(),
+                                                   request.ppid(),
+                                                   priority,
+                                                   priority,
+                                                   request.timer(),
+                                                   request.workTime());
     } else {
       return base;
     }

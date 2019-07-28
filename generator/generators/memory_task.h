@@ -207,7 +207,8 @@ inline Utils::MemoryTask generate(uint32_t requestCount = 40) {
 
   vector<GenPtr> gens = {&Details::genCreateProcess,
                          &Details::genTerminateProcess,
-                         &Details::genAllocateMemory, &Details::genFreeMemory};
+                         &Details::genAllocateMemory,
+                         &Details::genFreeMemory};
 
   auto strategy = randStrategy();
   auto state = MemoryState::initial();
@@ -241,7 +242,7 @@ inline Utils::MemoryTask generate(uint32_t requestCount = 40) {
 
     state = strategy->processRequest(requests.back(), state);
   }
-  return Utils::MemoryTask::create(strategy, 0, MemoryState::initial(),
-                                   requests);
+  return Utils::MemoryTask::create(
+      strategy, 0, MemoryState::initial(), requests);
 }
 } // namespace Generators::MemoryTask

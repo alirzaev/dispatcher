@@ -42,8 +42,11 @@ public:
    *  @throws ProcessesManagement::RequestException Исключение возникает, если
    *  переданные параметры не соответствуют заданным ограничениям.
    */
-  CreateProcessReq(int32_t pid, int32_t ppid = -1, size_t priority = 0,
-                   size_t basePriority = 0, int32_t timer = 0,
+  CreateProcessReq(int32_t pid,
+                   int32_t ppid = -1,
+                   size_t priority = 0,
+                   size_t basePriority = 0,
+                   int32_t timer = 0,
                    int32_t workTime = 0)
       : _pid(pid), _ppid(ppid), _priority(priority),
         _basePriority(basePriority), _timer(timer), _workTime(workTime) {
@@ -254,6 +257,10 @@ public:
   nlohmann::json dump() const { return {{"type", "TIME_QUANTUM_EXPIRED"}}; }
 };
 
-using Request = std::variant<CreateProcessReq, TerminateProcessReq, InitIO,
-                             TerminateIO, TransferControl, TimeQuantumExpired>;
+using Request = std::variant<CreateProcessReq,
+                             TerminateProcessReq,
+                             InitIO,
+                             TerminateIO,
+                             TransferControl,
+                             TimeQuantumExpired>;
 } // namespace ProcessesManagement

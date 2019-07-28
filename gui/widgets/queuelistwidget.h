@@ -1,9 +1,9 @@
+#pragma once
+
 #include <QDropEvent>
 #include <QListWidget>
 #include <QObject>
 #include <QWidget>
-
-#pragma once
 
 class QueueListWidget : public QListWidget {
   Q_OBJECT

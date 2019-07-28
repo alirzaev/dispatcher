@@ -27,11 +27,13 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
 
-  connect(ui->actionOpenTask, &QAction::triggered, this,
-          &MainWindow::openTasks);
-  connect(ui->actionSaveTask, &QAction::triggered, this,
-          &MainWindow::saveTasks);
-  connect(ui->actionGenerateTask, &QAction::triggered, this,
+  connect(
+      ui->actionOpenTask, &QAction::triggered, this, &MainWindow::openTasks);
+  connect(
+      ui->actionSaveTask, &QAction::triggered, this, &MainWindow::saveTasks);
+  connect(ui->actionGenerateTask,
+          &QAction::triggered,
+          this,
           &MainWindow::createTasks);
   connect(ui->actionQuit, &QAction::triggered, this, &QMainWindow::close);
   connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::showHelp);
@@ -40,8 +42,8 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::openTasks() {
-  auto fileName = QFileDialog::getOpenFileName(this, "Открыть файл задания", "",
-                                               "JSON (*.json)");
+  auto fileName = QFileDialog::getOpenFileName(
+      this, "Открыть файл задания", "", "JSON (*.json)");
   if (fileName.isEmpty()) {
     return;
   }
@@ -56,8 +58,8 @@ void MainWindow::openTasks() {
     loadTasks(tasks);
   } catch (const std::exception &ex) {
     qDebug() << ex.what();
-    QMessageBox::critical(this, "Ошибка",
-                          "Невозможно загрузить задания: файл поврежден");
+    QMessageBox::critical(
+        this, "Ошибка", "Невозможно загрузить задания: файл поврежден");
   }
 }
 
@@ -84,8 +86,8 @@ void MainWindow::loadTasks(const std::vector<Utils::Task> &tasks) {
 }
 
 void MainWindow::saveTasks() {
-  auto fileName = QFileDialog::getSaveFileName(this, "Сохранить задание в файл",
-                                               "", "JSON (*.json)");
+  auto fileName = QFileDialog::getSaveFileName(
+      this, "Сохранить задание в файл", "", "JSON (*.json)");
   if (fileName.isEmpty()) {
     return;
   }

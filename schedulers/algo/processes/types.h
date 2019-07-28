@@ -54,21 +54,37 @@ public:
   Process &operator=(Process &&rhs) = default;
 
   bool operator==(const Process &rhs) const {
-    return std::tuple{_pid,   _ppid,     _priority, _basePriority,
-                      _timer, _workTime, _state} ==
-           std::tuple{rhs._pid,          rhs._ppid,  rhs._priority,
-                      rhs._basePriority, rhs._timer, rhs._workTime,
-                      rhs._state};
+    return std::tuple{_pid,
+                      _ppid,
+                      _priority,
+                      _basePriority,
+                      _timer,
+                      _workTime,
+                      _state} == std::tuple{rhs._pid,
+                                            rhs._ppid,
+                                            rhs._priority,
+                                            rhs._basePriority,
+                                            rhs._timer,
+                                            rhs._workTime,
+                                            rhs._state};
   }
 
   bool operator!=(const Process &rhs) const { return !(*this == rhs); }
 
   bool operator<(const Process &rhs) const {
-    return std::tuple{_pid,   _ppid,     _priority, _basePriority,
-                      _timer, _workTime, _state} <
-           std::tuple{rhs._pid,          rhs._ppid,  rhs._priority,
-                      rhs._basePriority, rhs._timer, rhs._workTime,
-                      rhs._state};
+    return std::tuple{_pid,
+                      _ppid,
+                      _priority,
+                      _basePriority,
+                      _timer,
+                      _workTime,
+                      _state} < std::tuple{rhs._pid,
+                                           rhs._ppid,
+                                           rhs._priority,
+                                           rhs._basePriority,
+                                           rhs._timer,
+                                           rhs._workTime,
+                                           rhs._state};
   }
 
   int32_t ppid() const { return _ppid; }
@@ -244,9 +260,12 @@ public:
       state = "WAITING";
       break;
     }
-    return {{"pid", _pid},           {"ppid", _ppid},
-            {"priority", _priority}, {"basePriority", _basePriority},
-            {"timer", _timer},       {"workTime", _workTime},
+    return {{"pid", _pid},
+            {"ppid", _ppid},
+            {"priority", _priority},
+            {"basePriority", _basePriority},
+            {"timer", _timer},
+            {"workTime", _workTime},
             {"state", state}};
   }
 };

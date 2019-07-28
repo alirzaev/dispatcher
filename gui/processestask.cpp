@@ -57,15 +57,21 @@ ProcessesTask::~ProcessesTask() { delete ui; }
 
 void ProcessesTask::connectAll() {
 
-  connect(ui->acceptRequest, &QPushButton::clicked, this,
+  connect(ui->acceptRequest,
+          &QPushButton::clicked,
+          this,
           &ProcessesTask::nextRequest);
   connect(ui->resetState, &QPushButton::clicked, this, [=]() {
     _model.state = _model.task.state();
     refresh();
   });
-  connect(ui->spinBoxQueue1, QOverload<int>::of(&QSpinBox::valueChanged), this,
+  connect(ui->spinBoxQueue1,
+          QOverload<int>::of(&QSpinBox::valueChanged),
+          this,
           [=](int) { this->setQueuesLists(_model.state.queues); });
-  connect(ui->spinBoxQueue2, QOverload<int>::of(&QSpinBox::valueChanged), this,
+  connect(ui->spinBoxQueue2,
+          QOverload<int>::of(&QSpinBox::valueChanged),
+          this,
           [=](int) { this->setQueuesLists(_model.state.queues); });
   auto push1Handler = [=]() {
     auto pid = ui->lineEditQueue1Push->text().toInt();
@@ -80,11 +86,11 @@ void ProcessesTask::connectAll() {
     pushToQueue(queue, pid);
   };
   connect(ui->pushButtonQueue1Push, &QPushButton::clicked, this, push1Handler);
-  connect(ui->lineEditQueue1Push, &QLineEdit::returnPressed, this,
-          push1Handler);
+  connect(
+      ui->lineEditQueue1Push, &QLineEdit::returnPressed, this, push1Handler);
   connect(ui->pushButtonQueue2Push, &QPushButton::clicked, this, push2Handler);
-  connect(ui->lineEditQueue2Push, &QLineEdit::returnPressed, this,
-          push2Handler);
+  connect(
+      ui->lineEditQueue2Push, &QLineEdit::returnPressed, this, push2Handler);
   connect(ui->pushButtonQueue1Pop, &QPushButton::clicked, this, [=]() {
     auto queue = static_cast<std::size_t>(ui->spinBoxQueue1->value());
 
@@ -95,8 +101,10 @@ void ProcessesTask::connectAll() {
 
     popFromQueue(queue, ui->lineEditQueue2Pop);
   });
-  connect(ui->processesTable, &ProcessesTableWidget::customContextMenuRequested,
-          this, &ProcessesTask::provideContextMenu);
+  connect(ui->processesTable,
+          &ProcessesTableWidget::customContextMenuRequested,
+          this,
+          &ProcessesTask::provideContextMenu);
   connect(ui->listQueue1, &QueueListWidget::itemsOrderChanged, this, [=]() {
     _model.state = collectState();
     refresh();
@@ -175,9 +183,9 @@ void ProcessesTask::processActionCreate() {
       {StrategyType::WINDOWS,
        {Field::Pid, Field::Ppid, Field::Priority, Field::BasePriority}}};
 
-  auto dialog =
-      CreateProcessDialog(_model.state.processes,
-                          flagsMap.at(_model.task.strategy()->type()), this);
+  auto dialog = CreateProcessDialog(_model.state.processes,
+                                    flagsMap.at(_model.task.strategy()->type()),
+                                    this);
   auto res = dialog.exec();
 
   if (res == QDialog::Accepted) {

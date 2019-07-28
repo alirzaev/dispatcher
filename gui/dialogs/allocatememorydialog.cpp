@@ -11,9 +11,13 @@ AllocateMemoryDialog::AllocateMemoryDialog(QWidget *parent, int32_t maxSize)
   ui->PIDEdit->setValidator(new QIntValidator(0, 255));
   ui->sizeEdit->setValidator(new QIntValidator(1, maxSize));
 
-  connect(ui->buttonBox, &QDialogButtonBox::accepted, this,
+  connect(ui->buttonBox,
+          &QDialogButtonBox::accepted,
+          this,
           &AllocateMemoryDialog::tryAccept);
-  connect(ui->buttonBox, &QDialogButtonBox::rejected, this,
+  connect(ui->buttonBox,
+          &QDialogButtonBox::rejected,
+          this,
           &AllocateMemoryDialog::reject);
 }
 

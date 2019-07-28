@@ -33,8 +33,10 @@ namespace MemoryManagement {
  *  блок свободной памяти добавляется в конец списка свободных
  *  блоков памяти.
  */
-inline MemoryState allocateMemory(const MemoryState &state, uint32_t blockIndex,
-                                  int32_t pid, int32_t pages) {
+inline MemoryState allocateMemory(const MemoryState &state,
+                                  uint32_t blockIndex,
+                                  int32_t pid,
+                                  int32_t pages) {
   auto [blocks, freeBlocks] = state;
 
   auto block = blocks.at(blockIndex);
@@ -85,8 +87,8 @@ inline MemoryState allocateMemory(const MemoryState &state, uint32_t blockIndex,
  *  Особожденный блок памяти помещается в конец списка свободных
  *  блоков памяти.
  */
-inline MemoryState freeMemory(const MemoryState &state, int32_t pid,
-                              uint32_t blockIndex) {
+inline MemoryState
+freeMemory(const MemoryState &state, int32_t pid, uint32_t blockIndex) {
   auto [blocks, freeBlocks] = state;
 
   auto block = blocks.at(blockIndex);
@@ -176,8 +178,8 @@ inline MemoryState compressMemory(const MemoryState &state,
   }
 
   newBlocks.emplace_back(-1, address, freeMemory);
-  newBlocks.insert(newBlocks.end(), blocks.begin() + currentBlock,
-                   blocks.end());
+  newBlocks.insert(
+      newBlocks.end(), blocks.begin() + currentBlock, blocks.end());
   freeBlocks.emplace_back(-1, address, freeMemory);
 
   return {newBlocks, freeBlocks};

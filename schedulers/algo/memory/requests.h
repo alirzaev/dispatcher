@@ -201,6 +201,6 @@ public:
   }
 };
 
-using Request = std::variant<CreateProcessReq, TerminateProcessReq,
-                             AllocateMemory, FreeMemory>;
+using Request = std::
+    variant<CreateProcessReq, TerminateProcessReq, AllocateMemory, FreeMemory>;
 } // namespace MemoryManagement

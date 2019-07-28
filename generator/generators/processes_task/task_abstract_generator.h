@@ -18,7 +18,8 @@
 namespace Generators::ProcessesTask::Details {
 using namespace ProcessesManagement;
 
-template <class T> inline bool sameType(const Request &v1, const Request &v2) {
+template <class T>
+inline bool sameType(const Request &v1, const Request &v2) {
   return std::holds_alternative<T>(v1) && std::holds_alternative<T>(v2);
 }
 
@@ -27,8 +28,10 @@ std::remove_reference_t<SequenceContainer> filter(SequenceContainer &&container,
                                                   Predicate pred) {
   std::remove_reference_t<SequenceContainer> copy;
 
-  std::copy_if(std::begin(container), std::end(container),
-               std::back_inserter(copy), pred);
+  std::copy_if(std::begin(container),
+               std::end(container),
+               std::back_inserter(copy),
+               pred);
 
   return copy;
 }

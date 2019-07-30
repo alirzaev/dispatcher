@@ -16,5 +16,5 @@ public:
 
   static QString TO_ACTIVE;
 
-  ProcessMenu(QWidget *parent = nullptr);
+  ProcessMenu(int row, QWidget *parent = nullptr);
 };

@@ -6,12 +6,12 @@
 
 using namespace Utils::Literals;
 
-ProcessMenu::ProcessMenu(QWidget *parent) : QMenu(parent) {
+ProcessMenu::ProcessMenu(int row, QWidget *parent) : QMenu(parent) {
   addAction(CREATE);
-  addAction(TERMINATE);
-  addAction(TO_EXECUTING);
-  addAction(TO_WAITING);
-  addAction(TO_ACTIVE);
+  addAction(TERMINATE)->setEnabled(row != -1);
+  addAction(TO_EXECUTING)->setEnabled(row != -1);
+  addAction(TO_WAITING)->setEnabled(row != -1);
+  addAction(TO_ACTIVE)->setEnabled(row != -1);
 }
 
 QString ProcessMenu::CREATE = "Добавить"_qs;

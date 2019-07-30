@@ -122,7 +122,7 @@ void ProcessesTask::provideContextMenu(const QPoint &pos) {
 
   qDebug() << "ContextMenu: row " << row;
 
-  ProcessMenu menu;
+  ProcessMenu menu(row);
 
   auto action = menu.exec(globalPos);
   if (!action) {

@@ -188,7 +188,7 @@ void MemoryTask::processActionAllocate(const MemoryBlock &block,
             "Процесс нельзя поместить в свободный блок, содержащий столько же "s +
             "парагрфов, сколько требуется данному процессу"s);
       } else {
-        showErrorMessage("Неизвестная ошибка: "s + ex.what());
+        throw;
       }
     } catch (const std::exception &ex) {
       showErrorMessage("Неизвестная ошибка: "s + ex.what());
@@ -228,7 +228,7 @@ void MemoryTask::processActionCompress(uint32_t blockIndex) {
     if (ex.what() == "SINGLE_BLOCK"s) {
       showErrorMessage("Следующий блок свободен или отсутствует");
     } else {
-      showErrorMessage("Неизвестная ошибка: "s + ex.what());
+      throw;
     }
   } catch (const std::exception &ex) {
     showErrorMessage("Неизвестная ошибка: "s + ex.what());

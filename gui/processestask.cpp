@@ -1,6 +1,7 @@
 #include <cstddef>
 #include <exception>
 #include <map>
+#include <optional>
 #include <string>
 #include <variant>
 
@@ -119,10 +120,14 @@ void ProcessesTask::provideContextMenu(const QPoint &pos) {
   auto globalPos = processes->mapToGlobal(pos);
   auto *item = processes->itemAt(pos);
   auto row = item ? item->row() : -1;
+  _model.state = collectState();
+  auto process =
+      row != -1 ? std::optional{_model.state.processes.at(mapRowToIndex(row))}
+                : std::nullopt;
 
   qDebug() << "ContextMenu: row " << row;
 
-  ProcessMenu menu(row);
+  ProcessMenu menu(process);
 
   auto action = menu.exec(globalPos);
   if (!action) {
@@ -205,12 +210,6 @@ void ProcessesTask::processActionTerminate(std::size_t index) {
     auto pid = _model.state.processes.at(index).pid();
     _model.state = terminateProcess(_model.state, pid);
     refresh();
-  } catch (const OperationException &ex) {
-    if (ex.what() == "NO_SUCH_PROCESS"s) {
-      showErrorMessage("Процесс с таким PID не существует");
-    } else {
-      showErrorMessage("Неизвестная ошибка: "s + ex.what());
-    }
   } catch (const std::exception &ex) {
     showErrorMessage("Неизвестная ошибка: "s + ex.what());
   }
@@ -222,14 +221,6 @@ void ProcessesTask::processActionToExecuting(std::size_t index) {
     auto pid = _model.state.processes.at(index).pid();
     _model.state = switchTo(_model.state, pid);
     refresh();
-  } catch (const OperationException &ex) {
-    if (ex.what() == "NO_SUCH_PROCESS"s) {
-      showErrorMessage("Процесс с таким PID не существует");
-    } else if (ex.what() == "INVALID_STATE"s) {
-      showErrorMessage("Процесс должен быть в состоянии готовности");
-    } else {
-      showErrorMessage("Неизвестная ошибка: "s + ex.what());
-    }
   } catch (const std::exception &ex) {
     showErrorMessage("Неизвестная ошибка: "s + ex.what());
   }
@@ -241,12 +232,6 @@ void ProcessesTask::processActionToWaiting(std::size_t index) {
     auto pid = _model.state.processes.at(index).pid();
     _model.state = changeProcessState(_model.state, pid, ProcState::WAITING);
     refresh();
-  } catch (const OperationException &ex) {
-    if (ex.what() == "NO_SUCH_PROCESS"s) {
-      showErrorMessage("Процесс с таким PID не существует");
-    } else {
-      showErrorMessage("Неизвестная ошибка: "s + ex.what());
-    }
   } catch (const std::exception &ex) {
     showErrorMessage("Неизвестная ошибка: "s + ex.what());
   }
@@ -258,12 +243,6 @@ void ProcessesTask::processActionToActive(std::size_t index) {
     auto pid = _model.state.processes.at(index).pid();
     _model.state = changeProcessState(_model.state, pid, ProcState::ACTIVE);
     refresh();
-  } catch (const OperationException &ex) {
-    if (ex.what() == "NO_SUCH_PROCESS"s) {
-      showErrorMessage("Процесс с таким PID не существует");
-    } else {
-      showErrorMessage("Неизвестная ошибка: "s + ex.what());
-    }
   } catch (const std::exception &ex) {
     showErrorMessage("Неизвестная ошибка: "s + ex.what());
   }
@@ -345,7 +324,7 @@ void ProcessesTask::pushToQueue(std::size_t queue, int pid) {
     } else if (ex.what() == "ALREADY_IN_QUEUE"s) {
       showErrorMessage("Процесс с таким PID уже добавлен в одну из очередей");
     } else {
-      showErrorMessage("Неизвестная ошибка: "s + ex.what());
+      throw;
     }
   } catch (const std::exception &ex) {
     showErrorMessage("Неизвестная ошибка: "s + ex.what());
@@ -366,7 +345,7 @@ void ProcessesTask::popFromQueue(std::size_t queue, QLineEdit *lineEdit) {
     if (ex.what() == "EMPTY_QUEUE"s) {
       showErrorMessage("Очередь пуста");
     } else {
-      showErrorMessage("Неизвестная ошибка: "s + ex.what());
+      throw;
     }
   } catch (const std::exception &ex) {
     showErrorMessage("Неизвестная ошибка: "s + ex.what());

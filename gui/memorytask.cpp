@@ -47,6 +47,13 @@ MemoryTask::MemoryTask(Models::MemoryModel model, QWidget *parent)
     _model.state = _model.task.state();
     refresh();
   });
+  connect(ui->listFreeBlocks,
+          &ReorderableListWidget::itemsOrderChanged,
+          this,
+          [=]() {
+            _model.state = collectState();
+            refresh();
+          });
 
   refresh();
 }

@@ -29,7 +29,7 @@
 #include "dialogs/createprocessdialog.h"
 #include "menus/processmenu.h"
 #include "widgets/processestablewidget.h"
-#include "widgets/queuelistwidget.h"
+#include "widgets/reorderablelistwidget.h"
 
 #include "processestask.h"
 #include "ui_processestask.h"
@@ -106,10 +106,11 @@ void ProcessesTask::connectAll() {
           &ProcessesTableWidget::customContextMenuRequested,
           this,
           &ProcessesTask::provideContextMenu);
-  connect(ui->listQueue1, &QueueListWidget::itemsOrderChanged, this, [=]() {
-    _model.state = collectState();
-    refresh();
-  });
+  connect(
+      ui->listQueue1, &ReorderableListWidget::itemsOrderChanged, this, [=]() {
+        _model.state = collectState();
+        refresh();
+      });
 }
 
 void ProcessesTask::provideContextMenu(const QPoint &pos) {

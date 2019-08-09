@@ -57,7 +57,7 @@
         <string>Программная модель диспетчера задач для лабораторной работы по дисциплине &quot;Операционные системы&quot;</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignJustify|Qt::AlignVCenter</set>
+        <set>Qt::AlignCenter</set>
        </property>
        <property name="wordWrap">
         <bool>true</bool>

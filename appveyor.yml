@@ -5,22 +5,17 @@ platform: x64
 install:
   - cinst make
   - cinst 7zip.install
-  - echo "Extracting Qt for MinGW (static build)"
-  - 7z x .\.deps\Qt-5.12.1-mingw-static.zip -y -otmp
+  - 7z x .\qt-bundle\Qt-5.12.1-mingw-static.zip -y -otmp
   - move /Y .\tmp\5.12.1-mingw-static C:\Qt\5.12.1-mingw-static
 
 build_script:
-  - echo "Setting up Qt environment"
-  - set PATH=C:\Qt\5.12.1-mingw-static\bin;C:\Qt\5.12.1\mingw73_64;%PATH%
-  - set PATH=C:\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin;%PATH%
-  - echo "Building"
+  - set PATH=C:\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin;C:\Qt\5.12.1-mingw-static\bin;C:\Qt\5.12.1\mingw73_64;%PATH%
   - mkdir build
   - cd build
   - qmake ..\dispatcher.pro
   - make -j 2
 
 test_script:
-  - echo "Running tests"
   - tests\release\tests.exe
 
 artifacts:

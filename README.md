@@ -1,32 +1,38 @@
 # Модель диспетчера задач операционной системы
 
-[![Build Status](https://travis-ci.org/alirzaev/dispatcher.svg?branch=master)](https://travis-ci.org/alirzaev/dispatcher)
 [![Build status](https://ci.appveyor.com/api/projects/status/k043jd35wesnah6b?svg=true)](https://ci.appveyor.com/project/alirzaev/dispatcher)
 
 Программная модель диспетчера задач для лабораторной работы по дисциплине "Операционные системы"
+
+Руководство пользователя: https://alirzaev1996.gitbook.io/model-dispetchera-zadach-os/
 
 # Структура проекта
 
 - dispatcher.pro - Файл основного проекта
 
-  - schedulers - Библиотека с алгоритмами работы диспетчера задач
+  - schedulers/schedulers.pro - Библиотека с алгоритмами работы диспетчера задач
 
-  - tests - Тесты
+  - tests/tests.pro - Тесты
 
-  - generator - Библиотека для генерации заданий
+  - generator/generator.pro - Библиотека для генерации заданий
 
-  - gui - Собственно программная модель с GUI
+  - gui/gui.pro - Программная модель с графическим интерфейсом
 
 # Файл задания
 
-Структуру файла задания можно найти [здесь](https://github.com/alirzaev/dispatcher/blob/master/docs/TASK.md)
+Структуру файла задания можно найти [здесь](docs/TASK.md)
 
 # Сборка
 
 ## Необходимые компоненты
 
-- Qt (>= 5.11)
-- G++ (>= 7) или Visual C++ (>= 2017; короче, Visual Studio 2017)
+- Qt 5.11 или новее
+
+- Visual Studio 2017 или новее со следующими компонентами:
+  
+  - Разработка классических приложений на C++
+
+  - Debugging Tools for Windows
 
 ## Используемые сторонние библиотеки
 
@@ -36,4 +42,11 @@
 ## Сборка
 
 Проект собирается штатными средствами Qt: либо открываем `dispatcher.pro` через QtCreator, либо 
-собираем с помощью qmake.
+собираем с помощью qmake:
+
+```
+mkdir build
+cd build
+qmake ../dispatcher.pro
+make
+```

@@ -28,7 +28,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Модель диспетчера задач ОС</string>
+        <string/>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>

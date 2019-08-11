@@ -1,7 +1,5 @@
 # Модель диспетчера задач операционной системы
 
-[![Build status](https://ci.appveyor.com/api/projects/status/k043jd35wesnah6b?svg=true)](https://ci.appveyor.com/project/alirzaev/dispatcher)
-
 Программная модель диспетчера задач для лабораторной работы по дисциплине "Операционные системы"
 
 Руководство пользователя: https://alirzaev1996.gitbook.io/model-dispetchera-zadach-os/
@@ -50,3 +48,9 @@ cd build
 qmake ../dispatcher.pro
 make
 ```
+
+# В случае возникновения проблем
+
+Задания, которые генерируются самой программой, сохраняются в файл во временной папке пользователя: 
+`C:\Users\%USERNAME%\AppData\Local\Temp\dispatcher.json`. При составлении 
+[issue](https://github.com/alirzaev/dispatcher/issues), пожалуйста, прикрепите этот файл тоже.

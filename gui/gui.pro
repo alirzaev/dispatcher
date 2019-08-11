@@ -42,6 +42,7 @@ HEADERS += \
     menus/memoryblockmenu.h \
     processestask.h \
     literals.h \
+    taskgetter.h \
     widgets/processestablewidget.h \
     menus/processmenu.h \
     dialogs/createprocessdialog.h \

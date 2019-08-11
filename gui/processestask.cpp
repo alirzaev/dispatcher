@@ -52,7 +52,7 @@ ProcessesTask::ProcessesTask(Models::ProcessesModel model, QWidget *parent)
   refresh();
 }
 
-Models::ProcessesModel ProcessesTask::model() const { return _model; }
+Utils::Task ProcessesTask::task() const { return _model.task; }
 
 ProcessesTask::~ProcessesTask() { delete ui; }
 

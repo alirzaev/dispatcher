@@ -9,22 +9,25 @@
 
 #include <algo/processes/strategies.h>
 #include <algo/processes/types.h>
+#include <utils/tasks.h>
 
 #include "models.h"
+#include "taskgetter.h"
+
 #include "widgets/processestablewidget.h"
 
 namespace Ui {
 class ProcessesTask;
 }
 
-class ProcessesTask : public QWidget {
+class ProcessesTask : public QWidget, public TaskGetter {
   Q_OBJECT
 
 public:
-  explicit ProcessesTask(Models::ProcessesModel model,
+  explicit ProcessesTask(Models::ProcessesModel task,
                          QWidget *parent = nullptr);
 
-  Models::ProcessesModel model() const;
+  Utils::Task task() const override;
 
   ~ProcessesTask() override;
 

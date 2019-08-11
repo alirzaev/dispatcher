@@ -15,6 +15,7 @@
 #include <utils/tasks.h>
 
 #include "models.h"
+#include "taskgetter.h"
 
 #include "aboutwindow.h"
 #include "memorytask.h"
@@ -101,14 +102,9 @@ void MainWindow::saveTasks() {
   std::vector<Utils::Task> tasks;
 
   for (int i = 0; i < ui->tabWidget->count(); ++i) {
-    auto *widget = ui->tabWidget->widget(i);
-    if (auto *p = dynamic_cast<MemoryTask *>(widget); p != nullptr) {
-      auto model = p->model();
-      tasks.push_back(model.task);
-    } else if (auto *p = dynamic_cast<ProcessesTask *>(widget); p != nullptr) {
-      auto model = p->model();
-      tasks.push_back(model.task);
-    }
+    auto *widget = dynamic_cast<TaskGetter *>(ui->tabWidget->widget(i));
+    auto task = widget->task();
+    tasks.push_back(task);
   }
 
   Utils::saveTasks(tasks, file);

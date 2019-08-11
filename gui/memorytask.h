@@ -9,20 +9,22 @@
 #include <algo/memory/requests.h>
 #include <algo/memory/strategies.h>
 #include <algo/memory/types.h>
+#include <utils/tasks.h>
 
 #include "models.h"
+#include "taskgetter.h"
 
 namespace Ui {
 class MemoryTask;
 }
 
-class MemoryTask : public QWidget {
+class MemoryTask : public QWidget, public TaskGetter {
   Q_OBJECT
 
 public:
-  explicit MemoryTask(Models::MemoryModel model, QWidget *parent = nullptr);
+  explicit MemoryTask(Models::MemoryModel task, QWidget *parent = nullptr);
 
-  Models::MemoryModel model() const;
+  Utils::Task task() const override;
 
   ~MemoryTask() override;
 

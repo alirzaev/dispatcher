@@ -278,4 +278,4 @@ void MemoryTask::showInfoMessage(const std::string &message) {
   QMessageBox::information(this, "Внимание", QString::fromStdString(message));
 }
 
-Models::MemoryModel MemoryTask::model() const { return _model; }
+Utils::Task MemoryTask::task() const { return _model.task; }

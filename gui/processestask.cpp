@@ -189,19 +189,19 @@ void ProcessesTask::processActionCreate() {
       {StrategyType::WINDOWS,
        {Field::Pid, Field::Ppid, Field::Priority, Field::BasePriority}}};
 
-  auto dialog = CreateProcessDialog(_model.state.processes,
-                                    flagsMap.at(_model.task.strategy()->type()),
-                                    this);
-  auto res = dialog.exec();
+  auto process = CreateProcessDialog::getProcess(this,
+                                                 _model.state.processes,
+                                                 flagsMap.at(_model.task.strategy()->type()));
 
-  if (res == QDialog::Accepted) {
-    try {
-      auto process = dialog.data;
-      _model.state = addProcess(_model.state, process);
-      refresh();
-    } catch (const std::exception &ex) {
-      showErrorMessage("Неизвестная ошибка: "s + ex.what());
-    }
+  if (!process) {
+      return;
+  }
+
+  try {
+    _model.state = addProcess(_model.state, *process);
+    refresh();
+  } catch (const std::exception &ex) {
+    showErrorMessage("Неизвестная ошибка: "s + ex.what());
   }
 }
 

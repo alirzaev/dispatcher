@@ -45,6 +45,19 @@ CreateProcessDialog::CreateProcessDialog(
           &CreateProcessDialog::reject);
 }
 
+std::optional<ProcessesManagement::Process>
+CreateProcessDialog::getProcess(QWidget *parent,
+                                const CreateProcessDialog::ProcessesList &processes,
+                                const QFlags<CreateProcessDialog::EditableField> &editableFields)
+{
+    auto dialog = CreateProcessDialog(processes, editableFields, parent);
+    if (dialog.exec() == QDialog::Accepted) {
+        return dialog.data;
+    } else {
+        return std::nullopt;
+    }
+}
+
 CreateProcessDialog::~CreateProcessDialog() { delete ui; }
 
 void CreateProcessDialog::tryAccept() {

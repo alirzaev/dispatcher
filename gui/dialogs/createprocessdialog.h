@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <optional>
 
 #include <QDialog>
 #include <QFlags>
@@ -28,16 +29,20 @@ public:
   using ProcessesList =
       decltype(ProcessesManagement::ProcessesState::processes);
 
-  ProcessesManagement::Process data;
-
-  explicit CreateProcessDialog(const ProcessesList &processes,
-                               const QFlags<EditableField> &editableFields,
-                               QWidget *parent = nullptr);
+  static std::optional<ProcessesManagement::Process>
+  getProcess(QWidget *parent,
+             const ProcessesList &processes,
+             const QFlags<EditableField> &editableFields);
 
   ~CreateProcessDialog() override;
 
 private:
+  explicit CreateProcessDialog(const ProcessesList &processes,
+                               const QFlags<EditableField> &editableFields,
+                               QWidget *parent = nullptr);
   ProcessesList processes;
+
+  ProcessesManagement::Process data;
 
   Ui::CreateProcessDialog *ui;
 

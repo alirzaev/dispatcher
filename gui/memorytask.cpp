@@ -177,29 +177,20 @@ MemoryState MemoryTask::collectState() {
 
 void MemoryTask::processActionAllocate(const MemoryBlock &block,
                                        uint32_t blockIndex) {
-  auto dialog = AllocateMemoryDialog(this, block.size());
-  auto res = dialog.exec();
+  auto info = AllocateMemoryDialog::getMemoryBlockInfo(this, block.size());
 
-  if (res == QDialog::Accepted) {
-    auto [pid, size] = dialog.data;
+  if (!info) {
+      return;
+  }
 
-    try {
-      _model.state = collectState();
-      _model.state = allocateMemory(_model.state, blockIndex, pid, size);
-      refresh();
-    } catch (const OperationException &ex) {
-      if (ex.what() == "BLOCK_IS_USED"s) {
-        showErrorMessage("Данный блок памяти уже выделен другому процессу");
-      } else if (ex.what() == "TOO_SMALL"s) {
-        showErrorMessage(
-            "Процесс нельзя поместить в свободный блок, содержащий столько же "s +
-            "парагрфов, сколько требуется данному процессу"s);
-      } else {
-        throw;
-      }
-    } catch (const std::exception &ex) {
-      showErrorMessage("Неизвестная ошибка: "s + ex.what());
-    }
+  auto [pid, size] = *info;
+
+  try {
+    _model.state = collectState();
+    _model.state = allocateMemory(_model.state, blockIndex, pid, size);
+    refresh();
+  } catch (const std::exception &ex) {
+    showErrorMessage("Неизвестная ошибка: "s + ex.what());
   }
 }
 

@@ -37,14 +37,23 @@ MemoryTask::MemoryTask(Models::MemoryModel model, QWidget *parent)
 
   ui->listMemBlocks->setContextMenuPolicy(Qt::CustomContextMenu);
 
-  connect(ui->listMemBlocks, &QListWidget::customContextMenuRequested, this,
+  connect(ui->listMemBlocks,
+          &QListWidget::customContextMenuRequested,
+          this,
           &MemoryTask::provideContextMenu);
-  connect(ui->acceptRequest, &QPushButton::clicked, this,
-          &MemoryTask::nextRequest);
+  connect(
+      ui->acceptRequest, &QPushButton::clicked, this, &MemoryTask::nextRequest);
   connect(ui->resetState, &QPushButton::clicked, this, [=]() {
     _model.state = _model.task.state();
     refresh();
   });
+  connect(ui->listFreeBlocks,
+          &ReorderableListWidget::itemsOrderChanged,
+          this,
+          [=]() {
+            _model.state = collectState();
+            refresh();
+          });
 
   refresh();
 }
@@ -168,29 +177,20 @@ MemoryState MemoryTask::collectState() {
 
 void MemoryTask::processActionAllocate(const MemoryBlock &block,
                                        uint32_t blockIndex) {
-  auto dialog = AllocateMemoryDialog(this, block.size());
-  auto res = dialog.exec();
+  auto info = AllocateMemoryDialog::getMemoryBlockInfo(this, block.size());
 
-  if (res == QDialog::Accepted) {
-    auto [pid, size] = dialog.data;
+  if (!info) {
+      return;
+  }
 
-    try {
-      _model.state = collectState();
-      _model.state = allocateMemory(_model.state, blockIndex, pid, size);
-      refresh();
-    } catch (const OperationException &ex) {
-      if (ex.what() == "BLOCK_IS_USED"s) {
-        showErrorMessage("Данный блок памяти уже выделен другому процессу");
-      } else if (ex.what() == "TOO_SMALL"s) {
-        showErrorMessage(
-            "Процесс нельзя поместить в свободный блок, содержащий столько же "s +
-            "парагрфов, сколько требуется данному процессу"s);
-      } else {
-        showErrorMessage("Неизвестная ошибка: "s + ex.what());
-      }
-    } catch (const std::exception &ex) {
-      showErrorMessage("Неизвестная ошибка: "s + ex.what());
-    }
+  auto [pid, size] = *info;
+
+  try {
+    _model.state = collectState();
+    _model.state = allocateMemory(_model.state, blockIndex, pid, size);
+    refresh();
+  } catch (const std::exception &ex) {
+    showErrorMessage("Неизвестная ошибка: "s + ex.what());
   }
 }
 
@@ -226,7 +226,7 @@ void MemoryTask::processActionCompress(uint32_t blockIndex) {
     if (ex.what() == "SINGLE_BLOCK"s) {
       showErrorMessage("Следующий блок свободен или отсутствует");
     } else {
-      showErrorMessage("Неизвестная ошибка: "s + ex.what());
+      throw;
     }
   } catch (const std::exception &ex) {
     showErrorMessage("Неизвестная ошибка: "s + ex.what());
@@ -240,7 +240,6 @@ void MemoryTask::refresh() {
   setStrategy(_model.task.strategy()->type);
   if (_model.task.done()) {
     setRequest(_model.task.requests().back());
-    showInfoMessage("Вы успешно выполнили данное задание");
   } else {
     auto index = _model.task.completed();
     setRequest(_model.task.requests()[index]);
@@ -249,11 +248,14 @@ void MemoryTask::refresh() {
 
 void MemoryTask::nextRequest() {
   _model.state = collectState();
-  auto task = _model.task.next(_model.state);
-  if (task) {
+
+  if (auto task = _model.task.next(_model.state); task.has_value()) {
     _model.task = task.value();
     _model.state = _model.task.state();
     refresh();
+    if (_model.task.done()) {
+      showInfoMessage("Вы успешно выполнили данное задание");
+    }
   } else {
     showErrorMessage("Заявка обработана неверно");
   }
@@ -267,4 +269,4 @@ void MemoryTask::showInfoMessage(const std::string &message) {
   QMessageBox::information(this, "Внимание", QString::fromStdString(message));
 }
 
-Models::MemoryModel MemoryTask::model() const { return _model; }
+Utils::Task MemoryTask::task() const { return _model.task; }

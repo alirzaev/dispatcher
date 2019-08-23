@@ -3,18 +3,21 @@
 #include <limits>
 
 #include <QDialogButtonBox>
+#include <QFlags>
 #include <QIntValidator>
 #include <QMessageBox>
 
+#include <algo/processes/helpers.h>
 #include <algo/processes/types.h>
 
 #include "createprocessdialog.h"
 #include "ui_createprocessdialog.h"
 
 CreateProcessDialog::CreateProcessDialog(
-    const CreateProcessDialog::ProcessesList &processes, QWidget *parent)
-    : QDialog(parent), pids(processes.size(), -1),
-      ui(new Ui::CreateProcessDialog) {
+    const ProcessesList &processes,
+    const QFlags<EditableField> &editableFields,
+    QWidget *parent)
+    : QDialog(parent), processes(processes), ui(new Ui::CreateProcessDialog) {
   ui->setupUi(this);
   ui->lineEditPID->setValidator(new QIntValidator(0, 255));
   ui->lineEditPPID->setValidator(new QIntValidator(-1, 255));
@@ -23,18 +26,43 @@ CreateProcessDialog::CreateProcessDialog(
   ui->lineEditWorkTime->setValidator(
       new QIntValidator(0, std::numeric_limits<int>::max()));
 
-  connect(ui->buttonBox, &QDialogButtonBox::accepted, this,
-          &CreateProcessDialog::tryAccept);
-  connect(ui->buttonBox, &QDialogButtonBox::rejected, this,
-          &CreateProcessDialog::reject);
+  ui->lineEditPID->setEnabled(editableFields.testFlag(EditableField::Pid));
+  ui->lineEditPPID->setEnabled(editableFields.testFlag(EditableField::Ppid));
+  ui->lineEditPriority->setEnabled(
+      editableFields.testFlag(EditableField::Priority));
+  ui->lineEditBasePriority->setEnabled(
+      editableFields.testFlag(EditableField::BasePriority));
+  ui->lineEditWorkTime->setEnabled(
+      editableFields.testFlag(EditableField::WorkTime));
 
-  std::transform(processes.begin(), processes.end(), pids.begin(),
-                 [](const auto &p) { return p.pid(); });
+  connect(ui->buttonBox,
+          &QDialogButtonBox::accepted,
+          this,
+          &CreateProcessDialog::tryAccept);
+  connect(ui->buttonBox,
+          &QDialogButtonBox::rejected,
+          this,
+          &CreateProcessDialog::reject);
+}
+
+std::optional<ProcessesManagement::Process>
+CreateProcessDialog::getProcess(QWidget *parent,
+                                const CreateProcessDialog::ProcessesList &processes,
+                                const QFlags<CreateProcessDialog::EditableField> &editableFields)
+{
+    auto dialog = CreateProcessDialog(processes, editableFields, parent);
+    if (dialog.exec() == QDialog::Accepted) {
+        return dialog.data;
+    } else {
+        return std::nullopt;
+    }
 }
 
 CreateProcessDialog::~CreateProcessDialog() { delete ui; }
 
 void CreateProcessDialog::tryAccept() {
+  using ProcessesManagement::getIndexByPid;
+
   bool valid = ui->lineEditPID->hasAcceptableInput()             //
                && ui->lineEditPPID->hasAcceptableInput()         //
                && ui->lineEditPriority->hasAcceptableInput()     //
@@ -51,18 +79,18 @@ void CreateProcessDialog::tryAccept() {
   int32_t basePriority = ui->lineEditBasePriority->text().toInt();
   int32_t workTime = ui->lineEditWorkTime->text().toInt();
 
-  if (std::find(pids.begin(), pids.end(), pid) != pids.end()) {
+  if (getIndexByPid(processes, pid)) {
     QMessageBox::critical(this, "Ошибка", "Процесс с таким PID уже существует");
     return;
   }
-  if (ppid != -1 && std::find(pids.begin(), pids.end(), ppid) == pids.end()) {
-    QMessageBox::critical(this, "Ошибка",
-                          "Родительский процесс с таким PID не существует");
+  if (ppid != -1 && !getIndexByPid(processes, ppid)) {
+    QMessageBox::critical(
+        this, "Ошибка", "Родительский процесс с таким PID не существует");
     return;
   }
   if (priority < basePriority) {
-    QMessageBox::critical(this, "Ошибка",
-                          "Текущий приоритет не может быть меньше базового");
+    QMessageBox::critical(
+        this, "Ошибка", "Текущий приоритет не может быть меньше базового");
     return;
   }
 

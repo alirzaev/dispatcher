@@ -50,15 +50,15 @@ TEST_CASE("ProcessesManagement::Process") {
     REQUIRE_THROWS_AS(pm::Process{}.ppid(256), pm::TypeException);
 
     // Некорректный приоритет
-    REQUIRE_THROWS_AS(pm::Process{}.priority(-1), pm::TypeException);
     REQUIRE_THROWS_AS(pm::Process{}.priority(16), pm::TypeException);
 
     // Некорректный базовый приоритет
-    REQUIRE_THROWS_AS(pm::Process{}.basePriority(-1), pm::TypeException);
     REQUIRE_THROWS_AS(pm::Process{}.basePriority(16), pm::TypeException);
 
     // Текущий приоритет меньше базового
     REQUIRE_THROWS_AS(pm::Process{}.priority(0).basePriority(1),
+                      pm::TypeException);
+    REQUIRE_THROWS_AS(pm::Process{}.priority(2).basePriority(1).priority(0),
                       pm::TypeException);
 
     // Некорректное время работы
@@ -81,7 +81,8 @@ TEST_CASE("ProcessesManagement::ProcessesState") {
     REQUIRE(state.processes.size() == 1);
     REQUIRE(state.processes.at(0) == pm::Process{}.pid(1));
 
-    bool empty = std::all_of(state.queues.begin() + 1, state.queues.end(),
+    bool empty = std::all_of(state.queues.begin() + 1,
+                             state.queues.end(),
                              [](const auto &queue) { return queue.empty(); });
     REQUIRE(empty);
     REQUIRE(state.queues.at(0).size() == 1);
@@ -92,7 +93,8 @@ TEST_CASE("ProcessesManagement::ProcessesState") {
     auto state = pm::ProcessesState::initial();
 
     REQUIRE(state.processes.size() == 0);
-    bool empty = std::all_of(state.queues.begin(), state.queues.end(),
+    bool empty = std::all_of(state.queues.begin(),
+                             state.queues.end(),
                              [](const auto &queue) { return queue.empty(); });
     REQUIRE(empty);
   }

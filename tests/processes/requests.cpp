@@ -48,11 +48,9 @@ TEST_CASE("ProcessesManagement::CreateProcessReq") {
     REQUIRE_THROWS_AS(pm::CreateProcessReq(0, 256), pm::RequestException);
 
     // Некорректный приоритет
-    REQUIRE_THROWS_AS(pm::CreateProcessReq(0, -1, -1), pm::RequestException);
     REQUIRE_THROWS_AS(pm::CreateProcessReq(0, -1, 16), pm::RequestException);
 
     // Некорректный базовый приоритет
-    REQUIRE_THROWS_AS(pm::CreateProcessReq(0, -1, 0, -1), pm::RequestException);
     REQUIRE_THROWS_AS(pm::CreateProcessReq(0, -1, 0, 16), pm::RequestException);
 
     // Текущий приоритет меньше базового
@@ -134,13 +132,15 @@ TEST_CASE("ProcessesManagement::TerminateIO") {
     auto request = pm::TerminateIO(0);
 
     REQUIRE(request.pid() == 0);
+    REQUIRE(request.augment() == 1);
   }
 
   SECTION("Получить JSON экземпляра TerminateIO") {
     auto request = pm::TerminateIO(0);
 
     auto expected = nlohmann::json{{"type", "TERMINATE_IO"}, //
-                                   {"pid", 0}};
+                                   {"pid", 0},
+                                   {"augment", 1}};
     auto actual = request.dump();
 
     REQUIRE(actual == expected);
@@ -150,6 +150,10 @@ TEST_CASE("ProcessesManagement::TerminateIO") {
     // Некорректный PID
     REQUIRE_THROWS_AS(pm::TerminateIO(-1), pm::RequestException);
     REQUIRE_THROWS_AS(pm::TerminateIO(256), pm::RequestException);
+
+    // Некорректная прибавка к приоритету
+    REQUIRE_THROWS_AS(pm::TerminateIO(0, 0), pm::RequestException);
+    REQUIRE_THROWS_AS(pm::TerminateIO(0, 16), pm::RequestException);
   }
 }
 

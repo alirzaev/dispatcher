@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <deque>
 #include <map>
@@ -26,9 +27,9 @@ private:
 
   int32_t _ppid;
 
-  int32_t _priority;
+  size_t _priority;
 
-  int32_t _basePriority;
+  size_t _basePriority;
 
   int32_t _timer;
 
@@ -53,28 +54,44 @@ public:
   Process &operator=(Process &&rhs) = default;
 
   bool operator==(const Process &rhs) const {
-    return std::tuple{_pid,   _ppid,     _priority, _basePriority,
-                      _timer, _workTime, _state} ==
-           std::tuple{rhs._pid,          rhs._ppid,  rhs._priority,
-                      rhs._basePriority, rhs._timer, rhs._workTime,
-                      rhs._state};
+    return std::tuple{_pid,
+                      _ppid,
+                      _priority,
+                      _basePriority,
+                      _timer,
+                      _workTime,
+                      _state} == std::tuple{rhs._pid,
+                                            rhs._ppid,
+                                            rhs._priority,
+                                            rhs._basePriority,
+                                            rhs._timer,
+                                            rhs._workTime,
+                                            rhs._state};
   }
 
   bool operator!=(const Process &rhs) const { return !(*this == rhs); }
 
   bool operator<(const Process &rhs) const {
-    return std::tuple{_pid,   _ppid,     _priority, _basePriority,
-                      _timer, _workTime, _state} <
-           std::tuple{rhs._pid,          rhs._ppid,  rhs._priority,
-                      rhs._basePriority, rhs._timer, rhs._workTime,
-                      rhs._state};
+    return std::tuple{_pid,
+                      _ppid,
+                      _priority,
+                      _basePriority,
+                      _timer,
+                      _workTime,
+                      _state} < std::tuple{rhs._pid,
+                                           rhs._ppid,
+                                           rhs._priority,
+                                           rhs._basePriority,
+                                           rhs._timer,
+                                           rhs._workTime,
+                                           rhs._state};
   }
 
   int32_t ppid() const { return _ppid; }
 
-  int32_t priority() const { return _priority; }
+  size_t priority() const { return _priority; }
 
-  int32_t basePriority() const { return _basePriority; }
+  size_t basePriority() const { return _basePriority; }
 
   int32_t timer() const { return _timer; }
 
@@ -115,8 +132,8 @@ public:
    *  @throws ProcessesManagement::TypeException Исключение возникает, если
    *  переданные параметры не соответствуют заданным ограничениям.
    */
-  Process priority(int32_t priority) const {
-    if (priority < 0 || priority > 15) {
+  Process priority(size_t priority) const {
+    if (priority > 15 || _basePriority > priority) {
       throw TypeException("INVALID_PRIORITY");
     }
 
@@ -136,8 +153,8 @@ public:
    *  @throws ProcessesManagement::TypeException Исключение возникает, если
    *  переданные параметры не соответствуют заданным ограничениям.
    */
-  Process basePriority(int32_t basePriority) const {
-    if (basePriority < 0 || basePriority > 15 || basePriority > _priority) {
+  Process basePriority(size_t basePriority) const {
+    if (basePriority > 15 || basePriority > _priority) {
       throw TypeException("INVALID_BASE_PRIORITY");
     }
 
@@ -243,9 +260,12 @@ public:
       state = "WAITING";
       break;
     }
-    return {{"pid", _pid},           {"ppid", _ppid},
-            {"priority", _priority}, {"basePriority", _basePriority},
-            {"timer", _timer},       {"workTime", _workTime},
+    return {{"pid", _pid},
+            {"ppid", _ppid},
+            {"priority", _priority},
+            {"basePriority", _basePriority},
+            {"timer", _timer},
+            {"workTime", _workTime},
             {"state", state}};
   }
 };
@@ -281,7 +301,7 @@ public:
    *  @param queues Отображение вида <индекс очереди> -> <список PID'ов>.
    */
   ProcessesState(const std::vector<Process> &processes,
-                 const std::map<int32_t, std::deque<int32_t>> &queues)
+                 const std::map<size_t, std::deque<int32_t>> &queues)
       : processes(processes), queues() {
     for (const auto &queue : queues) {
       this->queues.at(queue.first) = queue.second;
@@ -342,7 +362,7 @@ public:
   static void validate(const std::vector<Process> &processes,
                        const std::array<std::deque<int32_t>, 16> &queues) {
     std::set<int32_t> pidsInQueues, pidsOfProcesses, activePids;
-    std::map<int32_t, std::set<int32_t>> queuesMap;
+    std::map<size_t, std::set<int32_t>> queuesMap;
 
     // В списке процессов не должно быть двух процессов с одинаковым PID.
     for (const auto &process : processes) {

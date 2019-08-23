@@ -43,8 +43,13 @@ ProcessesTableWidget::ProcessesTableWidget(QWidget *parent)
   setSelectionMode(QAbstractItemView::SingleSelection);
   setEditTriggers({QTableWidget::NoEditTriggers});
 
-  setHorizontalHeaderLabels({"PID"_qs, "PPID"_qs, "Состояние"_qs,
-                             "Приториет"_qs, "Б. приоритет"_qs, "t"_qs, "T"_qs,
+  setHorizontalHeaderLabels({"PID"_qs,
+                             "PPID"_qs,
+                             "Состояние"_qs,
+                             "Приториет"_qs,
+                             "Б. приоритет"_qs,
+                             "t"_qs,
+                             "T"_qs,
                              "T-t"_qs});
   setSortingEnabled(true);
   resizeColumnsToContents();
@@ -66,8 +71,8 @@ void ProcessesTableWidget::setProcesses(const ProcessesList &processes) {
     setItem(row, 0, new NumberItem(p.pid()));
     setItem(row, 1, new NumberItem(p.ppid()));
     setItem(row, 2, new TextItem(stateMap[p.state()]));
-    setItem(row, 3, new NumberItem(p.priority()));
-    setItem(row, 4, new NumberItem(p.basePriority()));
+    setItem(row, 3, new NumberItem(static_cast<int32_t>(p.priority())));
+    setItem(row, 4, new NumberItem(static_cast<int32_t>(p.basePriority())));
     setItem(row, 5, new NumberItem(p.timer()));
     setItem(row, 6, new NumberItem(p.workTime()));
     setItem(row, 7, new NumberItem(p.workTime() - p.timer()));

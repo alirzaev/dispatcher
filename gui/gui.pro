@@ -1,33 +1,23 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2018-10-17T16:42:06
-#
-#-------------------------------------------------
+include(../common.pri)
 
-QT       += core gui
+QT += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = gui
 TEMPLATE = app
 
-# The following define makes your compiler emit warnings if you use
-# any feature of Qt which has been marked as deprecated (the exact warnings
-# depend on your compiler). Please consult the documentation of the
-# deprecated API in order to know how to port your code away from it.
+TARGET = gui
+
+RC_ICONS = ../icon/ico/dispatcher.ico
+
+ICON = ../icon/icns/dispatcher.icns
+
+# Выдавать предупреждения при использовании deprecated API
 DEFINES += QT_DEPRECATED_WARNINGS
 
-# You can also make your code fail to compile if you use deprecated APIs.
-# In order to do so, uncomment the following line.
-# You can also select to disable deprecated APIs only up to a certain version of Qt.
-#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
-
-CONFIG += c++1z
-
 INCLUDEPATH += \
-    "../3rdparty" \
-    "../schedulers" \
-    "../generator"
+    ../schedulers \
+    ../generator
 
 SOURCES += \
     main.cpp \
@@ -40,7 +30,8 @@ SOURCES += \
     widgets/processestablewidget.cpp \
     menus/processmenu.cpp \
     dialogs/createprocessdialog.cpp \
-    widgets/queuelistwidget.cpp
+    aboutwindow.cpp \
+    widgets/reorderablelistwidget.cpp
 
 HEADERS += \
     mainwindow.h \
@@ -51,25 +42,22 @@ HEADERS += \
     menus/memoryblockmenu.h \
     processestask.h \
     literals.h \
+    taskgetter.h \
     widgets/processestablewidget.h \
     menus/processmenu.h \
     dialogs/createprocessdialog.h \
-    widgets/queuelistwidget.h
+    aboutwindow.h \
+    widgets/reorderablelistwidget.h
 
 FORMS += \
     mainwindow.ui \
     memorytask.ui \
     dialogs/allocatememorydialog.ui \
     processestask.ui \
-    dialogs/createprocessdialog.ui
+    dialogs/createprocessdialog.ui \
+    aboutwindow.ui
 
 TARGET = dispatcher
-
-# The following keeps the generated files at least somewhat separate
-# from the source files.
-UI_DIR = uics
-MOC_DIR = mocs
-OBJECTS_DIR = objs
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

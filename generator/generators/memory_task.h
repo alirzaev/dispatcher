@@ -3,14 +3,11 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <ctime>
 #include <functional>
-#include <iterator>
 #include <map>
 #include <optional>
 #include <random>
 #include <set>
-#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -18,6 +15,8 @@
 #include <algo/memory/strategies.h>
 #include <algo/memory/types.h>
 #include <utils/tasks.h>
+
+#include "rand_utils.h"
 
 namespace Generators::MemoryTask::Details {
 using namespace MemoryManagement;
@@ -33,32 +32,13 @@ struct MemoryBlockCmp {
 
 inline constexpr int32_t maxPid() { return 16; }
 
-template <class I, typename = std::enable_if_t<std::is_integral_v<I>>>
-inline I randRange(I a, I b) {
-  if (a > b) {
-    std::swap(a, b);
-  }
-  static std::mt19937 e(static_cast<unsigned int>(std::time(nullptr)));
-  std::uniform_int_distribution<I> dist(a, b);
-  return dist(e);
-}
-
-template <class BidIt,
-          typename = std::enable_if_t<!std::is_fundamental_v<BidIt>>>
-inline auto randChoice(BidIt first, BidIt last) -> decltype(*first) {
-  auto size = std::distance(first, last);
-  auto index = randRange<decltype(size)>(0, size - 1);
-  std::advance(first, index);
-  return *first;
-}
-
 inline StrategyPtr randStrategy() {
   vector<MemoryManagement::StrategyPtr> strategies = {
       MemoryManagement::FirstAppropriateStrategy::create(),
       MemoryManagement::MostAppropriateStrategy::create(),
       MemoryManagement::LeastAppropriateStrategy::create()};
 
-  return randChoice(strategies.begin(), strategies.end());
+  return RandUtils::randChoice(strategies);
 }
 
 inline set<int32_t> getAvailablePids(const MemoryState &state) {
@@ -70,7 +50,7 @@ inline set<int32_t> getAvailablePids(const MemoryState &state) {
     }
   }
   for (int32_t pid = 0; pid < maxPid(); ++pid) {
-    if (auto p = existingPids.find(pid); p == existingPids.end()) {
+    if (existingPids.find(pid) == existingPids.end()) {
       availabePids.insert(pid);
     }
   }
@@ -90,14 +70,16 @@ inline set<int32_t> getUsedPids(const MemoryState &state) {
 
 // <pages, bytes>
 inline std::pair<int32_t, int32_t> genRequestedMemory(int32_t availablePages) {
-  int32_t pages = randRange(1, availablePages);
+  int32_t pages = RandUtils::randRange(1, availablePages);
   int32_t min = (pages - 1) * 4096 + 1;
   int32_t max = pages * 4096;
-  return {pages, randRange(min, max)};
+  return {pages, RandUtils::randRange(min, max)};
 }
 
 inline optional<Request> genCreateProcess(const MemoryState &state,
                                           bool valid = true) {
+  using namespace RandUtils;
+
   auto [blocks, freeBlocks] = state;
   auto usedPids = getUsedPids(state), availabePids = getAvailablePids(state);
 
@@ -108,12 +90,12 @@ inline optional<Request> genCreateProcess(const MemoryState &state,
 
   if (valid && !availabePids.empty() && freePages > 0) {
     auto [pages, bytes] = genRequestedMemory(freePages);
-    auto newPid = randChoice(availabePids.begin(), availabePids.end());
+    auto newPid = randChoice(availabePids);
 
     return CreateProcessReq(newPid, bytes, pages);
   } else if (!valid && !usedPids.empty()) {
     auto [pages, bytes] = genRequestedMemory(randRange(1, 255));
-    auto newPid = randChoice(usedPids.begin(), usedPids.end());
+    auto newPid = randChoice(usedPids);
 
     return CreateProcessReq(newPid, bytes, pages);
   } else {
@@ -125,11 +107,11 @@ inline optional<Request> genTerminateProcess(const MemoryState &state,
                                              bool valid = true) {
   auto usedPids = getUsedPids(state), availabePids = getAvailablePids(state);
   if (valid && !usedPids.empty()) {
-    auto pid = randChoice(usedPids.begin(), usedPids.end());
+    auto pid = RandUtils::randChoice(usedPids);
 
     return TerminateProcessReq(pid);
   } else if (!valid && !availabePids.empty()) {
-    auto pid = randChoice(availabePids.begin(), availabePids.end());
+    auto pid = RandUtils::randChoice(availabePids);
 
     return TerminateProcessReq(pid);
   } else {
@@ -139,6 +121,8 @@ inline optional<Request> genTerminateProcess(const MemoryState &state,
 
 inline optional<Request> genAllocateMemory(const MemoryState &state,
                                            bool valid = true) {
+  using namespace RandUtils;
+
   auto [blocks, freeBlocks] = state;
   auto usedPids = getUsedPids(state), availabePids = getAvailablePids(state);
 
@@ -149,18 +133,18 @@ inline optional<Request> genAllocateMemory(const MemoryState &state,
 
   if (valid && !usedPids.empty() && freePages > 0) {
     auto [pages, bytes] = genRequestedMemory(freePages);
-    auto newPid = randChoice(usedPids.begin(), usedPids.end());
+    auto newPid = randChoice(usedPids);
 
     return AllocateMemory(newPid, bytes, pages);
   } else if (!valid) {
     if (!availabePids.empty()) {
       auto [pages, bytes] = genRequestedMemory(randRange(1, 255));
-      auto newPid = randChoice(availabePids.begin(), availabePids.end());
+      auto newPid = randChoice(availabePids);
 
       return AllocateMemory(newPid, bytes, pages);
     } else if (!usedPids.empty() && freePages < 255) {
       auto [pages, bytes] = genRequestedMemory(randRange(freePages, 255));
-      auto newPid = randChoice(usedPids.begin(), usedPids.end());
+      auto newPid = randChoice(usedPids);
 
       return AllocateMemory(newPid, bytes, pages);
     } else {
@@ -173,23 +157,34 @@ inline optional<Request> genAllocateMemory(const MemoryState &state,
 
 inline optional<Request> genFreeMemory(const MemoryState &state,
                                        bool valid = true) {
+  using namespace RandUtils;
+
   auto [blocks, freeBlocks] = state;
   auto usedPids = getUsedPids(state), availabePids = getAvailablePids(state);
 
+  std::map<int32_t, size_t> blocksCount;
   set<MemoryBlock, MemoryBlockCmp> usedBlocks;
   for (const auto &block : blocks) {
     if (block.pid() != -1) {
+      blocksCount[block.pid()] += 1;
+    }
+  }
+
+  // При освобождении последнего блока памяти должна создаваться заявка на
+  // завершение процесса
+  for (const auto &block : blocks) {
+    if (block.pid() != -1 && blocksCount[block.pid()] > 1) {
       usedBlocks.insert(block);
     }
   }
 
   if (valid && !usedBlocks.empty()) {
-    auto block = randChoice(usedBlocks.begin(), usedBlocks.end());
+    auto block = randChoice(usedBlocks);
 
     return FreeMemory(block.pid(), block.address());
   } else {
     if (!usedBlocks.empty()) {
-      auto block = randChoice(usedBlocks.begin(), usedBlocks.end());
+      auto block = randChoice(usedBlocks);
       auto delta = randRange(1, 255);
       auto newPid = (block.pid() + delta) % maxPid();
 
@@ -207,11 +202,13 @@ inline optional<Request> genFreeMemory(const MemoryState &state,
 namespace Generators::MemoryTask {
 inline Utils::MemoryTask generate(uint32_t requestCount = 40) {
   using namespace Details;
-  using genPtr = std::function<optional<Request>(const MemoryState &, bool)>;
+  using namespace RandUtils;
+  using GenPtr = std::function<optional<Request>(const MemoryState &, bool)>;
 
-  vector<genPtr> gens = {&Details::genCreateProcess,
+  vector<GenPtr> gens = {&Details::genCreateProcess,
                          &Details::genTerminateProcess,
-                         &Details::genAllocateMemory, &Details::genFreeMemory};
+                         &Details::genAllocateMemory,
+                         &Details::genFreeMemory};
 
   auto strategy = randStrategy();
   auto state = MemoryState::initial();
@@ -223,33 +220,29 @@ inline Utils::MemoryTask generate(uint32_t requestCount = 40) {
 
     for (auto gen : gens) {
       auto valid = gen(state, true);
-      if (valid.has_value()) {
+      if (valid) {
         validRequests.push_back(valid.value());
       }
 
       auto invalid = gen(state, false);
-      if (invalid.has_value()) {
+      if (invalid) {
         invalidRequests.push_back(invalid.value());
       }
     }
 
     if (validRequired && !validRequests.empty()) {
-      requests.push_back(
-          randChoice(validRequests.begin(), validRequests.end()));
+      requests.push_back(randChoice(validRequests));
     } else if (!validRequired && !invalidRequests.empty()) {
-      requests.push_back(
-          randChoice(invalidRequests.begin(), invalidRequests.end()));
+      requests.push_back(randChoice(invalidRequests));
     } else if (validRequired && validRequests.empty()) {
-      requests.push_back(
-          randChoice(invalidRequests.begin(), invalidRequests.end()));
+      requests.push_back(randChoice(invalidRequests));
     } else {
-      requests.push_back(
-          randChoice(validRequests.begin(), validRequests.end()));
+      requests.push_back(randChoice(validRequests));
     }
 
     state = strategy->processRequest(requests.back(), state);
   }
-  return Utils::MemoryTask::create(strategy, 0, MemoryState::initial(),
-                                   requests);
+  return Utils::MemoryTask::create(
+      strategy, 0, MemoryState::initial(), requests);
 }
 } // namespace Generators::MemoryTask

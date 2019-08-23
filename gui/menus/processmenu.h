@@ -1,8 +1,12 @@
 #pragma once
 
+#include <optional>
+
 #include <QMenu>
 #include <QString>
 #include <QWidget>
+
+#include <algo/processes/types.h>
 
 class ProcessMenu : public QMenu {
 public:
@@ -16,5 +20,6 @@ public:
 
   static QString TO_ACTIVE;
 
-  ProcessMenu(QWidget *parent = nullptr);
+  ProcessMenu(std::optional<ProcessesManagement::Process> process,
+              QWidget *parent = nullptr);
 };

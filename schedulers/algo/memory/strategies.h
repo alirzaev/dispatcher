@@ -64,7 +64,8 @@ public:
   MemoryState processRequest(const CreateProcessReq &request,
                              const MemoryState &state) const {
     return sortFreeBlocks(allocateMemoryGeneral(
-        AllocateMemory(request.pid(), request.bytes(), request.pages()), state,
+        AllocateMemory(request.pid(), request.bytes(), request.pages()),
+        state,
         true));
   }
 
@@ -83,10 +84,10 @@ public:
     while (true) {
       auto [blocks, freeBlocks] = currentState;
       // ищем очередной блок памяти, выделенный процессу
-      auto pos = std::find_if(blocks.begin(), blocks.end(),
-                              [&request](const auto &block) {
-                                return request.pid() == block.pid();
-                              });
+      auto pos = std::find_if(
+          blocks.begin(), blocks.end(), [&request](const auto &block) {
+            return request.pid() == block.pid();
+          });
       if (pos == blocks.end()) {
         break;
       }
@@ -128,10 +129,10 @@ public:
     auto [blocks, freeBlocks] = currentState;
 
     // ищем блок, начинающийся с заданного адреса
-    auto pos = std::find_if(blocks.begin(), blocks.end(),
-                            [&request](const auto &block) {
-                              return block.address() == request.address();
-                            });
+    auto pos = std::find_if(
+        blocks.begin(), blocks.end(), [&request](const auto &block) {
+          return block.address() == request.address();
+        });
     // если такого блока нет, игнорируем заявку
     if (pos == blocks.end()) {
       return state;
@@ -176,8 +177,9 @@ protected:
                 const std::vector<MemoryBlock> &freeBlocks,
                 int32_t size) const final {
     auto freeBlockPos = std::find_if(
-        freeBlocks.cbegin(), freeBlocks.cend(),
-        [&size](const auto &block) { return size <= block.size(); });
+        freeBlocks.cbegin(), freeBlocks.cend(), [&size](const auto &block) {
+          return size <= block.size();
+        });
 
     if (freeBlockPos != freeBlocks.cend()) {
       return std::find(blocks.cbegin(), blocks.cend(), *freeBlockPos);
@@ -229,14 +231,16 @@ protected:
    *  @return Новое состояние памяти.
    */
   virtual MemoryState
-  allocateMemoryGeneral(const AllocateMemory &request, const MemoryState &state,
+  allocateMemoryGeneral(const AllocateMemory &request,
+                        const MemoryState &state,
                         const bool createProcess = false) const final {
     auto [blocks, freeBlocks] = state;
 
     // проверяем, выделены ли процессу какие-либо блоки памяти
     auto processPos = std::find_if(
-        blocks.begin(), blocks.end(),
-        [&request](const auto &block) { return block.pid() == request.pid(); });
+        blocks.begin(), blocks.end(), [&request](const auto &block) {
+          return block.pid() == request.pid();
+        });
     // обработка некорректных ситуаций:
     // 1. Создание уже существующего процесса
     // 2. Выделение памяти несуществующему процессу
@@ -298,7 +302,8 @@ protected:
     auto currentState = state;
     auto [blocks, freeBlocks] = currentState;
 
-    std::stable_sort(freeBlocks.begin(), freeBlocks.end(),
+    std::stable_sort(freeBlocks.begin(),
+                     freeBlocks.end(),
                      [](const auto &left, const auto &right) {
                        return left.address() < right.address();
                      });
@@ -339,7 +344,8 @@ protected:
     auto currentState = state;
     auto [blocks, freeBlocks] = currentState;
 
-    std::stable_sort(freeBlocks.begin(), freeBlocks.end(),
+    std::stable_sort(freeBlocks.begin(),
+                     freeBlocks.end(),
                      [](const auto &left, const auto &right) {
                        if (left.size() == right.size()) {
                          return left.address() < right.address();
@@ -380,7 +386,8 @@ protected:
     auto currentState = state;
     auto [blocks, freeBlocks] = currentState;
 
-    std::stable_sort(freeBlocks.begin(), freeBlocks.end(),
+    std::stable_sort(freeBlocks.begin(),
+                     freeBlocks.end(),
                      [](const auto &left, const auto &right) {
                        if (left.size() == right.size()) {
                          return left.address() < right.address();

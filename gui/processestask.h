@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <string>
 
 #include <QLineEdit>
@@ -8,22 +9,25 @@
 
 #include <algo/processes/strategies.h>
 #include <algo/processes/types.h>
+#include <utils/tasks.h>
 
 #include "models.h"
+#include "taskgetter.h"
+
 #include "widgets/processestablewidget.h"
 
 namespace Ui {
 class ProcessesTask;
 }
 
-class ProcessesTask : public QWidget {
+class ProcessesTask : public QWidget, public TaskGetter {
   Q_OBJECT
 
 public:
-  explicit ProcessesTask(Models::ProcessesModel model,
+  explicit ProcessesTask(Models::ProcessesModel task,
                          QWidget *parent = nullptr);
 
-  Models::ProcessesModel model() const;
+  Utils::Task task() const override;
 
   ~ProcessesTask() override;
 
@@ -42,15 +46,17 @@ private:
 
   ProcessesManagement::ProcessesState collectState();
 
+  std::size_t mapRowToIndex(int row);
+
   void processActionCreate();
 
-  void processActionTerminate(int row);
+  void processActionTerminate(std::size_t index);
 
-  void processActionToExecuting(int row);
+  void processActionToExecuting(std::size_t index);
 
-  void processActionToWaiting(int row);
+  void processActionToWaiting(std::size_t index);
 
-  void processActionToActive(int row);
+  void processActionToActive(std::size_t index);
 
   void refresh();
 
@@ -64,9 +70,9 @@ private:
 
   void setStrategy(ProcessesManagement::StrategyType type);
 
-  void pushToQueue(int queue, int pid);
+  void pushToQueue(std::size_t queue, int pid);
 
-  void popFromQueue(int queue, QLineEdit *lineEdit);
+  void popFromQueue(std::size_t queue, QLineEdit *lineEdit);
 
   void showErrorMessage(const std::string &message);
 

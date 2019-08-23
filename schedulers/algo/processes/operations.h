@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <map>
@@ -28,11 +29,12 @@ namespace ProcessesManagement {
  *  "NO_SUCH_PROCESS" - процесса с таким @a pid не существует.
  */
 inline ProcessesState changeProcessState(const ProcessesState &state,
-                                         int32_t pid, ProcState newState) {
+                                         int32_t pid,
+                                         ProcState newState) {
   auto [processes, queues] = state;
 
-  if (auto it = getByPid(processes, pid); it != processes.end()) {
-    *it = it->state(newState);
+  if (auto index = getIndexByPid(processes, pid); index.has_value()) {
+    processes.at(*index) = processes.at(*index).state(newState);
     return {processes, queues};
   } else {
     throw OperationException("NO_SUCH_PROCESS");
@@ -54,18 +56,18 @@ inline ProcessesState changeProcessState(const ProcessesState &state,
  *  "NO_SUCH_PROCESS" - процесса с таким @a pid не существует;
  *  "ALREADY_IN_QUEUE" - процесс уже добавлен в одну из очередей.
  */
-inline ProcessesState pushToQueue(const ProcessesState &state,
-                                  int32_t queueIndex, int32_t pid) {
+inline ProcessesState
+pushToQueue(const ProcessesState &state, size_t queueIndex, int32_t pid) {
   auto [processes, queues] = state;
 
-  if (auto it = getByPid(processes, pid); it != processes.end()) {
+  if (auto index = getIndexByPid(processes, pid); index.has_value()) {
     for (const auto &queue : queues) {
       if (std::find(queue.begin(), queue.end(), pid) != queue.end()) {
         throw OperationException("ALREADY_IN_QUEUE");
       }
     }
-    queues.at(static_cast<size_t>(queueIndex)).push_back(pid);
-    *it = it->priority(queueIndex);
+    queues.at(queueIndex).push_back(pid);
+    processes.at(*index) = processes.at(*index).priority(queueIndex);
     return {processes, queues};
   } else {
     throw OperationException("NO_SUCH_PROCESS");
@@ -88,17 +90,17 @@ inline ProcessesState pushToQueue(const ProcessesState &state,
  *  queueIndex.
  */
 inline ProcessesState popFromQueue(const ProcessesState &state,
-                                   int32_t queueIndex) {
+                                   size_t queueIndex) {
   auto [processes, queues] = state;
 
-  auto &queue = queues.at(static_cast<size_t>(queueIndex));
+  auto &queue = queues.at(queueIndex);
   if (queue.empty()) {
     throw OperationException("EMPTY_QUEUE");
   }
 
   auto pid = queue.front();
 
-  if (auto it = getByPid(processes, pid); it == processes.end()) {
+  if (auto index = getIndexByPid(processes, pid); !index.has_value()) {
     throw OperationException("NO_SUCH_PROCESS");
   }
   queue.pop_front();
@@ -123,22 +125,27 @@ inline ProcessesState popFromQueue(const ProcessesState &state,
 inline ProcessesState switchTo(const ProcessesState &state, int32_t nextPid) {
   auto [processes, queues] = state;
 
-  auto prev = getByState(processes, ProcState::EXECUTING);
-  auto next = getByPid(processes, nextPid);
+  auto prevIndex = getIndexByState(processes, ProcState::EXECUTING);
+  auto nextIndex = getIndexByPid(processes, nextPid);
 
-  if (next == processes.end()) {
+  if (!nextIndex.has_value()) {
     throw OperationException("NO_SUCH_PROCESS");
   }
-  if (prev != processes.end() && *prev == *next) {
-    return state;
+
+  auto next = processes.at(*nextIndex);
+  if (prevIndex.has_value()) {
+    auto prev = processes.at(*prevIndex);
+    if (prev == next) {
+      return state;
+    } else {
+      processes.at(*prevIndex) = prev.state(ProcState::ACTIVE);
+    }
+
+    if (next.state() != ProcState::ACTIVE) {
+      throw OperationException("INVALID_STATE");
+    }
   }
-  if (next->state() != ProcState::ACTIVE) {
-    throw OperationException("INVALID_STATE");
-  }
-  if (prev != processes.end()) {
-    *prev = prev->state(ProcState::ACTIVE);
-  }
-  *next = next->state(ProcState::EXECUTING);
+  processes.at(*nextIndex) = next.state(ProcState::EXECUTING);
 
   return {processes, queues};
 }
@@ -160,9 +167,7 @@ inline ProcessesState terminateProcess(const ProcessesState &state,
                                        int32_t pid) {
   auto [processes, queues] = state;
 
-  auto it = getByPid(processes, pid);
-
-  if (it == processes.end()) {
+  if (auto index = getIndexByPid(processes, pid); !index.has_value()) {
     throw OperationException("NO_SUCH_PROCESS");
   }
 
@@ -173,13 +178,13 @@ inline ProcessesState terminateProcess(const ProcessesState &state,
     }
   }
   std::set<int32_t> toTerminate;
-  std::function<void(int32_t)> rec = [&rec, &toTerminate,
-                                      &parents](int32_t pid) {
-    toTerminate.insert(pid);
-    for (const auto &child : parents[pid]) {
-      rec(child);
-    }
-  };
+  std::function<void(int32_t)> rec =
+      [&rec, &toTerminate, &parents](int32_t pid) {
+        toTerminate.insert(pid);
+        for (const auto &child : parents[pid]) {
+          rec(child);
+        }
+      };
   rec(pid);
 
   decltype(processes) newProcesses;
@@ -219,14 +224,12 @@ inline ProcessesState terminateProcess(const ProcessesState &state,
 inline ProcessesState addProcess(const ProcessesState &state, Process process) {
   auto [processes, queues] = state;
 
-  auto it = getByPid(processes, process.pid());
-
-  if (it != processes.end()) {
+  if (auto index = getIndexByPid(processes, process.pid()); index.has_value()) {
     throw OperationException("PROCESS_EXISTS");
   }
 
-  auto parent = getByPid(processes, process.ppid());
-  if (process.ppid() != -1 && parent == processes.end()) {
+  auto parentIndex = getIndexByPid(processes, process.ppid());
+  if (process.ppid() != -1 && !parentIndex.has_value()) {
     throw OperationException("NO_SUCH_PPID");
   }
 
@@ -246,10 +249,10 @@ inline ProcessesState addProcess(const ProcessesState &state, Process process) {
 inline ProcessesState updateTimer(const ProcessesState &state) {
   auto [processes, queues] = state;
 
-  auto it = getByState(processes, ProcState::EXECUTING);
-
-  if (it != processes.end()) {
-    *it = it->timer(it->timer() + 1);
+  if (auto index = getIndexByState(processes, ProcState::EXECUTING);
+      index.has_value()) {
+    auto current = processes.at(*index);
+    processes.at(*index) = current.timer(current.timer() + 1);
   }
 
   return {processes, queues};

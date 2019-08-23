@@ -1,11 +1,9 @@
+include(../common.pri)
+
 TEMPLATE = lib
-CONFIG += c++1z
+
 CONFIG -= app_bundle
 CONFIG -= qt
-
-#QMAKE_CXXFLAGS += -Wa,-mbig-obj
-
-INCLUDEPATH += "../3rdparty"
 
 HEADERS += \
     algo/memory/exceptions.h \
@@ -15,7 +13,6 @@ HEADERS += \
     algo/memory/types.h \
     algo/processes/requests.h \
     algo/processes/exceptions.h \
-    algo/processes/strategies/sjt.h \
     algo/processes/types.h \
     utils/exceptions.h \
     utils/io.h \
@@ -27,12 +24,9 @@ HEADERS += \
     algo/processes/strategies/roundrobin.h \
     algo/processes/strategies/fcfs.h \
     algo/processes/helpers.h \
-    algo/processes/strategies/srt.h
-
-# The following keeps the generated files at least somewhat separate
-# from the source files.
-UI_DIR = uics
-MOC_DIR = mocs
-OBJECTS_DIR = objs
+    algo/processes/strategies/srt.h \
+    algo/processes/strategies/winnt.h \
+    algo/processes/strategies/sjn.h \
+    algo/processes/strategies/unix.h
 
 requires(false)

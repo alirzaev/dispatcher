@@ -4,6 +4,7 @@
 
 #include <QAction>
 #include <QDebug>
+#include <QDir>
 #include <QFileDialog>
 #include <QMessageBox>
 
@@ -14,7 +15,9 @@
 #include <utils/tasks.h>
 
 #include "models.h"
+#include "taskgetter.h"
 
+#include "aboutwindow.h"
 #include "memorytask.h"
 #include "processestask.h"
 
@@ -24,22 +27,24 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
-  ui->tabWidget->clear();
 
-  connect(ui->actionOpenTask, &QAction::triggered, this,
-          &MainWindow::openTasks);
-  connect(ui->actionSaveTask, &QAction::triggered, this,
-          &MainWindow::saveTasks);
-  connect(ui->actionGenerateTask, &QAction::triggered, this,
+  connect(
+      ui->actionOpenTask, &QAction::triggered, this, &MainWindow::openTasks);
+  connect(
+      ui->actionSaveTask, &QAction::triggered, this, &MainWindow::saveTasks);
+  connect(ui->actionGenerateTask,
+          &QAction::triggered,
+          this,
           &MainWindow::createTasks);
   connect(ui->actionQuit, &QAction::triggered, this, &QMainWindow::close);
+  connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::showHelp);
 }
 
 MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::openTasks() {
-  auto fileName = QFileDialog::getOpenFileName(this, "Открыть файл задания", "",
-                                               "JSON (*.json)");
+  auto fileName = QFileDialog::getOpenFileName(
+      this, "Открыть файл задания", "", "JSON (*.json)");
   if (fileName.isEmpty()) {
     return;
   }
@@ -54,8 +59,8 @@ void MainWindow::openTasks() {
     loadTasks(tasks);
   } catch (const std::exception &ex) {
     qDebug() << ex.what();
-    QMessageBox::critical(this, "Ошибка",
-                          "Невозможно загрузить задания: файл поврежден");
+    QMessageBox::critical(
+        this, "Ошибка", "Невозможно загрузить задания: файл поврежден");
   }
 }
 
@@ -82,8 +87,8 @@ void MainWindow::loadTasks(const std::vector<Utils::Task> &tasks) {
 }
 
 void MainWindow::saveTasks() {
-  auto fileName = QFileDialog::getSaveFileName(this, "Сохранить задание в файл",
-                                               "", "JSON (*.json)");
+  auto fileName = QFileDialog::getSaveFileName(
+      this, "Сохранить задание в файл", "", "JSON (*.json)");
   if (fileName.isEmpty()) {
     return;
   }
@@ -97,21 +102,38 @@ void MainWindow::saveTasks() {
   std::vector<Utils::Task> tasks;
 
   for (int i = 0; i < ui->tabWidget->count(); ++i) {
-    auto *widget = ui->tabWidget->widget(i);
-    if (auto *p = dynamic_cast<MemoryTask *>(widget); p != nullptr) {
-      auto model = p->model();
-      tasks.push_back(model.task);
-    } else if (auto *p = dynamic_cast<ProcessesTask *>(widget); p != nullptr) {
-      auto model = p->model();
-      tasks.push_back(model.task);
-    }
+    auto *widget = dynamic_cast<TaskGetter *>(ui->tabWidget->widget(i));
+    auto task = widget->task();
+    tasks.push_back(task);
   }
 
   Utils::saveTasks(tasks, file);
 }
 
 void MainWindow::createTasks() {
-  loadTasks({Generators::MemoryTask::generate(40),
-             Generators::ProcessesTask::generate(40, false),
-             Generators::ProcessesTask::generate(40, true)});
+  std::vector<Utils::Task> tasks = {
+      Generators::MemoryTask::generate(40),
+      Generators::ProcessesTask::generate(40, false),
+      Generators::ProcessesTask::generate(40, true)};
+
+  dumpTasks(tasks);
+  loadTasks(tasks);
+}
+
+void MainWindow::dumpTasks(const std::vector<Utils::Task> &tasks) {
+  try {
+    auto tempFilePath =
+        QDir::toNativeSeparators(QDir::tempPath() + "/dispatcher.json");
+
+    qDebug() << tempFilePath;
+
+    std::ofstream file(tempFilePath.toStdString());
+    Utils::saveTasks(tasks, file);
+  } catch (...) {
+  }
+}
+
+void MainWindow::showHelp() {
+  auto window = AboutWindow(this);
+  window.exec();
 }

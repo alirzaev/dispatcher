@@ -3,6 +3,7 @@
 #include <istream>
 #include <map>
 #include <ostream>
+#include <string>
 #include <variant>
 #include <vector>
 
@@ -26,18 +27,22 @@ using Utils::TaskException;
  */
 inline MemoryTask loadMemoryTask(const nlohmann::json &obj) {
   using namespace MemoryManagement;
-  StrategyPtr strategy;
+
+  auto toPair = [](auto strategy) -> std::pair<std::string, StrategyPtr> {
+    return {strategy->toString(), strategy};
+  };
+
+  std::map<std::string, StrategyPtr> strategies = {
+      toPair(FirstAppropriateStrategy::create()),
+      toPair(MostAppropriateStrategy::create()),
+      toPair(LeastAppropriateStrategy::create())};
 
   auto strategyType = obj["strategy"];
-  if (strategyType == "FIRST_APPROPRIATE") {
-    strategy = FirstAppropriateStrategy::create();
-  } else if (strategyType == "MOST_APPROPRIATE") {
-    strategy = MostAppropriateStrategy::create();
-  } else if (strategyType == "LEAST_APPROPRIATE") {
-    strategy = LeastAppropriateStrategy::create();
-  } else {
+  if (strategies.find(strategyType) == strategies.end()) {
     throw TaskException("UNKNOWN_STRATEGY");
   }
+
+  StrategyPtr strategy = strategies[strategyType];
 
   uint32_t completed = obj["completed"];
 
@@ -63,12 +68,12 @@ inline MemoryTask loadMemoryTask(const nlohmann::json &obj) {
     blocks.emplace_back(block["pid"], block["address"], block["size"]);
   }
   for (auto blockObj : obj["state"]["free_blocks"]) {
-    freeBlocks.emplace_back(blockObj["pid"], blockObj["address"],
-                            blockObj["size"]);
+    freeBlocks.emplace_back(
+        blockObj["pid"], blockObj["address"], blockObj["size"]);
   }
 
-  return MemoryTask::create(strategy, completed, {blocks, freeBlocks},
-                            requests);
+  return MemoryTask::create(
+      strategy, completed, {blocks, freeBlocks}, requests);
 }
 
 /**
@@ -86,35 +91,43 @@ inline MemoryTask loadMemoryTask(const nlohmann::json &obj) {
  */
 inline ProcessesTask loadProcessesTask(const nlohmann::json &obj) {
   using namespace ProcessesManagement;
-  StrategyPtr strategy;
+
+  auto toPair = [](auto strategy) -> std::pair<std::string, StrategyPtr> {
+    return {strategy->toString(), strategy};
+  };
+
+  std::map<std::string, StrategyPtr> strategies = {
+      toPair(RoundRobinStrategy::create()),
+      toPair(FcfsStrategy::create()),
+      toPair(SjnStrategy::create()),
+      toPair(SrtStrategy::create()),
+      toPair(WinNtStrategy::create()),
+      toPair(UnixStrategy::create())};
 
   auto strategyType = obj["strategy"];
-  if (strategyType == "ROUNDROBIN") {
-    strategy = RoundRobinStrategy::create();
-  } else if (strategyType == "FCFS") {
-    strategy = FcfsStrategy::create();
-  } else if (strategyType == "SJT") {
-    strategy = SjtStrategy::create();
-  } else if (strategyType == "SRT") {
-    strategy = SrtStrategy::create();
-  } else {
+  if (strategies.find(strategyType) == strategies.end()) {
     throw TaskException("UNKNOWN_STRATEGY");
   }
+
+  StrategyPtr strategy = strategies[strategyType];
 
   uint32_t completed = obj["completed"];
 
   std::vector<Request> requests;
   for (auto req : obj["requests"]) {
     if (req["type"] == "CREATE_PROCESS") {
-      requests.push_back(CreateProcessReq(req["pid"], req["ppid"],
-                                          req["priority"], req["basePriority"],
-                                          req["timer"], req["workTime"]));
+      requests.push_back(CreateProcessReq(req["pid"],
+                                          req["ppid"],
+                                          req["priority"],
+                                          req["basePriority"],
+                                          req["timer"],
+                                          req["workTime"]));
     } else if (req["type"] == "TERMINATE_PROCESS") {
       requests.push_back(TerminateProcessReq(req["pid"]));
     } else if (req["type"] == "INIT_IO") {
       requests.push_back(InitIO(req["pid"]));
     } else if (req["type"] == "TERMINATE_IO") {
-      requests.push_back(TerminateIO(req["pid"]));
+      requests.push_back(TerminateIO(req["pid"], req["augment"]));
     } else if (req["type"] == "TRANSFER_CONTROL") {
       requests.push_back(TransferControl(req["pid"]));
     } else if (req["type"] == "TIME_QUANTUM_EXPIRED") {
@@ -150,8 +163,8 @@ inline ProcessesTask loadProcessesTask(const nlohmann::json &obj) {
     }
   }
 
-  return ProcessesTask::create(strategy, completed, {processes, queues},
-                               requests);
+  return ProcessesTask::create(
+      strategy, completed, {processes, queues}, requests);
 }
 } // namespace Utils::details
 

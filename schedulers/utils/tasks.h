@@ -42,7 +42,8 @@ private:
    *  @param state Дескриптор состояния памяти.
    *  @param requests Список заявок для обработки.
    */
-  MemoryTask(Memory::StrategyPtr strategy, uint32_t completed,
+  MemoryTask(Memory::StrategyPtr strategy,
+             uint32_t completed,
              const Memory::MemoryState &state,
              const std::vector<Memory::Request> requests)
       : _strategy(strategy), _completed(completed), _state(state),
@@ -54,7 +55,8 @@ public:
    *
    *  @see Utils::MemoryTask::MemoryTask().
    */
-  static MemoryTask create(Memory::StrategyPtr strategy, uint32_t completed,
+  static MemoryTask create(Memory::StrategyPtr strategy,
+                           uint32_t completed,
                            const Memory::MemoryState &state,
                            const std::vector<Memory::Request> requests) {
     validate(strategy, completed, state, requests);
@@ -72,7 +74,8 @@ public:
    *  @throws Utils::TaskException Исключение возникает, если
    *  переданные параметры не соответствуют заданным ограничениям.
    */
-  static void validate(Memory::StrategyPtr strategy, uint32_t completed,
+  static void validate(Memory::StrategyPtr strategy,
+                       uint32_t completed,
                        const Memory::MemoryState &state,
                        const std::vector<Memory::Request> requests) {
     try {
@@ -188,7 +191,8 @@ private:
    *  @param state Дескриптор состояния процессов.
    *  @param requests Список заявок для обработки.
    */
-  ProcessesTask(Processes::StrategyPtr strategy, uint32_t completed,
+  ProcessesTask(Processes::StrategyPtr strategy,
+                uint32_t completed,
                 const Processes::ProcessesState &state,
                 const std::vector<Processes::Request> requests)
       : _strategy(strategy), _completed(completed), _state(state),
@@ -219,7 +223,8 @@ public:
    *  @throws Utils::TaskException Исключение возникает, если
    *  переданные параметры не соответствуют заданным ограничениям.
    */
-  static void validate(Processes::StrategyPtr strategy, uint32_t completed,
+  static void validate(Processes::StrategyPtr strategy,
+                       uint32_t completed,
                        const Processes::ProcessesState &state,
                        const std::vector<Processes::Request> requests) {
     try {

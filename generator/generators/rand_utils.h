@@ -5,7 +5,7 @@
 #include <random>
 #include <type_traits>
 
-namespace Generators::ProcessesTask::RandUtils {
+namespace Generators::RandUtils {
 template <class I, typename = std::enable_if_t<std::is_integral_v<I>>>
 inline I randRange(I a, I b) {
   if (a > b) {
@@ -24,4 +24,9 @@ inline auto randChoice(BidIt first, BidIt last) -> decltype(*first) {
   std::advance(first, index);
   return *first;
 }
-} // namespace Generators::ProcessesTask::RandUtils
+
+template <class Container>
+inline decltype(auto) randChoice(Container &&container) {
+  return randChoice(std::cbegin(container), std::cend(container));
+}
+} // namespace Generators::RandUtils

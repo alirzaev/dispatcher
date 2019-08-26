@@ -41,8 +41,7 @@ matrix:
         - sudo apt-get install qt511base qtchooser -y -q
 
       before_script:
-        - mkdir -p ~/.config/qtchooser
-        - echo -e "/opt/qt511/bin\n/opt/qt511/lib" > ~/.config/qtchooser/default.conf
+        - source /opt/qt511/bin/qt511-env.sh
 
       script:
         - mkdir build

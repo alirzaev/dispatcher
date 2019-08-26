@@ -3,7 +3,6 @@ include(../common.pri)
 TEMPLATE = app
 
 CONFIG += console
-CONFIG += object_parallel_to_source
 CONFIG -= app_bundle
 CONFIG -= qt
 
@@ -11,11 +10,11 @@ INCLUDEPATH += ../schedulers
 
 SOURCES += \
     main.cpp \
-    memory/requests.cpp \
-    memory/operations.cpp \
-    memory/types.cpp \
-    memory/strategies.cpp \
-    processes/helpers.cpp \
-    processes/requests.cpp \
-    processes/operations.cpp \
-    processes/types.cpp
+    memory/memory_operations.cpp \
+    memory/memory_requests.cpp \
+    memory/memory_strategies.cpp \
+    memory/memory_types.cpp \
+    processes/processes_helpers.cpp \
+    processes/processes_operations.cpp \
+    processes/processes_requests.cpp \
+    processes/processes_types.cpp

@@ -24,8 +24,7 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QTabWidget" name="tabWidget">
-       </widget>
+       <widget class="QTabWidget" name="tabWidget"/>
       </item>
      </layout>
     </item>
@@ -37,7 +36,7 @@
      <x>0</x>
      <y>0</y>
      <width>640</width>
-     <height>25</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
@@ -59,7 +58,6 @@
    <addaction name="menu"/>
    <addaction name="menuHelp"/>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpenTask">
    <property name="text">
     <string>Открыть</string>

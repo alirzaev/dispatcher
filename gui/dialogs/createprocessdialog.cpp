@@ -7,6 +7,8 @@
 #include <QIntValidator>
 #include <QMessageBox>
 
+#include <tl/optional.hpp>
+
 #include <algo/processes/helpers.h>
 #include <algo/processes/types.h>
 
@@ -45,17 +47,16 @@ CreateProcessDialog::CreateProcessDialog(
           &CreateProcessDialog::reject);
 }
 
-std::optional<ProcessesManagement::Process>
-CreateProcessDialog::getProcess(QWidget *parent,
-                                const CreateProcessDialog::ProcessesList &processes,
-                                const QFlags<CreateProcessDialog::EditableField> &editableFields)
-{
-    auto dialog = CreateProcessDialog(processes, editableFields, parent);
-    if (dialog.exec() == QDialog::Accepted) {
-        return dialog.data;
-    } else {
-        return std::nullopt;
-    }
+tl::optional<ProcessesManagement::Process> CreateProcessDialog::getProcess(
+    QWidget *parent,
+    const CreateProcessDialog::ProcessesList &processes,
+    const QFlags<CreateProcessDialog::EditableField> &editableFields) {
+  auto dialog = CreateProcessDialog(processes, editableFields, parent);
+  if (dialog.exec() == QDialog::Accepted) {
+    return dialog.data;
+  } else {
+    return tl::nullopt;
+  }
 }
 
 CreateProcessDialog::~CreateProcessDialog() { delete ui; }

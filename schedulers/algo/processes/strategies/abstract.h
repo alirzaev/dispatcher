@@ -5,13 +5,12 @@
 #include <cstdint>
 #include <exception>
 #include <memory>
-#include <optional>
 #include <sstream>
 #include <string>
 #include <utility>
-#include <variant>
 
-#include "../../../utils/overload.h"
+#include <tl/optional.hpp>
+
 #include "../operations.h"
 #include "../requests.h"
 #include "../types.h"
@@ -46,11 +45,9 @@ public:
    */
   ProcessesState processRequest(const Request &request,
                                 const ProcessesState &state) const {
-    return std::visit(
-        [this, state](const auto &req) {
-          return updateTimer(this->processRequest(req, state));
-        },
-        request);
+    return request.match([this, state](const auto &req) {
+      return updateTimer(this->processRequest(req, state));
+    });
   }
 
   /**
@@ -64,47 +61,42 @@ public:
     using namespace std::string_literals;
     using ss = std::stringstream;
 
-    return std::visit(
-        overload{
-            [](const CreateProcessReq &req) {
-              if (req.ppid() == -1) {
-                return static_cast<const ss &>(
-                           ss() << "Возник новый процесс PID = " << req.pid())
-                    .str();
-              } else {
-                return static_cast<const ss &>(
-                           ss()
-                           << "Процесс PID = " << req.ppid()
-                           << " породил дочерний процесс PID = " << req.pid())
-                    .str();
-              }
-            },
-            [](const TerminateProcessReq &req) {
-              return static_cast<const ss &>(ss() << "Завершен процесс PID = "
-                                                  << req.pid())
-                  .str();
-            },
-            [](const InitIO &req) {
-              return static_cast<const ss &>(ss()
-                                             << "Процесс PID = " << req.pid()
-                                             << " выдал запрос на ввод/вывод")
-                  .str();
-            },
-            [](const TerminateIO &req) {
-              return static_cast<const ss &>(ss()
-                                             << "Ввод/вывод для процесса PID = "
-                                             << req.pid() << " завершен")
-                  .str();
-            },
-            [](const TransferControl &req) {
-              return static_cast<const ss &>(ss()
-                                             << "Процесс PID = " << req.pid()
-                                             << " передал управление "
-                                                "операционной системе")
-                  .str();
-            },
-            [](const TimeQuantumExpired &) { return "Истек квант времени"s; }},
-        request);
+    return request.match(
+        [](const CreateProcessReq &req) {
+          if (req.ppid() == -1) {
+            return static_cast<const ss &>(ss() << "Возник новый процесс PID = "
+                                                << req.pid())
+                .str();
+          } else {
+            return static_cast<const ss &>(
+                       ss() << "Процесс PID = " << req.ppid()
+                            << " породил дочерний процесс PID = " << req.pid())
+                .str();
+          }
+        },
+        [](const TerminateProcessReq &req) {
+          return static_cast<const ss &>(ss() << "Завершен процесс PID = "
+                                              << req.pid())
+              .str();
+        },
+        [](const InitIO &req) {
+          return static_cast<const ss &>(ss() << "Процесс PID = " << req.pid()
+                                              << " выдал запрос на ввод/вывод")
+              .str();
+        },
+        [](const TerminateIO &req) {
+          return static_cast<const ss &>(ss()
+                                         << "Ввод/вывод для процесса PID = "
+                                         << req.pid() << " завершен")
+              .str();
+        },
+        [](const TransferControl &req) {
+          return static_cast<const ss &>(ss() << "Процесс PID = " << req.pid()
+                                              << " передал управление "
+                                                 "операционной системе")
+              .str();
+        },
+        [](const TimeQuantumExpired &) { return "Истек квант времени"s; });
   }
 
 protected:
@@ -180,9 +172,9 @@ protected:
    *  @param state Дескриптор состояния процессов.
    *
    *  @return Кортеж из двух чисел: PID процесса и индекс очереди, в которой он
-   *  находится; либо std::nullopt, если такового нет.
+   *  находится; либо tl::nullopt, если такового нет.
    */
-  virtual std::optional<std::pair<int32_t, size_t>>
+  virtual tl::optional<std::pair<int32_t, size_t>>
   schedule(const ProcessesState &state) const = 0;
 
   /**
@@ -190,14 +182,14 @@ protected:
    *
    * @param state Дескриптор состояния процессов.
    *
-   * @return Дескриптор процесса или std::nullopt, если такового нет.
+   * @return Дескриптор процесса или tl::nullopt, если такового нет.
    */
-  std::optional<Process> getCurrent(const ProcessesState &state) const {
+  tl::optional<Process> getCurrent(const ProcessesState &state) const {
     if (auto index = getIndexByState(state.processes, ProcState::EXECUTING);
         index.has_value()) {
       return state.processes.at(*index);
     } else {
-      return std::nullopt;
+      return tl::nullopt;
     };
   }
 };

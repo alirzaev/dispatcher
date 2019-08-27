@@ -3,8 +3,8 @@
 #include <cstdint>
 #include <memory>
 #include <string>
-#include <variant>
 
+#include <mapbox/variant.hpp>
 #include <nlohmann/json.hpp>
 
 #include "exceptions.h"
@@ -201,6 +201,6 @@ public:
   }
 };
 
-using Request = std::
+using Request = mapbox::util::
     variant<CreateProcessReq, TerminateProcessReq, AllocateMemory, FreeMemory>;
 } // namespace MemoryManagement

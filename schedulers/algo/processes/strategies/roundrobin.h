@@ -5,10 +5,10 @@
 #include <cstdint>
 #include <exception>
 #include <memory>
-#include <optional>
 #include <string>
 #include <utility>
-#include <variant>
+
+#include <tl/optional.hpp>
 
 #include "../exceptions.h"
 #include "../operations.h"
@@ -29,12 +29,12 @@ public:
   }
 
 protected:
-  std::optional<std::pair<int32_t, size_t>>
+  tl::optional<std::pair<int32_t, size_t>>
   schedule(const ProcessesState &state) const override {
     auto [processes, queues] = state;
 
     if (queues[0].empty()) {
-      return std::nullopt;
+      return tl::nullopt;
     } else {
       auto pid = queues[0].front();
       return {{pid, 0}};

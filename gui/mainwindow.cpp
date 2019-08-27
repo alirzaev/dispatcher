@@ -1,5 +1,4 @@
 #include <fstream>
-#include <variant>
 #include <vector>
 
 #include <QAction>
@@ -8,10 +7,11 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
+#include <mapbox/variant.hpp>
+
 #include <generators/memory_task.h>
 #include <generators/processes_task.h>
 #include <utils/io.h>
-#include <utils/overload.h>
 #include <utils/tasks.h>
 
 #include "models.h"
@@ -69,20 +69,19 @@ void MainWindow::loadTasks(const std::vector<Utils::Task> &tasks) {
   tabs->clear();
 
   for (const auto &task : tasks) {
-    std::visit(
-        overload{[tabs, this](const Utils::MemoryTask &task) {
-                   auto model = Models::MemoryModel{task.state(), task};
+    task.match(
+        [tabs, this](const Utils::MemoryTask &task) {
+          auto model = Models::MemoryModel{task.state(), task};
 
-                   auto *taskWidget = new MemoryTask(model, this);
-                   tabs->addTab(taskWidget, "Диспетчеризация памяти");
-                 },
-                 [tabs, this](const Utils::ProcessesTask &task) {
-                   auto model = Models::ProcessesModel{task.state(), task};
+          auto *taskWidget = new MemoryTask(model, this);
+          tabs->addTab(taskWidget, "Диспетчеризация памяти");
+        },
+        [tabs, this](const Utils::ProcessesTask &task) {
+          auto model = Models::ProcessesModel{task.state(), task};
 
-                   auto *taskWidget = new ProcessesTask(model, this);
-                   tabs->addTab(taskWidget, "Диспетчеризация процессов");
-                 }},
-        task);
+          auto *taskWidget = new ProcessesTask(model, this);
+          tabs->addTab(taskWidget, "Диспетчеризация процессов");
+        });
   }
 }
 

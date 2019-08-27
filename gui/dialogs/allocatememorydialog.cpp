@@ -1,9 +1,10 @@
-#include <optional>
 #include <utility>
 
 #include <QDialogButtonBox>
 #include <QIntValidator>
 #include <QMessageBox>
+
+#include <tl/optional.hpp>
 
 #include "literals.h"
 
@@ -12,8 +13,10 @@
 
 using namespace Utils::Literals;
 
-AllocateMemoryDialog::AllocateMemoryDialog(QWidget *parent, int32_t availablePages)
-    : QDialog(parent), ui(new Ui::AllocateMemoryDialog), availablePages(availablePages) {
+AllocateMemoryDialog::AllocateMemoryDialog(QWidget *parent,
+                                           int32_t availablePages)
+    : QDialog(parent), ui(new Ui::AllocateMemoryDialog),
+      availablePages(availablePages) {
   ui->setupUi(this);
   ui->PIDEdit->setValidator(new QIntValidator(0, 255));
   ui->sizeEdit->setValidator(new QIntValidator(1, 256));
@@ -30,14 +33,15 @@ AllocateMemoryDialog::AllocateMemoryDialog(QWidget *parent, int32_t availablePag
 
 AllocateMemoryDialog::~AllocateMemoryDialog() { delete ui; }
 
-std::optional<std::pair<int32_t, int32_t> > AllocateMemoryDialog::getMemoryBlockInfo(QWidget *parent, int32_t availablePages)
-{
-    auto dialog = AllocateMemoryDialog(parent, availablePages);
-    if (dialog.exec() == QDialog::Accepted) {
-        return dialog.info;
-    } else {
-        return std::nullopt;
-    }
+tl::optional<std::pair<int32_t, int32_t>>
+AllocateMemoryDialog::getMemoryBlockInfo(QWidget *parent,
+                                         int32_t availablePages) {
+  auto dialog = AllocateMemoryDialog(parent, availablePages);
+  if (dialog.exec() == QDialog::Accepted) {
+    return dialog.info;
+  } else {
+    return tl::nullopt;
+  }
 }
 
 void AllocateMemoryDialog::tryAccept() {
@@ -52,10 +56,12 @@ void AllocateMemoryDialog::tryAccept() {
   int32_t size = ui->sizeEdit->text().toInt();
 
   if (size > availablePages) {
-      QMessageBox::critical(this, "Ошибка",
-                            "Максимальное количество параграфов для выделения: %1"_qs
-                            .arg(availablePages));
-      return;
+    QMessageBox::critical(
+        this,
+        "Ошибка",
+        "Максимальное количество параграфов для выделения: %1"_qs.arg(
+            availablePages));
+    return;
   }
 
   this->info = {pid, size};

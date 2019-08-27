@@ -5,10 +5,11 @@
 #include <cstdint>
 #include <exception>
 #include <memory>
-#include <optional>
 #include <string>
 #include <utility>
-#include <variant>
+
+#include <mapbox/variant.hpp>
+#include <tl/optional.hpp>
 
 #include "../exceptions.h"
 #include "../operations.h"
@@ -34,14 +35,14 @@ public:
 
     auto base = AbstractStrategy::getRequestDescription(request);
 
-    if (std::holds_alternative<CreateProcessReq>(request)) {
-      auto req = std::get<CreateProcessReq>(request);
+    if (request.is<CreateProcessReq>()) {
+      auto req = request.get<CreateProcessReq>();
       return static_cast<const ss &>(ss() << base << ". "
                                           << "Базовый приоритет: "
                                           << req.basePriority())
           .str();
-    } else if (std::holds_alternative<TerminateIO>(request)) {
-      auto req = std::get<TerminateIO>(request);
+    } else if (request.is<TerminateIO>()) {
+      auto req = request.get<TerminateIO>();
       return static_cast<const ss &>(ss() << base << ". "
                                           << "Добавка: " << req.augment())
           .str();
@@ -51,7 +52,7 @@ public:
   }
 
 protected:
-  std::optional<std::pair<int32_t, size_t>>
+  tl::optional<std::pair<int32_t, size_t>>
   schedule(const ProcessesState &state) const override {
     auto [processes, queues] = state;
 
@@ -61,7 +62,7 @@ protected:
         return {{pid, i}};
       }
     }
-    return std::nullopt;
+    return tl::nullopt;
   }
 
 private:

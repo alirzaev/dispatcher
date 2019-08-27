@@ -2,7 +2,11 @@
 
 #include <optional>
 
+#include <mapbox/variant.hpp>
+
 #include <algo/processes/requests.h>
+#include <tl/optional.hpp>
+
 #include <algo/processes/types.h>
 
 #include "../rand_utils.h"
@@ -11,9 +15,8 @@
 
 namespace Generators::ProcessesTask::TaskGenerators {
 using namespace ProcessesManagement;
-using std::get;
-using std::nullopt;
-using std::optional;
+using tl::nullopt;
+using tl::optional;
 
 class UnixTaskGenerator : public AbstractTaskGenerator {
 public:
@@ -27,7 +30,7 @@ public:
                                      bool valid = true) const override {
     auto base = AbstractTaskGenerator::CreateProcessReq(state, valid);
     if (base) {
-      auto request = get<ProcessesManagement::CreateProcessReq>(*base);
+      auto request = base->get<ProcessesManagement::CreateProcessReq>();
 
       auto priority = RandUtils::randRange(0u, 11u);
       return ProcessesManagement::CreateProcessReq(request.pid(),

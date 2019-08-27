@@ -1,9 +1,7 @@
 #include <cstddef>
 #include <exception>
 #include <map>
-#include <optional>
 #include <string>
-#include <variant>
 
 #include <QDebug>
 #include <QFlags>
@@ -15,13 +13,15 @@
 #include <QSpinBox>
 #include <QString>
 
+#include <mapbox/variant.hpp>
+#include <tl/optional.hpp>
+
 #include <algo/processes/exceptions.h>
 #include <algo/processes/helpers.h>
 #include <algo/processes/operations.h>
 #include <algo/processes/requests.h>
 #include <algo/processes/strategies.h>
 #include <algo/processes/types.h>
-#include <utils/overload.h>
 
 #include "literals.h"
 #include "models.h"
@@ -123,8 +123,8 @@ void ProcessesTask::provideContextMenu(const QPoint &pos) {
   auto row = item ? item->row() : -1;
   _model.state = collectState();
   auto process =
-      row != -1 ? std::optional{_model.state.processes.at(mapRowToIndex(row))}
-                : std::nullopt;
+      row != -1 ? tl::optional{_model.state.processes.at(mapRowToIndex(row))}
+                : tl::nullopt;
 
   qDebug() << "ContextMenu: row " << row;
 
@@ -189,12 +189,13 @@ void ProcessesTask::processActionCreate() {
       {StrategyType::WINDOWS,
        {Field::Pid, Field::Ppid, Field::Priority, Field::BasePriority}}};
 
-  auto process = CreateProcessDialog::getProcess(this,
-                                                 _model.state.processes,
-                                                 flagsMap.at(_model.task.strategy()->type()));
+  auto process = CreateProcessDialog::getProcess(
+      this,
+      _model.state.processes,
+      flagsMap.at(_model.task.strategy()->type()));
 
   if (!process) {
-      return;
+    return;
   }
 
   try {

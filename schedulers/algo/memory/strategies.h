@@ -5,7 +5,8 @@
 #include <exception>
 #include <memory>
 #include <string>
-#include <variant>
+
+#include <mapbox/variant.hpp>
 
 #include "operations.h"
 #include "requests.h"
@@ -46,7 +47,7 @@ public:
    */
   MemoryState processRequest(const Request &request,
                              const MemoryState &state) const {
-    return std::visit(
+    return mapbox::util::apply_visitor(
         [this, state](const auto &req) {
           return this->processRequest(req, state);
         },

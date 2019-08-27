@@ -5,11 +5,12 @@
 #include <cstdint>
 #include <functional>
 #include <map>
-#include <optional>
 #include <random>
 #include <set>
 #include <utility>
 #include <vector>
+
+#include <tl/optional.hpp>
 
 #include <algo/memory/requests.h>
 #include <algo/memory/strategies.h>
@@ -20,9 +21,9 @@
 
 namespace Generators::MemoryTask::Details {
 using namespace MemoryManagement;
-using std::optional;
 using std::set;
 using std::vector;
+using tl::optional;
 
 struct MemoryBlockCmp {
   bool operator()(const MemoryBlock &first, const MemoryBlock &second) const {
@@ -99,7 +100,7 @@ inline optional<Request> genCreateProcess(const MemoryState &state,
 
     return CreateProcessReq(newPid, bytes, pages);
   } else {
-    return std::nullopt;
+    return tl::nullopt;
   }
 }
 
@@ -115,7 +116,7 @@ inline optional<Request> genTerminateProcess(const MemoryState &state,
 
     return TerminateProcessReq(pid);
   } else {
-    return std::nullopt;
+    return tl::nullopt;
   }
 }
 
@@ -148,10 +149,10 @@ inline optional<Request> genAllocateMemory(const MemoryState &state,
 
       return AllocateMemory(newPid, bytes, pages);
     } else {
-      return std::nullopt;
+      return tl::nullopt;
     }
   } else {
-    return std::nullopt;
+    return tl::nullopt;
   }
 }
 

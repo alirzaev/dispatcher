@@ -8,13 +8,13 @@
 #include <QString>
 
 #include <cstdint>
-#include <variant>
 #include <vector>
+
+#include <mapbox/variant.hpp>
 
 #include <algo/memory/requests.h>
 #include <algo/memory/strategies.h>
 #include <algo/memory/types.h>
-#include <utils/overload.h>
 
 #include "literals.h"
 
@@ -79,34 +79,30 @@ void MemoryTask::setFreeMemoryBlocks(const vector<MemoryBlock> &blocks) {
 }
 
 void MemoryTask::setRequest(const Request &request) {
-  auto *label = ui->labelRequestDescr;
-
-  std::visit(
-      overload{[label](const CreateProcessReq &req) {
-                 label->setText("Создан новый процесс PID = %1. "
-                                "Для размещения процесса в памяти (включая "
-                                "служебную информацию) требуется выделить "
-                                "%2 байт (%3 параграфов)"_qs.arg(req.pid())
-                                    .arg(req.bytes())
-                                    .arg(req.pages()));
-               },
-               [label](const TerminateProcessReq &req) {
-                 label->setText("Процесс PID = %1 завершен"_qs.arg(req.pid()));
-               },
-               [label](const AllocateMemory &req) {
-                 label->setText(
-                     "Процесс PID = %1 выдал запрос на выделение ему "
-                     "%2 байт (%3 параграфов) оперативной памяти"_qs
-                         .arg(req.pid())
-                         .arg(req.bytes())
-                         .arg(req.pages()));
-               },
-               [label](const FreeMemory &req) {
-                 label->setText("Процесс PID = %1 выдал запрос на освобождение "
-                                "блока памяти с адресом %2"_qs.arg(req.pid())
-                                    .arg(req.address()));
-               }},
-      request);
+  auto text = request.match(
+      [](const CreateProcessReq &req) {
+        return "Создан новый процесс PID = %1. "
+               "Для размещения процесса в памяти (включая "
+               "служебную информацию) требуется выделить "
+               "%2 байт (%3 параграфов)"_qs.arg(req.pid())
+                   .arg(req.bytes())
+                   .arg(req.pages());
+      },
+      [](const TerminateProcessReq &req) {
+        return "Процесс PID = %1 завершен"_qs.arg(req.pid());
+      },
+      [](const AllocateMemory &req) {
+        return "Процесс PID = %1 выдал запрос на выделение ему "
+               "%2 байт (%3 параграфов) оперативной памяти"_qs.arg(req.pid())
+                   .arg(req.bytes())
+                   .arg(req.pages());
+      },
+      [](const FreeMemory &req) {
+        return "Процесс PID = %1 выдал запрос на освобождение "
+               "блока памяти с адресом %2"_qs.arg(req.pid())
+                   .arg(req.address());
+      });
+  ui->labelRequestDescr->setText(text);
 }
 
 void MemoryTask::setStrategy(StrategyType type) {
@@ -180,7 +176,7 @@ void MemoryTask::processActionAllocate(const MemoryBlock &block,
   auto info = AllocateMemoryDialog::getMemoryBlockInfo(this, block.size());
 
   if (!info) {
-      return;
+    return;
   }
 
   auto [pid, size] = *info;

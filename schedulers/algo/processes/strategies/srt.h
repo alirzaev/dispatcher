@@ -4,13 +4,10 @@
 #include <cstdint>
 #include <exception>
 #include <memory>
-#include <optional>
 #include <sstream>
 #include <string>
 #include <utility>
-#include <variant>
 
-#include "../../../utils/overload.h"
 #include "../exceptions.h"
 #include "../operations.h"
 #include "sjn.h"

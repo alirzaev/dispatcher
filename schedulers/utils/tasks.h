@@ -2,12 +2,12 @@
 
 #include <cstdint>
 #include <memory>
-#include <optional>
 #include <stdexcept>
-#include <variant>
 #include <vector>
 
+#include <mapbox/variant.hpp>
 #include <nlohmann/json.hpp>
+#include <tl/optional.hpp>
 
 #include "../algo/memory/exceptions.h"
 #include "../algo/memory/requests.h"
@@ -126,11 +126,8 @@ public:
     obj["requests"] = nlohmann::json::array();
 
     for (auto request : requests()) {
-      std::visit(
-          [&obj](const auto &request) {
-            obj["requests"].push_back(request.dump());
-          },
-          request);
+      auto req_json = request.match([](const auto &req) { return req.dump(); });
+      obj["requests"].push_back(req_json);
     }
 
     return obj;
@@ -146,13 +143,13 @@ public:
    *
    *  @param state Дескриптор состояния памяти после обработки заявки.
    *
-   *  @return Новый объект задания или std::nullopt, если заявка обработана
+   *  @return Новый объект задания или tl::nullopt, если заявка обработана
    *  неправильно.
    *
    *  Если заявка была обработана правильно, то @a _completed увеличивается
    *  на 1.
    */
-  std::optional<MemoryTask> next(const Memory::MemoryState &state) const {
+  tl::optional<MemoryTask> next(const Memory::MemoryState &state) const {
     if (done()) {
       return *this;
     }
@@ -162,10 +159,10 @@ public:
       if (expected == state) {
         return MemoryTask{_strategy, _completed + 1, expected, _requests};
       } else {
-        return std::nullopt;
+        return tl::nullopt;
       }
     } catch (...) {
-      return std::nullopt;
+      return tl::nullopt;
     }
   }
 };
@@ -267,11 +264,8 @@ public:
     obj["requests"] = nlohmann::json::array();
 
     for (auto request : requests()) {
-      std::visit(
-          [&obj](const auto &request) {
-            obj["requests"].push_back(request.dump());
-          },
-          request);
+      auto req_json = request.match([](const auto &req) { return req.dump(); });
+      obj["requests"].push_back(req_json);
     }
 
     return obj;
@@ -295,13 +289,13 @@ public:
    *
    *  @param state Дескриптор состояния процессов после обработки заявки.
    *
-   *  @return Новый объект задания или std::nullopt, если заявка обработана
+   *  @return Новый объект задания или tl::nullopt, если заявка обработана
    *  неправильно.
    *
    *  Если заявка была обработана правильно, то @a _completed увеличивается
    *  на 1.
    */
-  std::optional<ProcessesTask>
+  tl::optional<ProcessesTask>
   next(const Processes::ProcessesState &state) const {
     if (done()) {
       return *this;
@@ -312,13 +306,13 @@ public:
       if (expected == state) {
         return ProcessesTask{_strategy, _completed + 1, expected, _requests};
       } else {
-        return std::nullopt;
+        return tl::nullopt;
       }
     } catch (...) {
-      return std::nullopt;
+      return tl::nullopt;
     }
   }
 };
 
-using Task = std::variant<MemoryTask, ProcessesTask>;
+using Task = mapbox::util::variant<MemoryTask, ProcessesTask>;
 } // namespace Utils

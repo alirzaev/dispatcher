@@ -4,8 +4,9 @@
 #include <map>
 #include <ostream>
 #include <string>
-#include <variant>
 #include <vector>
+
+#include <mapbox/variant.hpp>
 
 #include "../algo/processes/types.h"
 #include "tasks.h"
@@ -210,7 +211,8 @@ inline void saveTasks(const std::vector<Task> &tasks, std::ostream &os) {
   auto obj = nlohmann::json::array();
 
   for (Task task : tasks) {
-    std::visit([&obj](const auto &task) { obj.push_back(task.dump()); }, task);
+    auto task_json = task.match([](const auto &task) { return task.dump(); });
+    obj.push_back(task_json);
   }
 
   os << obj;

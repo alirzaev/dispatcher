@@ -43,6 +43,14 @@
 
 - Xcode 10 (Command Line Tools)
 
+### Ubuntu
+
+- Минимальная версия Ubuntu - 16.04
+
+- Qt 5.11 или новее
+
+- g++ 7 или новее
+
 ## Используемые сторонние библиотеки
 
 - [Catch2 2.4.1](https://github.com/catchorg/Catch2)

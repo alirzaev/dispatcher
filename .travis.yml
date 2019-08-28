@@ -68,3 +68,6 @@ matrix:
         provider: script
         skip_cleanup: true
         script: curl --upload-file dispatcher*.AppImage https://transfer.sh/dispatcher-git.$VERSION-x86_64.AppImage
+        on:
+          tags: false
+          all_branches: true

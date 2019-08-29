@@ -7,6 +7,8 @@
 
 Руководство пользователя: https://alirzaev1996.gitbook.io/model-dispetchera-zadach-os/
 
+Загрузки: https://github.com/alirzaev/dispatcher/releases/latest
+
 # Структура проекта
 
 - dispatcher.pro - Файл основного проекта

@@ -3,9 +3,11 @@
 
 #include <QAction>
 #include <QDebug>
+#include <QDesktopServices>
 #include <QDir>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QUrl>
 
 #include <mapbox/variant.hpp>
 
@@ -37,6 +39,8 @@ MainWindow::MainWindow(QWidget *parent)
           this,
           &MainWindow::createTasks);
   connect(ui->actionQuit, &QAction::triggered, this, &QMainWindow::close);
+  connect(
+      ui->actionOpenTmpDir, &QAction::triggered, this, &MainWindow::openTmpDir);
   connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::showHelp);
 }
 
@@ -135,4 +139,8 @@ void MainWindow::dumpTasks(const std::vector<Utils::Task> &tasks) {
 void MainWindow::showHelp() {
   auto window = AboutWindow(this);
   window.exec();
+}
+
+void MainWindow::openTmpDir() {
+  QDesktopServices::openUrl(QUrl::fromLocalFile(QDir::tempPath()));
 }

@@ -35,4 +35,6 @@ private:
   void dumpTasks(const std::vector<Utils::Task> &tasks);
 
   void showHelp();
+
+  void openTmpDir();
 };

@@ -5,7 +5,7 @@
 
 Программная модель диспетчера задач для лабораторной работы по дисциплине "Операционные системы"
 
-Руководство пользователя: https://alirzaev1996.gitbook.io/model-dispetchera-zadach-os/
+Руководство пользователя: [HTML](https://alirzaev.github.io/dispatcher/user-manual), [PDF](https://alirzaev.github.io/dispatcher/user-manual.pdf)
 
 Загрузки: https://github.com/alirzaev/dispatcher/releases/latest
 

@@ -30,6 +30,7 @@ matrix:
         - cd gui
         - macdeployqt dispatcher.app
         - 7z a -tzip dispatcher-git.$VERSION.zip dispatcher.app
+
       deploy:
         provider: script
         skip_cleanup: true
@@ -86,3 +87,38 @@ matrix:
         on:
           tags: false
           all_branches: true
+
+    - os: linux
+
+      dist: bionic
+
+      language: ruby
+
+      rvm: 2.6.3
+
+      before_install:
+        - gem update --system
+        - gem install bundler:2.0.2
+
+      install:
+        - cd docs/user-manual
+        - bundle install --jobs=3 --retry=3
+
+      script:
+        - bundle exec asciidoctor -o index.html index.adoc
+        - bundle exec asciidoctor-pdf -o user-manual.pdf index.adoc
+
+      before_deploy:
+        - mkdir -p dist/user-manual
+        - mv index.html dist/user-manual/index.html
+        - mv user-manual.pdf dist/user-manual.pdf
+        - cp -r images dist/user-manual/images
+
+      deploy:
+        - provider: pages
+          skip-cleanup: true
+          github-token: $GITHUB_TOKEN
+          local-dir: diston:
+          on:
+            tags: false
+            all_branches: true

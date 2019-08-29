@@ -11,10 +11,13 @@ matrix:
           packages:
           - qt
           - make
+          - p7zip
+          - curl
 
       before_script:
         - export PATH="/usr/local/opt/make/libexec/gnubin:$PATH"
         - export PATH="/usr/local/opt/qt/bin:$PATH"
+        - export VERSION=`git rev-parse --short HEAD`
 
       script:
         - mkdir build
@@ -22,6 +25,18 @@ matrix:
         - qmake ../dispatcher.pro
         - make -j 2
         - ./tests/tests
+
+      before_deploy:
+        - cd gui
+        - macdeployqt dispatcher.app
+        - 7z a -tzip dispatcher-git.$VERSION.zip dispatcher.app
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script: curl --upload-file dispatcher*.zip https://transfer.sh/dispatcher-git.$VERSION.zip
+        on:
+          tags: false
+          all_branches: true
 
     - os: linux
 
@@ -46,6 +61,7 @@ matrix:
       before_script:
         - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 1
         - source /opt/qt511/bin/qt511-env.sh
+        - export VERSION=`git rev-parse --short HEAD`
 
       script:
         - mkdir build
@@ -61,7 +77,6 @@ matrix:
         - cp icon/svg/dispatcher.svg dispatcher.AppDir/dispatcher.svg
         - curl -L https://github.com/probonopd/linuxdeployqt/releases/download/6/linuxdeployqt-6-x86_64.AppImage > linuxdeployqt
         - chmod a+x linuxdeployqt
-        - export VERSION=`git rev-parse --short HEAD`
         - ./linuxdeployqt dispatcher.AppDir/dispatcher.desktop -appimage
 
       deploy:

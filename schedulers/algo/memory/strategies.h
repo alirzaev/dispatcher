@@ -47,11 +47,9 @@ public:
    */
   MemoryState processRequest(const Request &request,
                              const MemoryState &state) const {
-    return mapbox::util::apply_visitor(
-        [this, state](const auto &req) {
-          return this->processRequest(req, state);
-        },
-        request);
+    return request.match([this, state](const auto &req) {
+      return this->processRequest(req, state);
+    });
   }
 
   /**

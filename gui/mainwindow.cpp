@@ -30,10 +30,19 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
 
+#ifdef RESTRICTED_MODE
+  ui->actionOpenTask->setVisible(false);
+  ui->actionSaveTask->setVisible(false);
+
+  auto title = this->windowTitle();
+  this->setWindowTitle(title + " (режим ограниченной функциональности)");
+#else
   connect(
       ui->actionOpenTask, &QAction::triggered, this, &MainWindow::openTasks);
   connect(
       ui->actionSaveTask, &QAction::triggered, this, &MainWindow::saveTasks);
+#endif
+
   connect(ui->actionGenerateTask,
           &QAction::triggered,
           this,
@@ -46,6 +55,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow() { delete ui; }
 
+#ifndef RESTRICTED_MODE
 void MainWindow::openTasks() {
   auto fileName = QFileDialog::getOpenFileName(
       this, "Открыть файл задания", "", "JSON (*.json)");
@@ -65,27 +75,6 @@ void MainWindow::openTasks() {
     qDebug() << ex.what();
     QMessageBox::critical(
         this, "Ошибка", "Невозможно загрузить задания: файл поврежден");
-  }
-}
-
-void MainWindow::loadTasks(const std::vector<Utils::Task> &tasks) {
-  auto *tabs = ui->tabWidget;
-  tabs->clear();
-
-  for (const auto &task : tasks) {
-    task.match(
-        [tabs, this](const Utils::MemoryTask &task) {
-          auto model = Models::MemoryModel{task.state(), task};
-
-          auto *taskWidget = new MemoryTask(model, this);
-          tabs->addTab(taskWidget, "Диспетчеризация памяти");
-        },
-        [tabs, this](const Utils::ProcessesTask &task) {
-          auto model = Models::ProcessesModel{task.state(), task};
-
-          auto *taskWidget = new ProcessesTask(model, this);
-          tabs->addTab(taskWidget, "Диспетчеризация процессов");
-        });
   }
 }
 
@@ -111,6 +100,28 @@ void MainWindow::saveTasks() {
   }
 
   Utils::saveTasks(tasks, file);
+}
+#endif
+
+void MainWindow::loadTasks(const std::vector<Utils::Task> &tasks) {
+  auto *tabs = ui->tabWidget;
+  tabs->clear();
+
+  for (const auto &task : tasks) {
+    task.match(
+        [tabs, this](const Utils::MemoryTask &task) {
+          auto model = Models::MemoryModel{task.state(), task};
+
+          auto *taskWidget = new MemoryTask(model, this);
+          tabs->addTab(taskWidget, "Диспетчеризация памяти");
+        },
+        [tabs, this](const Utils::ProcessesTask &task) {
+          auto model = Models::ProcessesModel{task.state(), task};
+
+          auto *taskWidget = new ProcessesTask(model, this);
+          tabs->addTab(taskWidget, "Диспетчеризация процессов");
+        });
+  }
 }
 
 void MainWindow::createTasks() {

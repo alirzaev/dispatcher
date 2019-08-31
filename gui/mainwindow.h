@@ -24,11 +24,13 @@ public:
 private:
   Ui::MainWindow *ui;
 
+#ifndef RESTRICTED_MODE
   void openTasks();
 
-  void loadTasks(const std::vector<Utils::Task> &tasks);
-
   void saveTasks();
+#endif
+
+  void loadTasks(const std::vector<Utils::Task> &tasks);
 
   void createTasks();
 

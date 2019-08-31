@@ -85,6 +85,16 @@
       </widget>
      </item>
      <item>
+      <widget class="QLabel" name="labelRestrictedMode">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="verticalSpacer2">
        <property name="orientation">
         <enum>Qt::Vertical</enum>

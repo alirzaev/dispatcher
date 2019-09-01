@@ -65,7 +65,7 @@ void MainWindow::openTasks() {
 
   std::ifstream file(fileName.toStdString());
   if (!file) {
-    QMessageBox::critical(this, "Ошибка", "Невозможно открыть файл задания");
+    QMessageBox::warning(this, "Ошибка", "Невозможно открыть файл задания");
   }
 
   try {
@@ -73,7 +73,7 @@ void MainWindow::openTasks() {
     loadTasks(tasks);
   } catch (const std::exception &ex) {
     qDebug() << ex.what();
-    QMessageBox::critical(
+    QMessageBox::warning(
         this, "Ошибка", "Невозможно загрузить задания: файл поврежден");
   }
 }

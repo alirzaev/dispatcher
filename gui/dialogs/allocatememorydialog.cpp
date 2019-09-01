@@ -48,7 +48,7 @@ void AllocateMemoryDialog::tryAccept() {
   bool valid = ui->PIDEdit->hasAcceptableInput() //
                && ui->sizeEdit->hasAcceptableInput();
   if (!valid) {
-    QMessageBox::critical(this, "Ошибка", "Поля заполнены неверно");
+    QMessageBox::warning(this, "Ошибка", "Поля заполнены неверно");
     return;
   }
 
@@ -56,7 +56,7 @@ void AllocateMemoryDialog::tryAccept() {
   int32_t size = ui->sizeEdit->text().toInt();
 
   if (size > availablePages) {
-    QMessageBox::critical(
+    QMessageBox::warning(
         this,
         "Ошибка",
         "Максимальное количество параграфов для выделения: %1"_qs.arg(

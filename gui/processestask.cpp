@@ -328,6 +328,14 @@ void ProcessesTask::pushToQueue(QLineEdit *lineEdit, QSpinBox *spinBox) {
     } else {
       throw;
     }
+  } catch (const TypeException &ex) {
+    if (ex.what() == "INVALID_PRIORITY"s &&
+        _model.task.strategy()->type() == StrategyType::WINDOWS) {
+      warning(
+          "Процесс нельзя добавить в очередь с приоритетом меньше базового");
+    } else {
+      throw;
+    }
   } catch (const std::exception &ex) {
     warning("Неизвестная ошибка: "s + ex.what());
   }

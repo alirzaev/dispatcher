@@ -4,9 +4,14 @@ QT += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+restricted {
+  DEFINES += RESTRICTED_MODE
+  message("Restricted mode is enabled")
+}
+
 TEMPLATE = app
 
-TARGET = gui
+TARGET = dispatcher
 
 RC_ICONS = ../icon/ico/dispatcher.ico
 
@@ -56,10 +61,3 @@ FORMS += \
     processestask.ui \
     dialogs/createprocessdialog.ui \
     aboutwindow.ui
-
-TARGET = dispatcher
-
-# Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target

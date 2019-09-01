@@ -7,6 +7,8 @@
 #include <QIntValidator>
 #include <QMessageBox>
 
+#include <tl/optional.hpp>
+
 #include <algo/processes/helpers.h>
 #include <algo/processes/types.h>
 
@@ -45,17 +47,16 @@ CreateProcessDialog::CreateProcessDialog(
           &CreateProcessDialog::reject);
 }
 
-std::optional<ProcessesManagement::Process>
-CreateProcessDialog::getProcess(QWidget *parent,
-                                const CreateProcessDialog::ProcessesList &processes,
-                                const QFlags<CreateProcessDialog::EditableField> &editableFields)
-{
-    auto dialog = CreateProcessDialog(processes, editableFields, parent);
-    if (dialog.exec() == QDialog::Accepted) {
-        return dialog.data;
-    } else {
-        return std::nullopt;
-    }
+tl::optional<ProcessesManagement::Process> CreateProcessDialog::getProcess(
+    QWidget *parent,
+    const CreateProcessDialog::ProcessesList &processes,
+    const QFlags<CreateProcessDialog::EditableField> &editableFields) {
+  auto dialog = CreateProcessDialog(processes, editableFields, parent);
+  if (dialog.exec() == QDialog::Accepted) {
+    return dialog.data;
+  } else {
+    return tl::nullopt;
+  }
 }
 
 CreateProcessDialog::~CreateProcessDialog() { delete ui; }
@@ -69,7 +70,7 @@ void CreateProcessDialog::tryAccept() {
                && ui->lineEditBasePriority->hasAcceptableInput() //
                && ui->lineEditWorkTime->hasAcceptableInput();
   if (!valid) {
-    QMessageBox::critical(this, "Ошибка", "Поля заполнены неверно");
+    QMessageBox::warning(this, "Ошибка", "Поля заполнены неверно");
     return;
   }
 
@@ -80,16 +81,16 @@ void CreateProcessDialog::tryAccept() {
   int32_t workTime = ui->lineEditWorkTime->text().toInt();
 
   if (getIndexByPid(processes, pid)) {
-    QMessageBox::critical(this, "Ошибка", "Процесс с таким PID уже существует");
+    QMessageBox::warning(this, "Ошибка", "Процесс с таким PID уже существует");
     return;
   }
   if (ppid != -1 && !getIndexByPid(processes, ppid)) {
-    QMessageBox::critical(
+    QMessageBox::warning(
         this, "Ошибка", "Родительский процесс с таким PID не существует");
     return;
   }
   if (priority < basePriority) {
-    QMessageBox::critical(
+    QMessageBox::warning(
         this, "Ошибка", "Текущий приоритет не может быть меньше базового");
     return;
   }

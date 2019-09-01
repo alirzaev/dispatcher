@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=dispatcher
+Exec=dispatcher
+Icon=dispatcher
+Comment=Модель диспетчера задач ОС
+Categories=Education;

@@ -1,0 +1,9 @@
+= Модель диспетчера задач ОС
+Али Рзаев <alirzaev1996@gmail.com>
+:imagesdir: images
+:toc: left
+:toc-title: Содержание
+
+include::section-1.adoc[]
+
+include::section-2.adoc[]

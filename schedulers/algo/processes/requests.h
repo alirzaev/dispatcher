@@ -2,8 +2,8 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <variant>
 
+#include <mapbox/variant.hpp>
 #include <nlohmann/json.hpp>
 
 #include "exceptions.h"
@@ -257,10 +257,10 @@ public:
   nlohmann::json dump() const { return {{"type", "TIME_QUANTUM_EXPIRED"}}; }
 };
 
-using Request = std::variant<CreateProcessReq,
-                             TerminateProcessReq,
-                             InitIO,
-                             TerminateIO,
-                             TransferControl,
-                             TimeQuantumExpired>;
+using Request = mapbox::util::variant<CreateProcessReq,
+                                      TerminateProcessReq,
+                                      InitIO,
+                                      TerminateIO,
+                                      TransferControl,
+                                      TimeQuantumExpired>;
 } // namespace ProcessesManagement

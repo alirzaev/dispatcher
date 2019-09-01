@@ -5,13 +5,13 @@
 #include <cstdint>
 #include <exception>
 #include <memory>
-#include <optional>
 #include <sstream>
 #include <string>
 #include <utility>
-#include <variant>
 
-#include "../../../utils/overload.h"
+#include <mapbox/variant.hpp>
+#include <tl/optional.hpp>
+
 #include "../exceptions.h"
 #include "../operations.h"
 #include "abstract.h"
@@ -36,8 +36,8 @@ public:
 
     auto base = AbstractStrategy::getRequestDescription(request);
 
-    if (std::holds_alternative<CreateProcessReq>(request)) {
-      auto req = std::get<CreateProcessReq>(request);
+    if (request.is<CreateProcessReq>()) {
+      auto req = request.get<CreateProcessReq>();
       return static_cast<const ss &>(ss() << base << ". "
                                           << "Предполагаемое время выполнения: "
                                           << req.workTime())
@@ -48,7 +48,7 @@ public:
   }
 
 protected:
-  std::optional<std::pair<int32_t, size_t>>
+  tl::optional<std::pair<int32_t, size_t>>
   schedule(const ProcessesState &state) const override {
     auto [processes, queues] = state;
 
@@ -56,7 +56,7 @@ protected:
       auto pid = queues[0].front();
       return {{pid, 0}};
     } else {
-      return std::nullopt;
+      return tl::nullopt;
     }
   }
 

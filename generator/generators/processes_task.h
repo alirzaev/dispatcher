@@ -2,9 +2,10 @@
 
 #include <cstdint>
 #include <memory>
-#include <optional>
 #include <utility>
 #include <vector>
+
+#include <tl/optional.hpp>
 
 #include <algo/processes/requests.h>
 #include <algo/processes/strategies.h>
@@ -48,9 +49,9 @@ inline Utils::ProcessesTask generate(uint32_t requestCount = 40,
   using namespace Details;
   using namespace ProcessesManagement;
   using namespace RandUtils;
-  using std::nullopt;
-  using std::optional;
   using std::vector;
+  using tl::nullopt;
+  using tl::optional;
 
   auto [strategy, generator] = randStrategy(preemptive);
   auto state = ProcessesState::initial();

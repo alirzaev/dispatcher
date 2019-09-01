@@ -1,9 +1,7 @@
 #include <cstddef>
 #include <exception>
 #include <map>
-#include <optional>
 #include <string>
-#include <variant>
 
 #include <QDebug>
 #include <QFlags>
@@ -15,13 +13,15 @@
 #include <QSpinBox>
 #include <QString>
 
+#include <mapbox/variant.hpp>
+#include <tl/optional.hpp>
+
 #include <algo/processes/exceptions.h>
 #include <algo/processes/helpers.h>
 #include <algo/processes/operations.h>
 #include <algo/processes/requests.h>
 #include <algo/processes/strategies.h>
 #include <algo/processes/types.h>
-#include <utils/overload.h>
 
 #include "literals.h"
 #include "models.h"
@@ -75,16 +75,10 @@ void ProcessesTask::connectAll() {
           this,
           [=](int) { this->setQueuesLists(_model.state.queues); });
   auto push1Handler = [=]() {
-    auto pid = ui->lineEditQueue1Push->text().toInt();
-    auto queue = static_cast<std::size_t>(ui->spinBoxQueue1->value());
-
-    pushToQueue(queue, pid);
+    pushToQueue(ui->lineEditQueue1Push, ui->spinBoxQueue1);
   };
   auto push2Handler = [=]() {
-    auto pid = ui->lineEditQueue2Push->text().toInt();
-    auto queue = static_cast<std::size_t>(ui->spinBoxQueue2->value());
-
-    pushToQueue(queue, pid);
+    pushToQueue(ui->lineEditQueue2Push, ui->spinBoxQueue2);
   };
   connect(ui->pushButtonQueue1Push, &QPushButton::clicked, this, push1Handler);
   connect(
@@ -123,8 +117,8 @@ void ProcessesTask::provideContextMenu(const QPoint &pos) {
   auto row = item ? item->row() : -1;
   _model.state = collectState();
   auto process =
-      row != -1 ? std::optional{_model.state.processes.at(mapRowToIndex(row))}
-                : std::nullopt;
+      row != -1 ? tl::optional{_model.state.processes.at(mapRowToIndex(row))}
+                : tl::nullopt;
 
   qDebug() << "ContextMenu: row " << row;
 
@@ -189,19 +183,20 @@ void ProcessesTask::processActionCreate() {
       {StrategyType::WINDOWS,
        {Field::Pid, Field::Ppid, Field::Priority, Field::BasePriority}}};
 
-  auto process = CreateProcessDialog::getProcess(this,
-                                                 _model.state.processes,
-                                                 flagsMap.at(_model.task.strategy()->type()));
+  auto process = CreateProcessDialog::getProcess(
+      this,
+      _model.state.processes,
+      flagsMap.at(_model.task.strategy()->type()));
 
   if (!process) {
-      return;
+    return;
   }
 
   try {
     _model.state = addProcess(_model.state, *process);
     refresh();
   } catch (const std::exception &ex) {
-    showErrorMessage("Неизвестная ошибка: "s + ex.what());
+    warning("Неизвестная ошибка: "s + ex.what());
   }
 }
 
@@ -212,7 +207,7 @@ void ProcessesTask::processActionTerminate(std::size_t index) {
     _model.state = terminateProcess(_model.state, pid);
     refresh();
   } catch (const std::exception &ex) {
-    showErrorMessage("Неизвестная ошибка: "s + ex.what());
+    warning("Неизвестная ошибка: "s + ex.what());
   }
 }
 
@@ -223,7 +218,7 @@ void ProcessesTask::processActionToExecuting(std::size_t index) {
     _model.state = switchTo(_model.state, pid);
     refresh();
   } catch (const std::exception &ex) {
-    showErrorMessage("Неизвестная ошибка: "s + ex.what());
+    warning("Неизвестная ошибка: "s + ex.what());
   }
 }
 
@@ -234,7 +229,7 @@ void ProcessesTask::processActionToWaiting(std::size_t index) {
     _model.state = changeProcessState(_model.state, pid, ProcState::WAITING);
     refresh();
   } catch (const std::exception &ex) {
-    showErrorMessage("Неизвестная ошибка: "s + ex.what());
+    warning("Неизвестная ошибка: "s + ex.what());
   }
 }
 
@@ -245,7 +240,7 @@ void ProcessesTask::processActionToActive(std::size_t index) {
     _model.state = changeProcessState(_model.state, pid, ProcState::ACTIVE);
     refresh();
   } catch (const std::exception &ex) {
-    showErrorMessage("Неизвестная ошибка: "s + ex.what());
+    warning("Неизвестная ошибка: "s + ex.what());
   }
 }
 
@@ -270,10 +265,11 @@ void ProcessesTask::nextRequest() {
     _model.state = _model.task.state();
     refresh();
     if (_model.task.done()) {
-      showInfoMessage("Вы успешно выполнили данное задание");
+      QMessageBox::information(
+          this, "Внимание", "Вы успешно выполнили данное задание");
     }
   } else {
-    showErrorMessage("Заявка обработана неверно");
+    warning("Заявка обработана неверно");
   }
 }
 
@@ -314,21 +310,34 @@ void ProcessesTask::setStrategy(StrategyType type) {
   label->setText(strategyMap[type]);
 }
 
-void ProcessesTask::pushToQueue(std::size_t queue, int pid) {
+void ProcessesTask::pushToQueue(QLineEdit *lineEdit, QSpinBox *spinBox) {
+  auto pid = lineEdit->text().toInt();
+  auto queue = static_cast<std::size_t>(spinBox->value());
+
   try {
     _model.state = collectState();
     _model.state = ProcessesManagement::pushToQueue(_model.state, queue, pid);
     refresh();
+
+    lineEdit->clear();
   } catch (const OperationException &ex) {
     if (ex.what() == "NO_SUCH_PROCESS"s) {
-      showErrorMessage("Процесс с таким PID не существует");
+      warning("Процесс с таким PID не существует");
     } else if (ex.what() == "ALREADY_IN_QUEUE"s) {
-      showErrorMessage("Процесс с таким PID уже добавлен в одну из очередей");
+      warning("Процесс с таким PID уже добавлен в одну из очередей");
+    } else {
+      throw;
+    }
+  } catch (const TypeException &ex) {
+    if (ex.what() == "INVALID_PRIORITY"s &&
+        _model.task.strategy()->type() == StrategyType::WINDOWS) {
+      warning(
+          "Процесс нельзя добавить в очередь с приоритетом меньше базового");
     } else {
       throw;
     }
   } catch (const std::exception &ex) {
-    showErrorMessage("Неизвестная ошибка: "s + ex.what());
+    warning("Неизвестная ошибка: "s + ex.what());
   }
 }
 
@@ -344,19 +353,15 @@ void ProcessesTask::popFromQueue(std::size_t queue, QLineEdit *lineEdit) {
     refresh();
   } catch (const OperationException &ex) {
     if (ex.what() == "EMPTY_QUEUE"s) {
-      showErrorMessage("Очередь пуста");
+      warning("Очередь пуста");
     } else {
       throw;
     }
   } catch (const std::exception &ex) {
-    showErrorMessage("Неизвестная ошибка: "s + ex.what());
+    warning("Неизвестная ошибка: "s + ex.what());
   }
 }
 
-void ProcessesTask::showErrorMessage(const std::string &message) {
-  QMessageBox::critical(this, "Ошибка", QString::fromStdString(message));
-}
-
-void ProcessesTask::showInfoMessage(const std::string &message) {
-  QMessageBox::information(this, "Внимание", QString::fromStdString(message));
+void ProcessesTask::warning(const std::string &message) {
+  QMessageBox::warning(this, "Ошибка", QString::fromStdString(message));
 }

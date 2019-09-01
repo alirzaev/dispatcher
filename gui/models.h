@@ -1,6 +1,6 @@
 #pragma once
 
-#include <variant>
+#include <mapbox/variant.hpp>
 
 #include <algo/memory/types.h>
 #include <algo/processes/types.h>
@@ -19,5 +19,5 @@ struct MemoryModel {
   Utils::MemoryTask task;
 };
 
-using TaskModel = std::variant<ProcessesModel, MemoryModel>;
+using TaskModel = mapbox::util::variant<ProcessesModel, MemoryModel>;
 } // namespace Models

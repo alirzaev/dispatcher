@@ -17,7 +17,6 @@ HEADERS += \
     utils/exceptions.h \
     utils/io.h \
     utils/tasks.h \
-    utils/overload.h \
     algo/processes/operations.h \
     algo/processes/strategies.h \
     algo/processes/strategies/abstract.h \

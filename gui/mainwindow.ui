@@ -24,8 +24,7 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QTabWidget" name="tabWidget">
-       </widget>
+       <widget class="QTabWidget" name="tabWidget"/>
       </item>
      </layout>
     </item>
@@ -37,7 +36,7 @@
      <x>0</x>
      <y>0</y>
      <width>640</width>
-     <height>25</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
@@ -54,12 +53,18 @@
     <property name="title">
      <string>&amp;Справка</string>
     </property>
+    <widget class="QMenu" name="menuTroubleshooting">
+     <property name="title">
+      <string>Устранение неполадок</string>
+     </property>
+     <addaction name="actionOpenTmpDir"/>
+    </widget>
+    <addaction name="menuTroubleshooting"/>
     <addaction name="actionAbout"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menuHelp"/>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpenTask">
    <property name="text">
     <string>Открыть</string>
@@ -98,6 +103,11 @@
    </property>
    <property name="shortcut">
     <string>F1</string>
+   </property>
+  </action>
+  <action name="actionOpenTmpDir">
+   <property name="text">
+    <string>Открыть временную папку</string>
    </property>
   </action>
  </widget>

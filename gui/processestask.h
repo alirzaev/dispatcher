@@ -5,6 +5,7 @@
 
 #include <QLineEdit>
 #include <QPoint>
+#include <QSpinBox>
 #include <QWidget>
 
 #include <algo/processes/strategies.h>
@@ -70,11 +71,9 @@ private:
 
   void setStrategy(ProcessesManagement::StrategyType type);
 
-  void pushToQueue(std::size_t queue, int pid);
+  void pushToQueue(QLineEdit *lineEdit, QSpinBox *spinBox);
 
   void popFromQueue(std::size_t queue, QLineEdit *lineEdit);
 
-  void showErrorMessage(const std::string &message);
-
-  void showInfoMessage(const std::string &message);
+  void warning(const std::string &message);
 };

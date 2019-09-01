@@ -1,6 +1,6 @@
-#include <optional>
-
 #include <QString>
+
+#include <tl/optional.hpp>
 
 #include <algo/processes/types.h>
 
@@ -11,7 +11,7 @@
 using namespace Utils::Literals;
 using namespace ProcessesManagement;
 
-ProcessMenu::ProcessMenu(std::optional<Process> process, QWidget *parent)
+ProcessMenu::ProcessMenu(tl::optional<Process> process, QWidget *parent)
     : QMenu(parent) {
   addAction(CREATE);
   addAction(TERMINATE)->setEnabled(process.has_value());

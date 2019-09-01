@@ -1,6 +1,7 @@
 #pragma once
 
-#include <optional>
+#include <mapbox/variant.hpp>
+#include <tl/optional.hpp>
 
 #include <algo/processes/requests.h>
 #include <algo/processes/types.h>
@@ -11,9 +12,8 @@
 
 namespace Generators::ProcessesTask::TaskGenerators {
 using namespace ProcessesManagement;
-using std::get;
-using std::nullopt;
-using std::optional;
+using tl::nullopt;
+using tl::optional;
 
 class SjnTaskGenerator : public AbstractTaskGenerator {
 public:
@@ -27,7 +27,7 @@ public:
                                      bool valid = true) const override {
     auto base = AbstractTaskGenerator::CreateProcessReq(state, valid);
     if (base) {
-      auto request = get<ProcessesManagement::CreateProcessReq>(*base);
+      auto request = base->get<ProcessesManagement::CreateProcessReq>();
 
       auto workTime = RandUtils::randRange(4, 32);
       return ProcessesManagement::CreateProcessReq(request.pid(),

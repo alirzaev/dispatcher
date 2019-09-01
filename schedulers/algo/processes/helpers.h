@@ -3,8 +3,9 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <optional>
 #include <vector>
+
+#include <tl/optional.hpp>
 
 #include "types.h"
 
@@ -16,10 +17,10 @@ namespace ProcessesManagement {
  *  @param processes Список дескрипторов процессов.
  *  @param pid Идентификатор процесса.
  *
- *  @return Индекс (std::optional) искомого дескриптора или std::nullopt,
+ *  @return Индекс (tl::optional) искомого дескриптора или tl::nullopt,
  *  если процесса с таким @a pid не существует.
  */
-inline std::optional<std::size_t>
+inline tl::optional<std::size_t>
 getIndexByPid(const std::vector<Process> &processes, int32_t pid) {
 
   auto pos =
@@ -28,7 +29,7 @@ getIndexByPid(const std::vector<Process> &processes, int32_t pid) {
                    [pid](const auto &process) { return process.pid() == pid; });
 
   if (pos == processes.end()) {
-    return std::nullopt;
+    return tl::nullopt;
   }
 
   return static_cast<std::size_t>(pos - processes.begin());
@@ -41,11 +42,11 @@ getIndexByPid(const std::vector<Process> &processes, int32_t pid) {
  *  @param state Дескриптор состояния процессов.
  *  @param pid Идентификатор процесса.
  *
- *  @return Индекс (std::optional) искомого дескриптора или std::nullopt,
+ *  @return Индекс (tl::optional) искомого дескриптора или tl::nullopt,
  *  если процесса с таким @a pid не существует.
  */
-inline std::optional<std::size_t> getIndexByPid(const ProcessesState &state,
-                                                int32_t pid) {
+inline tl::optional<std::size_t> getIndexByPid(const ProcessesState &state,
+                                               int32_t pid) {
   return getIndexByPid(state.processes, pid);
 }
 
@@ -56,10 +57,10 @@ inline std::optional<std::size_t> getIndexByPid(const ProcessesState &state,
  *  @param processes Список дескрипторов процессов.
  *  @param state Состояние процесса.
  *
- *  @return Индекс (std::optional) искомого дескриптора или std::nullopt,
+ *  @return Индекс (tl::optional) искомого дескриптора или tl::nullopt,
  *  если процесса с таким @a pid не существует.
  */
-inline std::optional<std::size_t>
+inline tl::optional<std::size_t>
 getIndexByState(const std::vector<Process> &processes, ProcState state) {
   auto pos = std::find_if(
       processes.begin(), processes.end(), [state](const auto &process) {
@@ -67,7 +68,7 @@ getIndexByState(const std::vector<Process> &processes, ProcState state) {
       });
 
   if (pos == processes.end()) {
-    return std::nullopt;
+    return tl::nullopt;
   }
 
   return static_cast<std::size_t>(pos - processes.begin());
@@ -80,11 +81,11 @@ getIndexByState(const std::vector<Process> &processes, ProcState state) {
  *  @param state Дескриптор состояния процессов.
  *  @param procState Состояние процесса.
  *
- *  @return Индекс (std::optional) искомого дескриптора или std::nullopt,
+ *  @return Индекс (tl::optional) искомого дескриптора или tl::nullopt,
  *  если процесса с таким @a pid не существует.
  */
-inline std::optional<std::size_t> getIndexByState(const ProcessesState &state,
-                                                  ProcState procState) {
+inline tl::optional<std::size_t> getIndexByState(const ProcessesState &state,
+                                                 ProcState procState) {
   return getIndexByState(state.processes, procState);
 }
 } // namespace ProcessesManagement

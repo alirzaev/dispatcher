@@ -8,13 +8,13 @@
 #include <QString>
 
 #include <cstdint>
-#include <variant>
 #include <vector>
+
+#include <mapbox/variant.hpp>
 
 #include <algo/memory/requests.h>
 #include <algo/memory/strategies.h>
 #include <algo/memory/types.h>
-#include <utils/overload.h>
 
 #include "literals.h"
 
@@ -79,34 +79,30 @@ void MemoryTask::setFreeMemoryBlocks(const vector<MemoryBlock> &blocks) {
 }
 
 void MemoryTask::setRequest(const Request &request) {
-  auto *label = ui->labelRequestDescr;
-
-  std::visit(
-      overload{[label](const CreateProcessReq &req) {
-                 label->setText("Создан новый процесс PID = %1. "
-                                "Для размещения процесса в памяти (включая "
-                                "служебную информацию) требуется выделить "
-                                "%2 байт (%3 параграфов)"_qs.arg(req.pid())
-                                    .arg(req.bytes())
-                                    .arg(req.pages()));
-               },
-               [label](const TerminateProcessReq &req) {
-                 label->setText("Процесс PID = %1 завершен"_qs.arg(req.pid()));
-               },
-               [label](const AllocateMemory &req) {
-                 label->setText(
-                     "Процесс PID = %1 выдал запрос на выделение ему "
-                     "%2 байт (%3 параграфов) оперативной памяти"_qs
-                         .arg(req.pid())
-                         .arg(req.bytes())
-                         .arg(req.pages()));
-               },
-               [label](const FreeMemory &req) {
-                 label->setText("Процесс PID = %1 выдал запрос на освобождение "
-                                "блока памяти с адресом %2"_qs.arg(req.pid())
-                                    .arg(req.address()));
-               }},
-      request);
+  auto text = request.match(
+      [](const CreateProcessReq &req) {
+        return "Создан новый процесс PID = %1. "
+               "Для размещения процесса в памяти (включая "
+               "служебную информацию) требуется выделить "
+               "%2 байт (%3 параграфов)"_qs.arg(req.pid())
+                   .arg(req.bytes())
+                   .arg(req.pages());
+      },
+      [](const TerminateProcessReq &req) {
+        return "Процесс PID = %1 завершен"_qs.arg(req.pid());
+      },
+      [](const AllocateMemory &req) {
+        return "Процесс PID = %1 выдал запрос на выделение ему "
+               "%2 байт (%3 параграфов) оперативной памяти"_qs.arg(req.pid())
+                   .arg(req.bytes())
+                   .arg(req.pages());
+      },
+      [](const FreeMemory &req) {
+        return "Процесс PID = %1 выдал запрос на освобождение "
+               "блока памяти с адресом %2"_qs.arg(req.pid())
+                   .arg(req.address());
+      });
+  ui->labelRequestDescr->setText(text);
 }
 
 void MemoryTask::setStrategy(StrategyType type) {
@@ -180,7 +176,7 @@ void MemoryTask::processActionAllocate(const MemoryBlock &block,
   auto info = AllocateMemoryDialog::getMemoryBlockInfo(this, block.size());
 
   if (!info) {
-      return;
+    return;
   }
 
   auto [pid, size] = *info;
@@ -190,7 +186,7 @@ void MemoryTask::processActionAllocate(const MemoryBlock &block,
     _model.state = allocateMemory(_model.state, blockIndex, pid, size);
     refresh();
   } catch (const std::exception &ex) {
-    showErrorMessage("Неизвестная ошибка: "s + ex.what());
+    warning("Неизвестная ошибка: "s + ex.what());
   }
 }
 
@@ -203,7 +199,7 @@ void MemoryTask::processActionFree(const MemoryBlock &block,
     _model.state = freeMemory(_model.state, pid, blockIndex);
     refresh();
   } catch (const std::exception &ex) {
-    showErrorMessage("Неизвестная ошибка: "s + ex.what());
+    warning("Неизвестная ошибка: "s + ex.what());
   }
 }
 
@@ -213,7 +209,7 @@ void MemoryTask::processActionDefragment() {
     _model.state = defragmentMemory(_model.state);
     refresh();
   } catch (const std::exception &ex) {
-    showErrorMessage("Неизвестная ошибка: "s + ex.what());
+    warning("Неизвестная ошибка: "s + ex.what());
   }
 }
 
@@ -224,12 +220,12 @@ void MemoryTask::processActionCompress(uint32_t blockIndex) {
     refresh();
   } catch (const OperationException &ex) {
     if (ex.what() == "SINGLE_BLOCK"s) {
-      showErrorMessage("Следующий блок свободен или отсутствует");
+      warning("Следующий блок свободен или отсутствует");
     } else {
       throw;
     }
   } catch (const std::exception &ex) {
-    showErrorMessage("Неизвестная ошибка: "s + ex.what());
+    warning("Неизвестная ошибка: "s + ex.what());
   }
 }
 
@@ -254,19 +250,16 @@ void MemoryTask::nextRequest() {
     _model.state = _model.task.state();
     refresh();
     if (_model.task.done()) {
-      showInfoMessage("Вы успешно выполнили данное задание");
+      QMessageBox::information(
+          this, "Внимание", "Вы успешно выполнили данное задание");
     }
   } else {
-    showErrorMessage("Заявка обработана неверно");
+    warning("Заявка обработана неверно");
   }
 }
 
-void MemoryTask::showErrorMessage(const std::string &message) {
-  QMessageBox::critical(this, "Ошибка", QString::fromStdString(message));
-}
-
-void MemoryTask::showInfoMessage(const std::string &message) {
-  QMessageBox::information(this, "Внимание", QString::fromStdString(message));
+void MemoryTask::warning(const std::string &message) {
+  QMessageBox::warning(this, "Ошибка", QString::fromStdString(message));
 }
 
 Utils::Task MemoryTask::task() const { return _model.task; }

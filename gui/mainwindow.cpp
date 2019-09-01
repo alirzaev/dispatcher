@@ -1,17 +1,19 @@
 #include <fstream>
-#include <variant>
 #include <vector>
 
 #include <QAction>
 #include <QDebug>
+#include <QDesktopServices>
 #include <QDir>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QUrl>
+
+#include <mapbox/variant.hpp>
 
 #include <generators/memory_task.h>
 #include <generators/processes_task.h>
 #include <utils/io.h>
-#include <utils/overload.h>
 #include <utils/tasks.h>
 
 #include "models.h"
@@ -28,20 +30,32 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
 
+#ifdef RESTRICTED_MODE
+  ui->actionOpenTask->setVisible(false);
+  ui->actionSaveTask->setVisible(false);
+
+  auto title = this->windowTitle();
+  this->setWindowTitle(title + " (режим ограниченной функциональности)");
+#else
   connect(
       ui->actionOpenTask, &QAction::triggered, this, &MainWindow::openTasks);
   connect(
       ui->actionSaveTask, &QAction::triggered, this, &MainWindow::saveTasks);
+#endif
+
   connect(ui->actionGenerateTask,
           &QAction::triggered,
           this,
           &MainWindow::createTasks);
   connect(ui->actionQuit, &QAction::triggered, this, &QMainWindow::close);
+  connect(
+      ui->actionOpenTmpDir, &QAction::triggered, this, &MainWindow::openTmpDir);
   connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::showHelp);
 }
 
 MainWindow::~MainWindow() { delete ui; }
 
+#ifndef RESTRICTED_MODE
 void MainWindow::openTasks() {
   auto fileName = QFileDialog::getOpenFileName(
       this, "Открыть файл задания", "", "JSON (*.json)");
@@ -51,7 +65,7 @@ void MainWindow::openTasks() {
 
   std::ifstream file(fileName.toStdString());
   if (!file) {
-    QMessageBox::critical(this, "Ошибка", "Невозможно открыть файл задания");
+    QMessageBox::warning(this, "Ошибка", "Невозможно открыть файл задания");
   }
 
   try {
@@ -59,30 +73,8 @@ void MainWindow::openTasks() {
     loadTasks(tasks);
   } catch (const std::exception &ex) {
     qDebug() << ex.what();
-    QMessageBox::critical(
+    QMessageBox::warning(
         this, "Ошибка", "Невозможно загрузить задания: файл поврежден");
-  }
-}
-
-void MainWindow::loadTasks(const std::vector<Utils::Task> &tasks) {
-  auto *tabs = ui->tabWidget;
-  tabs->clear();
-
-  for (const auto &task : tasks) {
-    std::visit(
-        overload{[tabs, this](const Utils::MemoryTask &task) {
-                   auto model = Models::MemoryModel{task.state(), task};
-
-                   auto *taskWidget = new MemoryTask(model, this);
-                   tabs->addTab(taskWidget, "Диспетчеризация памяти");
-                 },
-                 [tabs, this](const Utils::ProcessesTask &task) {
-                   auto model = Models::ProcessesModel{task.state(), task};
-
-                   auto *taskWidget = new ProcessesTask(model, this);
-                   tabs->addTab(taskWidget, "Диспетчеризация процессов");
-                 }},
-        task);
   }
 }
 
@@ -108,6 +100,28 @@ void MainWindow::saveTasks() {
   }
 
   Utils::saveTasks(tasks, file);
+}
+#endif
+
+void MainWindow::loadTasks(const std::vector<Utils::Task> &tasks) {
+  auto *tabs = ui->tabWidget;
+  tabs->clear();
+
+  for (const auto &task : tasks) {
+    task.match(
+        [tabs, this](const Utils::MemoryTask &task) {
+          auto model = Models::MemoryModel{task.state(), task};
+
+          auto *taskWidget = new MemoryTask(model, this);
+          tabs->addTab(taskWidget, "Диспетчеризация памяти");
+        },
+        [tabs, this](const Utils::ProcessesTask &task) {
+          auto model = Models::ProcessesModel{task.state(), task};
+
+          auto *taskWidget = new ProcessesTask(model, this);
+          tabs->addTab(taskWidget, "Диспетчеризация процессов");
+        });
+  }
 }
 
 void MainWindow::createTasks() {
@@ -136,4 +150,8 @@ void MainWindow::dumpTasks(const std::vector<Utils::Task> &tasks) {
 void MainWindow::showHelp() {
   auto window = AboutWindow(this);
   window.exec();
+}
+
+void MainWindow::openTmpDir() {
+  QDesktopServices::openUrl(QUrl::fromLocalFile(QDir::tempPath()));
 }

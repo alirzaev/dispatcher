@@ -1,6 +1,7 @@
 #pragma once
 
-#include <optional>
+#include <mapbox/variant.hpp>
+#include <tl/optional.hpp>
 
 #include <algo/processes/requests.h>
 #include <algo/processes/types.h>
@@ -11,9 +12,8 @@
 
 namespace Generators::ProcessesTask::TaskGenerators {
 using namespace ProcessesManagement;
-using std::get;
-using std::nullopt;
-using std::optional;
+using tl::nullopt;
+using tl::optional;
 
 class WinNtTaskGenerator : public AbstractTaskGenerator {
 public:
@@ -27,7 +27,7 @@ public:
                                      bool valid = true) const override {
     auto base = AbstractTaskGenerator::CreateProcessReq(state, valid);
     if (base) {
-      auto request = get<ProcessesManagement::CreateProcessReq>(*base);
+      auto request = base->get<ProcessesManagement::CreateProcessReq>();
 
       auto priority = RandUtils::randRange(0u, 11u);
       return ProcessesManagement::CreateProcessReq(request.pid(),
@@ -45,7 +45,7 @@ public:
                                 bool valid = true) const override {
     auto base = AbstractTaskGenerator::TerminateIO(state, valid);
     if (base) {
-      auto request = get<ProcessesManagement::TerminateIO>(*base);
+      auto request = base->get<ProcessesManagement::TerminateIO>();
 
       auto pid = request.pid();
       auto augment = RandUtils::randRange(1u, 3u);

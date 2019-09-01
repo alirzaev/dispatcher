@@ -3,11 +3,12 @@
 #include <algorithm>
 #include <cstdint>
 #include <iterator>
-#include <optional>
 #include <set>
 #include <utility>
-#include <variant>
 #include <vector>
+
+#include <mapbox/variant.hpp>
+#include <tl/optional.hpp>
 
 #include <algo/processes/helpers.h>
 #include <algo/processes/requests.h>
@@ -19,8 +20,17 @@ namespace Generators::ProcessesTask::Details {
 using namespace ProcessesManagement;
 
 template <class T>
+inline const T *get_if(const Request *req) {
+  if (req->is<T>()) {
+    return &req->get<T>();
+  } else {
+    return nullptr;
+  }
+}
+
+template <class T>
 inline bool sameType(const Request &v1, const Request &v2) {
-  return std::holds_alternative<T>(v1) && std::holds_alternative<T>(v2);
+  return v1.is<T>() && v2.is<T>();
 }
 
 template <class SequenceContainer, class Predicate>
@@ -39,13 +49,10 @@ std::remove_reference_t<SequenceContainer> filter(SequenceContainer &&container,
 
 namespace Generators::ProcessesTask::TaskGenerators {
 using namespace ProcessesManagement;
-using std::get;
-using std::get_if;
-using std::holds_alternative;
-using std::nullopt;
-using std::optional;
 using std::set;
 using std::vector;
+using tl::nullopt;
+using tl::optional;
 
 class AbstractTaskGenerator {
 public:
@@ -60,6 +67,7 @@ public:
            std::pair<optional<Request>, bool> lastRequestInfo,
            bool valid = true) const {
     using Details::filter;
+    using Details::get_if;
     using Details::sameType;
     namespace PM = ProcessesManagement;
 
@@ -100,7 +108,7 @@ public:
     if (!last) {
       // первая заявка - только CreateProcessReq
       requests = filter(requests, [](const auto &request) {
-        return holds_alternative<PM::CreateProcessReq>(request);
+        return request.template is<PM::CreateProcessReq>();
       });
     } else if (isLastValid) {
       // не должно быть двух подряд идущих заявок TimeQuantumExpired или

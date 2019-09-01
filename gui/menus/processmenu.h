@@ -1,10 +1,10 @@
 #pragma once
 
-#include <optional>
-
 #include <QMenu>
 #include <QString>
 #include <QWidget>
+
+#include <tl/optional.hpp>
 
 #include <algo/processes/types.h>
 
@@ -20,6 +20,6 @@ public:
 
   static QString TO_ACTIVE;
 
-  ProcessMenu(std::optional<ProcessesManagement::Process> process,
+  ProcessMenu(tl::optional<ProcessesManagement::Process> process,
               QWidget *parent = nullptr);
 };

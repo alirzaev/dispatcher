@@ -17,7 +17,7 @@
 
 namespace ProcessesManagement {
 
-enum class StrategyType { ROUNDROBIN, FCFS, SJN, SRT, WINDOWS, UNIX };
+enum class StrategyType { ROUNDROBIN, FCFS, SJN, SRT, WINDOWS, UNIX, LINUXO1 };
 
 /**
  * @brief Базовый класс для всех стратегий.

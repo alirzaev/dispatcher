@@ -176,6 +176,7 @@ void ProcessesTask::processActionCreate() {
 
   std::map<StrategyType, QFlags<Field>> flagsMap = {
       {StrategyType::ROUNDROBIN, {Field::Pid, Field::Ppid}},
+      {StrategyType::LINUXO1, {Field::Pid, Field::Ppid}},
       {StrategyType::FCFS, {Field::Pid, Field::Ppid}},
       {StrategyType::SJN, {Field::Pid, Field::Ppid, Field::WorkTime}},
       {StrategyType::SRT, {Field::Pid, Field::Ppid, Field::WorkTime}},
@@ -305,7 +306,8 @@ void ProcessesTask::setStrategy(StrategyType type) {
       {StrategyType::SJN, "Стратегия: SJN"_qs},
       {StrategyType::SRT, "Стратегия: SRT"_qs},
       {StrategyType::WINDOWS, "Стратегия: Windows NT"_qs},
-      {StrategyType::UNIX, "Стратегия: Unix"_qs}};
+      {StrategyType::UNIX, "Стратегия: Unix"_qs},
+      {StrategyType::LINUXO1, "Стратегия: Linux O(1)"}};
 
   label->setText(strategyMap[type]);
 }

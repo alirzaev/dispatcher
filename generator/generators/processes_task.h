@@ -32,7 +32,8 @@ inline pair<StrategyPtr, GeneratorPtr> randStrategy(bool preemptive = false) {
     strategies = {
         {RoundRobinStrategy::create(), make_shared<RoundRobinTaskGenerator>()},
         {WinNtStrategy::create(), make_shared<WinNtTaskGenerator>()},
-        {UnixStrategy::create(), make_shared<UnixTaskGenerator>()}};
+        {UnixStrategy::create(), make_shared<UnixTaskGenerator>()},
+        {LinuxO1Strategy::create(), make_shared<LinuxO1TaskGenerator>()}};
   } else {
     strategies = {{FcfsStrategy::create(), make_shared<FcfsTaskGenerator>()},
                   {SjnStrategy::create(), make_shared<SjnTaskGenerator>()},

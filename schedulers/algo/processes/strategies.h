@@ -2,6 +2,7 @@
 
 #include "strategies/abstract.h"
 #include "strategies/fcfs.h"
+#include "strategies/linuxo1.h"
 #include "strategies/roundrobin.h"
 #include "strategies/sjn.h"
 #include "strategies/srt.h"

@@ -103,7 +103,8 @@ inline ProcessesTask loadProcessesTask(const nlohmann::json &obj) {
       toPair(SjnStrategy::create()),
       toPair(SrtStrategy::create()),
       toPair(WinNtStrategy::create()),
-      toPair(UnixStrategy::create())};
+      toPair(UnixStrategy::create()),
+      toPair(LinuxO1Strategy::create())};
 
   auto strategyType = obj["strategy"];
   if (strategies.find(strategyType) == strategies.end()) {

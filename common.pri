@@ -21,7 +21,7 @@ equals(HAS_GIT, "YES") {
 
 DEFINES += DISPATCHER_MAJOR="0"
 DEFINES += DISPATCHER_MINOR="5"
-DEFINES += DISPATCHER_PATCH="1"
+DEFINES += DISPATCHER_PATCH="2"
 DEFINES += GIT_REV="\\\"$$GIT_REV\\\""
 
 # Отвести сгенерированным файлам отдельные директории

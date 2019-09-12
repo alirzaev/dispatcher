@@ -15,6 +15,7 @@ HEADERS += \
     generators/memory_task.h \
     generators/processes_task.h \
     generators/processes_task/task_generators.h \
+    generators/processes_task/task_linuxo1_generator.h \
     generators/processes_task/task_roundrobin_generator.h \
     generators/processes_task/task_abstract_generator.h \
     generators/processes_task/task_fcfs_generator.h \

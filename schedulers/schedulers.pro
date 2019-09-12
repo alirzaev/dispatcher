@@ -13,6 +13,7 @@ HEADERS += \
     algo/memory/types.h \
     algo/processes/requests.h \
     algo/processes/exceptions.h \
+    algo/processes/strategies/linuxo1.h \
     algo/processes/types.h \
     utils/exceptions.h \
     utils/io.h \

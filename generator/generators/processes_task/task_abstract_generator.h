@@ -75,14 +75,12 @@ public:
                             this->CreateProcessReq(state, valid),
                             this->CreateProcessReq(state, valid),
                             this->CreateProcessReq(state, valid),
+                            this->CreateProcessReq(state, valid),
                             this->TerminateProcessReq(state, valid),
                             this->TerminateProcessReq(state, valid),
+                            this->TerminateProcessReq(state, valid),
                             this->InitIO(state, valid),
                             this->InitIO(state, valid),
-                            this->InitIO(state, valid),
-                            this->InitIO(state, valid),
-                            this->TerminateIO(state, valid),
-                            this->TerminateIO(state, valid),
                             this->TerminateIO(state, valid),
                             this->TerminateIO(state, valid),
                             this->TransferControl(state, valid),
@@ -91,6 +89,8 @@ public:
     if (preemptive()) {
       optionals.push_back(this->TimeQuantumExpired(state, valid));
       optionals.push_back(this->TimeQuantumExpired(state, valid));
+    } else {
+      optionals.push_back(this->TransferControl(state, valid));
     }
 
     optionals = filter(optionals, [](const auto &request) { return request; });
@@ -169,14 +169,14 @@ public:
       auto pid = RandUtils::randChoice(availablePids);
       auto ppid = -1;
 
-      // 1 из 2 заявок - дочерний процесс (если возможно)
-      if (RandUtils::randRange(0, 256) % 2 == 0) {
+      // 3 из 5 заявок - дочерний процесс (если возможно)
+      if (RandUtils::randRange(0, 256) % 5 < 2) {
+        return ProcessesManagement::CreateProcessReq(pid, ppid);
+      } else {
         usedPids.insert(-1);
         auto parentIndex = getIndexByState(processes, ProcState::EXECUTING);
         ppid = parentIndex ? processes.at(*parentIndex).pid() : -1;
 
-        return ProcessesManagement::CreateProcessReq(pid, ppid);
-      } else {
         return ProcessesManagement::CreateProcessReq(pid, ppid);
       }
     } else if (!valid && !usedPids.empty()) {
@@ -277,7 +277,7 @@ public:
   }
 
 protected:
-  constexpr int32_t maxPid() const { return 16; }
+  constexpr int32_t maxPid() const { return 24; }
 
   set<int32_t> getAvailablePids(const ProcessesState &state) const {
     auto [processes, queues] = state;

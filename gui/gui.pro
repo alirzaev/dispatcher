@@ -61,3 +61,6 @@ FORMS += \
     processestask.ui \
     dialogs/createprocessdialog.ui \
     aboutwindow.ui
+
+RESOURCES += \
+    resources.qrc

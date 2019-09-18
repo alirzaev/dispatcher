@@ -205,7 +205,7 @@ void ProcessesTask::processActionTerminate(std::size_t index) {
   try {
     _model.state = collectState();
     auto pid = _model.state.processes.at(index).pid();
-    _model.state = terminateProcess(_model.state, pid);
+    _model.state = terminateProcess(_model.state, pid, false);
     refresh();
   } catch (const std::exception &ex) {
     warning("Неизвестная ошибка: "s + ex.what());

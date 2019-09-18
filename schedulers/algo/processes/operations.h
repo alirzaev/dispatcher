@@ -154,6 +154,8 @@ inline ProcessesState switchTo(const ProcessesState &state, int32_t nextPid) {
  *
  *  @param state Дескриптор состояния процессов.
  *  @param pid Идентификатор процесса.
+ *  @param terminateChildren Удалять все дерево процессов или только данный
+ *  процесс.
  *
  *  @return Новое состояние процессов.
  *
@@ -163,7 +165,8 @@ inline ProcessesState switchTo(const ProcessesState &state, int32_t nextPid) {
  *  "NO_SUCH_PROCESS" - процесса с таким @a pid не существует.
  */
 inline ProcessesState terminateProcess(const ProcessesState &state,
-                                       int32_t pid) {
+                                       int32_t pid,
+                                       bool terminateChildren = true) {
   auto [processes, queues] = state;
 
   if (auto index = getIndexByPid(processes, pid); !index.has_value()) {
@@ -184,7 +187,11 @@ inline ProcessesState terminateProcess(const ProcessesState &state,
           rec(child);
         }
       };
-  rec(pid);
+  if (terminateChildren) {
+    rec(pid);
+  } else {
+    toTerminate.insert(pid);
+  }
 
   decltype(processes) newProcesses;
   decltype(queues) newQueues;

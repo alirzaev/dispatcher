@@ -125,13 +125,12 @@ protected:
     newState = pushToQueue(newState, 0, process.pid());
     newState = sortQueues(newState);
 
-    if (newState.processes.size() == 1) {
-      auto next = schedule(newState);
-      if (next) {
-        auto [pid, queue] = next.value();
-        newState = popFromQueue(newState, queue);
-        newState = switchTo(newState, pid);
-      }
+    auto current = getCurrent(newState);
+    auto next = schedule(newState);
+    if (!current && next) {
+      auto [pid, queue] = next.value();
+      newState = popFromQueue(newState, queue);
+      newState = switchTo(newState, pid);
     }
 
     return newState;

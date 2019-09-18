@@ -250,6 +250,7 @@ void ProcessesTask::refresh() {
   setProcessesList(processes);
   setQueuesLists(queues);
   setStrategy(_model.task.strategy()->type());
+  setCompletedTaskCount(_model.task.completed(), _model.task.requests().size());
   if (_model.task.done()) {
     setRequest(_model.task.requests().back());
   } else {
@@ -310,6 +311,12 @@ void ProcessesTask::setStrategy(StrategyType type) {
       {StrategyType::LINUXO1, "Стратегия: Linux O(1)"}};
 
   label->setText(strategyMap[type]);
+}
+
+void ProcessesTask::setCompletedTaskCount(std::size_t count,
+                                          std::size_t total) {
+  ui->completeTaskLabel->setText(
+      "Обработано заявок: %1 из %2"_qs.arg(count).arg(total));
 }
 
 void ProcessesTask::pushToQueue(QLineEdit *lineEdit, QSpinBox *spinBox) {

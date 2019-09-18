@@ -71,6 +71,8 @@ private:
 
   void setStrategy(ProcessesManagement::StrategyType type);
 
+  void setCompletedTaskCount(std::size_t count, std::size_t total);
+
   void pushToQueue(QLineEdit *lineEdit, QSpinBox *spinBox);
 
   void popFromQueue(std::size_t queue, QLineEdit *lineEdit);

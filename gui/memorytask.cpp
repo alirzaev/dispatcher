@@ -117,6 +117,11 @@ void MemoryTask::setStrategy(StrategyType type) {
   }
 }
 
+void MemoryTask::setCompletedTaskCount(std::size_t count, std::size_t total) {
+  ui->completeTaskLabel->setText(
+      "Обработано заявок: %1 из %2"_qs.arg(count).arg(total));
+}
+
 void MemoryTask::provideContextMenu(const QPoint &pos) {
   qDebug() << "ContextMenu";
 
@@ -234,6 +239,7 @@ void MemoryTask::refresh() {
   setMemoryBlocks(blocks);
   setFreeMemoryBlocks(freeBlocks);
   setStrategy(_model.task.strategy()->type);
+  setCompletedTaskCount(_model.task.completed(), _model.task.requests().size());
   if (_model.task.done()) {
     setRequest(_model.task.requests().back());
   } else {

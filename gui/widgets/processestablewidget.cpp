@@ -1,8 +1,10 @@
 #include <map>
+#include <utility>
 #include <vector>
 
 #include <QAbstractItemView>
 #include <QHeaderView>
+#include <QIcon>
 #include <QString>
 #include <QTableWidgetItem>
 
@@ -60,17 +62,20 @@ void ProcessesTableWidget::setProcesses(const ProcessesList &processes) {
   setRowCount(static_cast<int>(processes.size()));
   setSortingEnabled(false);
 
-  std::map<ProcState, QString> stateMap = {{ProcState::ACTIVE, "A"_qs},
-                                           {ProcState::WAITING, "W"_qs},
-                                           {ProcState::EXECUTING, "E"_qs}};
+  std::map<ProcState, std::pair<QString, QString>> stateMap = {
+      {ProcState::ACTIVE, {":/g/images/yellow_circle.svg"_qs, "Q"}},
+      {ProcState::WAITING, {":/g/images/red_circle.svg"_qs, "W"}},
+      {ProcState::EXECUTING, {":/g/images/green_circle.svg"_qs, "E"}}};
 
   for (size_t i = 0; i < processes.size(); ++i) {
     const auto &p = processes[i];
     auto row = static_cast<int>(i);
 
+    auto [stateIcon, stateText] = stateMap[p.state()];
+
     setItem(row, 0, new NumberItem(p.pid()));
     setItem(row, 1, new NumberItem(p.ppid()));
-    setItem(row, 2, new TextItem(stateMap[p.state()]));
+    setItem(row, 2, new TextItem(QIcon(stateIcon), stateText));
     setItem(row, 3, new NumberItem(static_cast<int32_t>(p.priority())));
     setItem(row, 4, new NumberItem(static_cast<int32_t>(p.basePriority())));
     setItem(row, 5, new NumberItem(p.timer()));

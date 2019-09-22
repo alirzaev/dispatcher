@@ -121,4 +121,4 @@ matrix:
           local-dir: docs/user-manual/dist
           on:
             tags: false
-            all_branches: true
+            branch: master

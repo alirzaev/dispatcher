@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <iterator>
 #include <set>
+#include <tuple>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -12,21 +14,13 @@
 
 #include <algo/processes/helpers.h>
 #include <algo/processes/requests.h>
+#include <algo/processes/strategies.h>
 #include <algo/processes/types.h>
 
 #include "../rand_utils.h"
 
 namespace Generators::ProcessesTask::Details {
 using namespace ProcessesManagement;
-
-template <class T>
-inline const T *get_if(const Request *req) {
-  if (req->is<T>()) {
-    return &req->get<T>();
-  } else {
-    return nullptr;
-  }
-}
 
 template <class T>
 inline bool sameType(const Request &v1, const Request &v2) {
@@ -45,6 +39,24 @@ std::remove_reference_t<SequenceContainer> filter(SequenceContainer &&container,
 
   return copy;
 }
+
+template <class T1, class T2>
+bool equalsByPid(const Request &v1, const Request &v2) {
+  if ((v1.template is<TimeQuantumExpired>() &&
+       !v2.template is<TimeQuantumExpired>()) ||
+      (!v1.template is<TimeQuantumExpired>() &&
+       v2.template is<TimeQuantumExpired>())) {
+    return false;
+  }
+  if (sameType<TimeQuantumExpired>(v1, v2)) {
+    return true;
+  }
+  if (v1.template is<T1>() && v2.template is<T2>()) {
+    return v1.get<T1>().pid() == v2.get<T2>().pid();
+  } else {
+    return false;
+  }
+}
 } // namespace Generators::ProcessesTask::Details
 
 namespace Generators::ProcessesTask::TaskGenerators {
@@ -55,7 +67,107 @@ using tl::nullopt;
 using tl::optional;
 
 class AbstractTaskGenerator {
+private:
+  vector<optional<Request>> basis(const ProcessesState &state,
+                                  bool valid = true) const {
+    auto [active, waiting, executing] = collectStats(state);
+
+    auto optionals = vector{this->CreateProcessReq(state, valid),
+                            this->CreateProcessReq(state, valid),
+                            this->CreateProcessReq(state, valid),
+                            this->TerminateProcessReq(state, valid),
+                            this->TerminateProcessReq(state, valid),
+                            this->TerminateProcessReq(state, valid),
+                            this->InitIO(state, valid),
+                            this->TerminateIO(state, valid),
+                            this->TransferControl(state, valid),
+                            this->TransferControl(state, valid)};
+
+    if (active < 5 || executing < 1) {
+      optionals.push_back(this->CreateProcessReq(state, valid));
+      optionals.push_back(this->CreateProcessReq(state, valid));
+    }
+
+    if (active > 7) {
+      optionals.push_back(this->TerminateProcessReq(state, valid));
+      optionals.push_back(this->TerminateProcessReq(state, valid));
+      optionals.push_back(this->TerminateProcessReq(state, valid));
+    }
+
+    if (waiting < 1) {
+      optionals.push_back(this->InitIO(state, valid));
+      optionals.push_back(this->InitIO(state, valid));
+    }
+
+    if (waiting > 3) {
+      optionals.push_back(this->TerminateIO(state, valid));
+      optionals.push_back(this->TerminateIO(state, valid));
+    }
+
+    if (preemptive()) {
+      optionals.push_back(this->TimeQuantumExpired(state, valid));
+      optionals.push_back(this->TimeQuantumExpired(state, valid));
+    } else {
+      optionals.push_back(this->TransferControl(state, valid));
+      optionals.push_back(this->TransferControl(state, valid));
+    }
+
+    return optionals;
+  }
+
+  vector<Request> applyFilters(vector<optional<Request>> optionals,
+                               optional<Request> last,
+                               bool valid) const {
+    using Details::equalsByPid;
+    using Details::filter;
+    using Details::sameType;
+    namespace PM = ProcessesManagement;
+
+    vector<Request> requests;
+    for (const auto &opt : optionals) {
+      if (opt) {
+        requests.push_back(*opt);
+      }
+    }
+    requests = filter(requests, [last, valid](const auto &req) {
+      // если предыдущая заявка была заведомо некорректной, то предусловия
+      // опустить
+      if (!valid) {
+        return true;
+      }
+      // первая заявка - только CreateProcessReq
+      if (!last) {
+        return req.template is<PM::CreateProcessReq>();
+      }
+
+      bool ok = true;
+      // не должно быть двух подряд идущих заявок TimeQuantumExpired или
+      // TransferControl
+      ok &= !sameType<PM::TimeQuantumExpired>(*last, req);
+      ok &= !sameType<PM::TransferControl>(*last, req);
+
+      // после CreateProcessReq не должны идти заявки TransferControl или
+      // TerminateProcessReq с таким же PID
+      ok &= !equalsByPid<PM::CreateProcessReq, PM::TransferControl>(*last, req);
+      ok &= !equalsByPid<PM::CreateProcessReq, PM::TerminateProcessReq>(*last,
+                                                                        req);
+
+      // после InitIO не должна идти заявка TerminateIO с таким же PID
+      ok &= !equalsByPid<PM::InitIO, PM::TerminateIO>(*last, req);
+
+      return ok;
+    });
+
+    return requests;
+  }
+
 public:
+  struct Stats {
+    int active;
+    int waiting;
+    int executing;
+  };
+
   virtual ~AbstractTaskGenerator() = default;
 
   AbstractTaskGenerator() = default;
@@ -66,97 +178,78 @@ public:
   generate(const ProcessesState &state,
            std::pair<optional<Request>, bool> lastRequestInfo,
            bool valid = true) const {
-    using Details::filter;
-    using Details::get_if;
-    using Details::sameType;
-    namespace PM = ProcessesManagement;
+    auto [last, lastValid] = lastRequestInfo;
 
-    auto optionals = vector{this->CreateProcessReq(state, valid),
-                            this->CreateProcessReq(state, valid),
-                            this->CreateProcessReq(state, valid),
-                            this->CreateProcessReq(state, valid),
-                            this->CreateProcessReq(state, valid),
-                            this->TerminateProcessReq(state, valid),
-                            this->TerminateProcessReq(state, valid),
-                            this->TerminateProcessReq(state, valid),
-                            this->InitIO(state, valid),
-                            this->InitIO(state, valid),
-                            this->TerminateIO(state, valid),
-                            this->TerminateIO(state, valid),
-                            this->TransferControl(state, valid),
-                            this->TransferControl(state, valid)};
+    auto optionals = basis(state, valid);
 
-    if (preemptive()) {
-      optionals.push_back(this->TimeQuantumExpired(state, valid));
-      optionals.push_back(this->TimeQuantumExpired(state, valid));
-    } else {
-      optionals.push_back(this->TransferControl(state, valid));
-    }
+    auto requests = applyFilters(optionals, last, lastValid);
 
-    optionals = filter(optionals, [](const auto &request) { return request; });
+    return requests;
+  }
 
-    vector<Request> requests;
-    for (const auto &opt : optionals) {
-      if (opt) {
-        requests.push_back(*opt);
+  Stats collectStats(const ProcessesState &state) const {
+    int active = 0, waiting = 0, executing = 0;
+    for (const auto &process : state.processes) {
+      if (process.state() == ProcState::ACTIVE) {
+        active++;
+      } else if (process.state() == ProcState::WAITING) {
+        waiting++;
+      } else {
+        executing++;
       }
     }
 
-    auto last = lastRequestInfo.first;
-    auto isLastValid = lastRequestInfo.second;
+    return {active, waiting, executing};
+  }
 
-    if (!last) {
-      // первая заявка - только CreateProcessReq
-      requests = filter(requests, [](const auto &request) {
-        return request.template is<PM::CreateProcessReq>();
-      });
-    } else if (isLastValid) {
-      // не должно быть двух подряд идущих заявок TimeQuantumExpired или
-      // TransferControl
-      requests = filter(requests, [&var = *last](const auto &request) {
-        return !sameType<PM::TimeQuantumExpired>(request, var) &&
-               !sameType<PM::TransferControl>(request, var);
-      });
-      // после CreateProcessReq не должны идти заявки TransferControl или
-      // TerminateProcessReq с таким же PID
-      requests = filter(requests, [&var = *last](const auto &request) {
-        auto *last = get_if<PM::CreateProcessReq>(&var);
-
-        if (!last) {
-          return true;
-        }
-
-        if (auto current = get_if<PM::TransferControl>(&request);
-            current && current->pid() == last->pid()) {
-          return false;
-        }
-
-        if (auto current = get_if<PM::TerminateProcessReq>(&request);
-            current && current->pid() == last->pid()) {
-          return false;
-        }
-
-        return true;
-      });
-      // после InitIO не должна идти заявка TerminateIO с таким же PID
-      requests = filter(requests, [&var = *last](const auto &request) {
-        auto *last = get_if<PM::InitIO>(&var);
-
-        if (!last) {
-          return true;
-        }
-
-        if (auto current = get_if<PM::TerminateIO>(&request);
-            current && current->pid() == last->pid()) {
-          return false;
-        }
-
-        return true;
-      });
+  std::pair<ProcessesState, vector<Request>> bootstrap(ProcessesState state,
+                                                       StrategyPtr strategy) {
+    using Ptr = std::function<optional<Request>(const ProcessesState &)>;
+    vector<Ptr> genFns{
+        [this](const ProcessesState &state) {
+          return this->CreateProcessReq(state);
+        },
+        [this](const ProcessesState &state) {
+          return this->CreateProcessReq(state);
+        },
+        [this](const ProcessesState &state) {
+          return this->TimeQuantumExpired(state);
+        },
+        [this](const ProcessesState &state) {
+          return this->CreateProcessReq(state);
+        },
+        [this](const ProcessesState &state) {
+          return this->CreateProcessReq(state);
+        },
+        [this](const ProcessesState &state) {
+          return this->TransferControl(state);
+        },
+        [this](const ProcessesState &state) {
+          return this->CreateProcessReq(state);
+        },
+        [this](const ProcessesState &state) { return this->InitIO(state); }};
+    if (!preemptive()) {
+      genFns.erase(genFns.begin() + 2);
     }
-    // если предыдущая заявка была заведомо некорректной, то предусловия
-    // опустить
-    return requests;
+
+    auto rand = RandUtils::randRange(0, 255);
+    if (rand % 3 == 0) {
+      // TimeQuantumExpired <-> TransferControl
+      std::swap(genFns[2], genFns[5]);
+    } else if (rand % 3 == 1) {
+      // TransferControl <-> InitIO
+      std::swap(genFns[5], genFns[7]);
+    }
+
+    vector<Request> requests;
+    for (const auto &genFn : genFns) {
+      if (auto opt = genFn(state); opt.has_value()) {
+        requests.push_back(*opt);
+        state = strategy->processRequest(*opt, state);
+      }
+    }
+
+    return {state, requests};
   }
 
   virtual optional<Request> CreateProcessReq(const ProcessesState &state,
@@ -214,7 +307,9 @@ public:
       usedPids.erase(processes.at(*currentIndex).pid());
     }
 
-    if (valid && currentIndex) {
+    if (valid && currentIndex &&
+        !usedPids.empty()) { // хотя бы один процесс должен исполняться на
+                             // процессоре
       auto pid = processes.at(*currentIndex).pid();
       return ProcessesManagement::InitIO(pid);
     } else if (!valid && !usedPids.empty()) {
@@ -272,7 +367,7 @@ public:
   }
 
   virtual optional<Request> TimeQuantumExpired(const ProcessesState &,
-                                               bool) const {
+                                               bool = true) const {
     return ProcessesManagement::TimeQuantumExpired();
   }
 
@@ -280,9 +375,8 @@ protected:
   constexpr int32_t maxPid() const { return 24; }
 
   set<int32_t> getAvailablePids(const ProcessesState &state) const {
-    auto [processes, queues] = state;
     set<int32_t> existingPids, availabePids;
-    for (const auto &process : processes) {
+    for (const auto &process : state.processes) {
       existingPids.insert(process.pid());
     }
     for (int32_t pid = 0; pid < maxPid(); ++pid) {
@@ -294,9 +388,8 @@ protected:
   }
 
   set<int32_t> getUsedPids(const ProcessesState &state) const {
-    auto [processes, queues] = state;
     set<int32_t> usedPids;
-    for (const auto &process : processes) {
+    for (const auto &process : state.processes) {
       usedPids.insert(process.pid());
     }
     return usedPids;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -54,13 +55,17 @@ inline Utils::ProcessesTask generate(uint32_t requestCount = 40,
   using tl::nullopt;
   using tl::optional;
 
+  const auto initialState = ProcessesState::initial();
+
   auto [strategy, generator] = randStrategy(preemptive);
-  auto state = ProcessesState::initial();
-  vector<Request> requests;
+  auto [state, requests] = generator->bootstrap(initialState, strategy);
+  auto initialSize = requests.size();
   bool isLastValid = true;
 
-  for (uint32_t i = 0; i < requestCount; ++i) {
-    bool validRequired = i == 0 ? true : randRange(0, 256) % 16 > 0;
+  for (uint32_t i = 0;
+       requestCount > initialSize && i < requestCount - initialSize;
+       ++i) {
+    bool validRequired = requests.empty() ? true : randRange(0, 256) % 16 > 0;
     optional<Request> last =
         requests.empty() ? nullopt : optional(requests.back());
     vector<Request> validRequests =
@@ -79,7 +84,10 @@ inline Utils::ProcessesTask generate(uint32_t requestCount = 40,
 
     state = strategy->processRequest(requests.back(), state);
   }
-  return Utils::ProcessesTask::create(
-      strategy, 0, ProcessesState::initial(), requests);
+
+  if (requests.size() > requestCount) {
+    requests.erase(requests.begin() + requestCount, requests.end());
+  }
+  return Utils::ProcessesTask::create(strategy, 0, initialState, requests);
 }
 } // namespace Generators::ProcessesTask

@@ -29,4 +29,10 @@ template <class Container>
 inline decltype(auto) randChoice(Container &&container) {
   return randChoice(std::cbegin(container), std::cend(container));
 }
+
+template <class Container>
+inline void randShuffle(Container &container) {
+  static std::mt19937 e(static_cast<unsigned int>(std::time(nullptr)));
+  std::shuffle(std::begin(container), std::end(container), e);
+}
 } // namespace Generators::RandUtils

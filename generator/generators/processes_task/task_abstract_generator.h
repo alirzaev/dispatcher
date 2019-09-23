@@ -228,17 +228,24 @@ public:
           return this->CreateProcessReq(state);
         },
         [this](const ProcessesState &state) { return this->InitIO(state); }};
-    if (!preemptive()) {
-      genFns.erase(genFns.begin() + 2);
-    }
 
     auto rand = RandUtils::randRange(0, 255);
     if (rand % 3 == 0) {
       // TimeQuantumExpired <-> TransferControl
       std::swap(genFns[2], genFns[5]);
+      if (!preemptive()) {
+        genFns.erase(genFns.begin() + 5);
+      }
     } else if (rand % 3 == 1) {
       // TransferControl <-> InitIO
       std::swap(genFns[5], genFns[7]);
+      if (!preemptive()) {
+        genFns.erase(genFns.begin() + 2);
+      }
+    } else {
+      if (!preemptive()) {
+        genFns.erase(genFns.begin() + 2);
+      }
     }
 
     vector<Request> requests;

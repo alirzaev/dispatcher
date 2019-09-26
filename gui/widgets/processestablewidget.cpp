@@ -63,9 +63,9 @@ void ProcessesTableWidget::setProcesses(const ProcessesList &processes) {
   setSortingEnabled(false);
 
   std::map<ProcState, std::pair<QString, QString>> stateMap = {
-      {ProcState::ACTIVE, {":/g/images/yellow_circle.svg"_qs, "Q"}},
-      {ProcState::WAITING, {":/g/images/red_circle.svg"_qs, "W"}},
-      {ProcState::EXECUTING, {":/g/images/green_circle.svg"_qs, "E"}}};
+      {ProcState::ACTIVE, {":/g/images/yellow_circle.png"_qs, "Q"}},
+      {ProcState::WAITING, {":/g/images/red_circle.png"_qs, "W"}},
+      {ProcState::EXECUTING, {":/g/images/green_circle.png"_qs, "E"}}};
 
   for (size_t i = 0; i < processes.size(); ++i) {
     const auto &p = processes[i];

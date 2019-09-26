@@ -16,12 +16,12 @@ ProcessMenu::ProcessMenu(tl::optional<Process> process, QWidget *parent)
     : QMenu(parent) {
   addAction(CREATE);
   addAction(TERMINATE)->setEnabled(process.has_value());
-  addAction(QIcon(":/g/images/green_circle.svg"), TO_EXECUTING)
+  addAction(QIcon(":/g/images/green_circle.png"), TO_EXECUTING)
       ->setEnabled(process.has_value() &&
                    process->state() == ProcState::ACTIVE);
-  addAction(QIcon(":/g/images/red_circle.svg"), TO_WAITING)
+  addAction(QIcon(":/g/images/red_circle.png"), TO_WAITING)
       ->setEnabled(process.has_value());
-  addAction(QIcon(":/g/images/yellow_circle.svg"), TO_ACTIVE)
+  addAction(QIcon(":/g/images/yellow_circle.png"), TO_ACTIVE)
       ->setEnabled(process.has_value());
 }
 

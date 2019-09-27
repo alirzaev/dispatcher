@@ -1,3 +1,6 @@
+#ifdef _WIN32
+#include <filesystem>
+#endif
 #include <fstream>
 #include <vector>
 
@@ -63,12 +66,19 @@ void MainWindow::openTasks() {
     return;
   }
 
-  std::ifstream file(fileName.toStdString());
-  if (!file) {
-    QMessageBox::warning(this, "Ошибка", "Невозможно открыть файл задания");
-  }
-
   try {
+
+    std::ifstream file;
+    file.exceptions(std::ios_base::failbit);
+#ifdef _WIN32
+    file.open(std::filesystem::path(fileName.toStdU16String()));
+#else
+    file.open(fileName.toStdString());
+#endif
+    if (!file) {
+      QMessageBox::warning(this, "Ошибка", "Невозможно открыть файл задания");
+      return;
+    }
     auto tasks = Utils::loadTasks(file);
     loadTasks(tasks);
   } catch (const std::exception &ex) {
@@ -89,17 +99,28 @@ void MainWindow::saveTasks() {
     fileName.append(".json");
   }
 
-  std::ofstream file(fileName.toStdString());
+  try {
+    std::ofstream file;
+    file.exceptions(std::ios_base::failbit);
+#ifdef _WIN32
+    file.open(std::filesystem::path(fileName.toStdU16String()));
+#else
+    file.open(fileName.toStdString());
+#endif
 
-  std::vector<Utils::Task> tasks;
+    std::vector<Utils::Task> tasks;
 
-  for (int i = 0; i < ui->tabWidget->count(); ++i) {
-    auto *widget = dynamic_cast<TaskGetter *>(ui->tabWidget->widget(i));
-    auto task = widget->task();
-    tasks.push_back(task);
+    for (int i = 0; i < ui->tabWidget->count(); ++i) {
+      auto *widget = dynamic_cast<TaskGetter *>(ui->tabWidget->widget(i));
+      auto task = widget->task();
+      tasks.push_back(task);
+    }
+
+    Utils::saveTasks(tasks, file);
+  } catch (const std::exception &ex) {
+    qDebug() << ex.what();
+    QMessageBox::warning(this, "Ошибка", "Невозможно сохранить задания");
   }
-
-  Utils::saveTasks(tasks, file);
 }
 #endif
 

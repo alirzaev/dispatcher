@@ -5,7 +5,6 @@
 #include <cstdint>
 #include <functional>
 #include <map>
-#include <random>
 #include <set>
 #include <utility>
 #include <vector>
@@ -231,14 +230,13 @@ inline Utils::MemoryTask generate(uint32_t requestCount = 40) {
       }
     }
 
-    if (validRequired && !validRequests.empty()) {
+    auto isLastValid = (validRequired && !validRequests.empty()) ||
+                       (!validRequired && invalidRequests.empty());
+
+    if (isLastValid) {
       requests.push_back(randChoice(validRequests));
-    } else if (!validRequired && !invalidRequests.empty()) {
-      requests.push_back(randChoice(invalidRequests));
-    } else if (validRequired && validRequests.empty()) {
-      requests.push_back(randChoice(invalidRequests));
     } else {
-      requests.push_back(randChoice(validRequests));
+      requests.push_back(randChoice(invalidRequests));
     }
 
     state = strategy->processRequest(requests.back(), state);

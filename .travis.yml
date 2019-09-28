@@ -27,7 +27,7 @@ matrix:
         - ./tests/tests
 
       before_deploy:
-        - cd gui
+        - cd dispatcher
         - macdeployqt dispatcher.app
         - 7z a -tzip dispatcher-git.$VERSION.zip dispatcher.app
 
@@ -74,7 +74,7 @@ matrix:
       before_deploy:
         - cd ../
         - mkdir -p dispatcher.AppDir/usr/bin
-        - cp build/gui/dispatcher dispatcher.AppDir/usr/bin/dispatcher
+        - cp build/dispatcher/dispatcher dispatcher.AppDir/usr/bin/dispatcher
         - cp icon/svg/dispatcher.svg dispatcher.AppDir/dispatcher.svg
         - curl -L https://github.com/probonopd/linuxdeployqt/releases/download/6/linuxdeployqt-6-x86_64.AppImage > linuxdeployqt
         - chmod a+x linuxdeployqt

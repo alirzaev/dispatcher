@@ -1,10 +1,10 @@
 #include <QString>
 
-#include "../literals.h"
+#include <qtutils/literals.h>
 
 #include "memoryblockitem.h"
 
-using namespace Utils::Literals;
+using namespace QtUtils::Literals;
 
 MemoryBlockItem::MemoryBlockItem(const MemoryManagement::MemoryBlock &block,
                                  bool highlightFree,

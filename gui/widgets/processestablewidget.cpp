@@ -10,12 +10,12 @@
 
 #include <algo/processes/types.h>
 
-#include "../literals.h"
+#include <qtutils/literals.h>
 
 #include "processestablewidget.h"
 
 using namespace ProcessesManagement;
-using namespace Utils::Literals;
+using namespace QtUtils::Literals;
 
 using TextItem = QTableWidgetItem;
 

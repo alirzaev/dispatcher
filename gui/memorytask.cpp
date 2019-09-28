@@ -16,7 +16,7 @@
 #include <algo/memory/strategies.h>
 #include <algo/memory/types.h>
 
-#include "literals.h"
+#include <qtutils/literals.h>
 
 #include "dialogs/allocatememorydialog.h"
 #include "listitems/memoryblockitem.h"
@@ -27,7 +27,7 @@
 
 using namespace std::literals;
 using namespace MemoryManagement;
-using namespace Utils::Literals;
+using namespace QtUtils::Literals;
 
 using std::vector;
 

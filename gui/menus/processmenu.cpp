@@ -5,11 +5,11 @@
 
 #include <algo/processes/types.h>
 
-#include "../literals.h"
+#include <qtutils/literals.h>
 
 #include "processmenu.h"
 
-using namespace Utils::Literals;
+using namespace QtUtils::Literals;
 using namespace ProcessesManagement;
 
 ProcessMenu::ProcessMenu(tl::optional<Process> process, QWidget *parent)

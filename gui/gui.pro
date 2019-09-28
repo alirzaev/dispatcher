@@ -1,4 +1,5 @@
 include(../common.pri)
+include(../qtutils.pri)
 
 QT += core gui
 
@@ -46,7 +47,6 @@ HEADERS += \
     listitems/memoryblockitem.h \
     menus/memoryblockmenu.h \
     processestask.h \
-    literals.h \
     taskgetter.h \
     widgets/processestablewidget.h \
     menus/processmenu.h \

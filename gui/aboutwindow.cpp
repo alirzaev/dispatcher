@@ -1,9 +1,9 @@
-#include "literals.h"
+#include <qtutils/literals.h>
 
 #include "aboutwindow.h"
 #include "ui_aboutwindow.h"
 
-using namespace Utils::Literals;
+using namespace QtUtils::Literals;
 
 AboutWindow::AboutWindow(QWidget *parent)
     : QDialog(parent), ui(new Ui::AboutWindow) {

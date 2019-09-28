@@ -19,6 +19,8 @@
 #include <utils/io.h>
 #include <utils/tasks.h>
 
+#include <qtutils/fileio.h>
+
 #include "models.h"
 #include "taskgetter.h"
 
@@ -67,18 +69,12 @@ void MainWindow::openTasks() {
   }
 
   try {
-
-    std::ifstream file;
-    file.exceptions(std::ios_base::failbit);
-#ifdef _WIN32
-    file.open(std::filesystem::path(fileName.toStdU16String()));
-#else
-    file.open(fileName.toStdString());
-#endif
+    std::ifstream file = QtUtils::FileIO::openStdIfstream(fileName);
     if (!file) {
       QMessageBox::warning(this, "Ошибка", "Невозможно открыть файл задания");
       return;
     }
+
     auto tasks = Utils::loadTasks(file);
     loadTasks(tasks);
   } catch (const std::exception &ex) {
@@ -100,13 +96,7 @@ void MainWindow::saveTasks() {
   }
 
   try {
-    std::ofstream file;
-    file.exceptions(std::ios_base::failbit);
-#ifdef _WIN32
-    file.open(std::filesystem::path(fileName.toStdU16String()));
-#else
-    file.open(fileName.toStdString());
-#endif
+    std::ofstream file = QtUtils::FileIO::openStdOfstream(fileName);
 
     std::vector<Utils::Task> tasks;
 
@@ -162,7 +152,7 @@ void MainWindow::dumpTasks(const std::vector<Utils::Task> &tasks) {
 
     qDebug() << tempFilePath;
 
-    std::ofstream file(tempFilePath.toStdString());
+    std::ofstream file = QtUtils::FileIO::openStdOfstream(tempFilePath);
     Utils::saveTasks(tasks, file);
   } catch (...) {
   }

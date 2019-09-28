@@ -6,12 +6,12 @@
 
 #include <tl/optional.hpp>
 
-#include "literals.h"
+#include <qtutils/literals.h>
 
 #include "allocatememorydialog.h"
 #include "ui_allocatememorydialog.h"
 
-using namespace Utils::Literals;
+using namespace QtUtils::Literals;
 
 AllocateMemoryDialog::AllocateMemoryDialog(QWidget *parent,
                                            int32_t availablePages)

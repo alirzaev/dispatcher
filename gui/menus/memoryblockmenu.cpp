@@ -1,10 +1,10 @@
 #include <QString>
 
-#include "../literals.h"
+#include <qtutils/literals.h>
 
 #include "memoryblockmenu.h"
 
-using namespace Utils::Literals;
+using namespace QtUtils::Literals;
 
 MemoryBlockMenu::MemoryBlockMenu(const MemoryManagement::MemoryBlock &block,
                                  QWidget *parent)

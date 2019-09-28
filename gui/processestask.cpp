@@ -23,7 +23,8 @@
 #include <algo/processes/strategies.h>
 #include <algo/processes/types.h>
 
-#include "literals.h"
+#include <qtutils/literals.h>
+
 #include "models.h"
 
 #include "dialogs/createprocessdialog.h"
@@ -36,7 +37,7 @@
 
 using namespace std::string_literals;
 using namespace ProcessesManagement;
-using namespace Utils::Literals;
+using namespace QtUtils::Literals;
 
 ProcessesTask::ProcessesTask(Models::ProcessesModel model, QWidget *parent)
     : QWidget(parent), ui(new Ui::ProcessesTask), _model(model) {

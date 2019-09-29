@@ -257,13 +257,13 @@
   <customwidget>
    <class>ProcessesTableWidget</class>
    <extends>QWidget</extends>
-   <header>widgets/processestablewidget.h</header>
+   <header>../widgets/processestablewidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>ReorderableListWidget</class>
    <extends>QListWidget</extends>
-   <header>widgets/reorderablelistwidget.h</header>
+   <header>../widgets/reorderablelistwidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -19,6 +19,8 @@ using namespace QtUtils::Literals;
 
 using TextItem = QTableWidgetItem;
 
+extern void initResources();
+
 class NumberItem : public QTableWidgetItem {
 public:
   NumberItem() : NumberItem(0) {}
@@ -41,6 +43,8 @@ public:
 
 ProcessesTableWidget::ProcessesTableWidget(QWidget *parent)
     : QTableWidget(parent) {
+  initResources();
+
   setColumnCount(8);
   setSelectionMode(QAbstractItemView::SingleSelection);
   setEditTriggers({QTableWidget::NoEditTriggers});

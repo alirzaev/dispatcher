@@ -25,12 +25,12 @@
 
 #include <qtutils/literals.h>
 
-#include "models.h"
+#include <dialogs/createprocessdialog.h>
+#include <reorderablelistwidget.h>
+#include <processestablewidget.h>
+#include <menus/processmenu.h>
 
-#include "dialogs/createprocessdialog.h"
-#include "menus/processmenu.h"
-#include "widgets/processestablewidget.h"
-#include "widgets/reorderablelistwidget.h"
+#include "models.h"
 
 #include "processestask.h"
 #include "ui_processestask.h"

@@ -12,8 +12,12 @@
 using namespace QtUtils::Literals;
 using namespace ProcessesManagement;
 
+extern void initResources();
+
 ProcessMenu::ProcessMenu(tl::optional<Process> process, QWidget *parent)
     : QMenu(parent) {
+  initResources();
+
   addAction(CREATE);
   addAction(TERMINATE)->setEnabled(process.has_value());
   addAction(QIcon(":/g/images/green_circle.png"), TO_EXECUTING)

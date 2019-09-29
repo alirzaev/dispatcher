@@ -12,10 +12,10 @@
 #include <algo/processes/types.h>
 #include <utils/tasks.h>
 
+#include <processestablewidget.h>
+
 #include "models.h"
 #include "taskgetter.h"
-
-#include "widgets/processestablewidget.h"
 
 namespace Ui {
 class ProcessesTask;

@@ -18,9 +18,10 @@
 
 #include <qtutils/literals.h>
 
-#include "dialogs/allocatememorydialog.h"
-#include "listitems/memoryblockitem.h"
-#include "menus/memoryblockmenu.h"
+#include <dialogs/allocatememorydialog.h>
+#include <reorderablelistwidget.h>
+#include <menus/memoryblockmenu.h>
+#include <listitems/memoryblockitem.h>
 
 #include "memorytask.h"
 #include "ui_memorytask.h"

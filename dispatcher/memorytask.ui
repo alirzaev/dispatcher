@@ -160,7 +160,7 @@
   <customwidget>
    <class>ReorderableListWidget</class>
    <extends>QListWidget</extends>
-   <header>widgets/reorderablelistwidget.h</header>
+   <header>../widgets/reorderablelistwidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -35,15 +35,15 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
 
+  connect(
+      ui->actionOpenTask, &QAction::triggered, this, &MainWindow::openTasks);
+
 #ifdef RESTRICTED_MODE
-  ui->actionOpenTask->setVisible(false);
   ui->actionSaveTask->setVisible(false);
 
   auto title = this->windowTitle();
   this->setWindowTitle(title + " (режим ограниченной функциональности)");
 #else
-  connect(
-      ui->actionOpenTask, &QAction::triggered, this, &MainWindow::openTasks);
   connect(
       ui->actionSaveTask, &QAction::triggered, this, &MainWindow::saveTasks);
 #endif
@@ -60,7 +60,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow() { delete ui; }
 
-#ifndef RESTRICTED_MODE
 void MainWindow::openTasks() {
   auto fileName = QFileDialog::getOpenFileName(
       this, "Открыть файл задания", "", "JSON (*.json)");
@@ -84,6 +83,7 @@ void MainWindow::openTasks() {
   }
 }
 
+#ifndef RESTRICTED_MODE
 void MainWindow::saveTasks() {
   auto fileName = QFileDialog::getSaveFileName(
       this, "Сохранить задание в файл", "", "JSON (*.json)");

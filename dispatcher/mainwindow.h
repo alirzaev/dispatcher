@@ -24,9 +24,9 @@ public:
 private:
   Ui::MainWindow *ui;
 
-#ifndef RESTRICTED_MODE
   void openTasks();
 
+#ifndef RESTRICTED_MODE
   void saveTasks();
 #endif
 

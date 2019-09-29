@@ -1,3 +1,4 @@
+#include <QIcon>
 #include <QString>
 
 #include <qtutils/literals.h>
@@ -10,17 +11,16 @@ MemoryBlockItem::MemoryBlockItem(const MemoryManagement::MemoryBlock &block,
                                  bool highlightFree,
                                  QListWidget *parent)
     : QListWidgetItem(parent), _block(block) {
-  auto blockRepr = "address: %1; size: %2; pid: %3"_qs.arg(block.address(), 3)
-                       .arg(block.size(), 3)
-                       .arg(block.pid(), 3);
+  setText("address: %1; size: %2; pid: %3"_qs.arg(block.address(), 3)
+              .arg(block.size(), 3)
+              .arg(block.pid(), 3));
   if (highlightFree) {
     if (block.pid() == -1) {
-      blockRepr.prepend("* ");
+      setIcon(QIcon(":/g/images/green_circle.png"));
     } else {
-      blockRepr.prepend("  ");
+      setIcon(QIcon(":/g/images/red_circle.png"));
     }
   }
-  setText(blockRepr);
 }
 
 const MemoryManagement::MemoryBlock &MemoryBlockItem::block() const {

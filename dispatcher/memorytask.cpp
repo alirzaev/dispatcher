@@ -19,9 +19,9 @@
 #include <qtutils/literals.h>
 
 #include <dialogs/allocatememorydialog.h>
-#include <reorderablelistwidget.h>
-#include <menus/memoryblockmenu.h>
 #include <listitems/memoryblockitem.h>
+#include <menus/memoryblockmenu.h>
+#include <reorderablelistwidget.h>
 
 #include "memorytask.h"
 #include "ui_memorytask.h"
@@ -75,7 +75,7 @@ void MemoryTask::setFreeMemoryBlocks(const vector<MemoryBlock> &blocks) {
   list->clear();
 
   for (const auto &block : blocks) {
-    list->addItem(new MemoryBlockItem(block));
+    list->addItem(new MemoryBlockItem(block, true));
   }
 }
 

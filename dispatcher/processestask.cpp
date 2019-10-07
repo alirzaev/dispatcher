@@ -26,9 +26,9 @@
 #include <qtutils/literals.h>
 
 #include <dialogs/createprocessdialog.h>
-#include <reorderablelistwidget.h>
-#include <processestablewidget.h>
 #include <menus/processmenu.h>
+#include <processestablewidget.h>
+#include <reorderablelistwidget.h>
 
 #include "models.h"
 
@@ -321,6 +321,9 @@ void ProcessesTask::setCompletedTaskCount(std::size_t count,
 }
 
 void ProcessesTask::pushToQueue(QLineEdit *lineEdit, QSpinBox *spinBox) {
+  if (lineEdit->text().isEmpty()) {
+    return;
+  }
   auto pid = lineEdit->text().toInt();
   auto queue = static_cast<std::size_t>(spinBox->value());
 

@@ -2,6 +2,7 @@
 #include <filesystem>
 #endif
 #include <fstream>
+#include <utility>
 #include <vector>
 
 #include <QAction>
@@ -74,7 +75,24 @@ void MainWindow::openTasks() {
       return;
     }
 
-    auto tasks = Utils::loadTasks(file);
+    std::vector<Utils::Task> tasks;
+    unsigned int total_count = 0;
+    for (auto task : Utils::loadTasks(file)) {
+      total_count++;
+      bool empty =
+          task.match([](const auto &t) { return t.requests().empty(); });
+      if (!empty) {
+        tasks.push_back(std::move(task));
+      }
+    }
+    if (tasks.empty()) {
+      QMessageBox::warning(this, "Ошибка", "Файл пуст");
+      return;
+    } else if (total_count > tasks.size()) {
+      QMessageBox::warning(
+          this, "Внимание", "Не все задания удалось загрузить");
+    }
+
     loadTasks(tasks);
   } catch (const std::exception &ex) {
     qDebug() << ex.what();

@@ -18,5 +18,5 @@ test_script:
   - tests\release\tests.exe
 
 artifacts:
-  - path: build\gui\release\dispatcher.exe
+  - path: build\dispatcher\release\dispatcher.exe
     name: dispatcher-x64-windows.exe

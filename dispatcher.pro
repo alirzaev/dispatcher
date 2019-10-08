@@ -1,11 +1,13 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-          gui \
+          dispatcher \
           schedulers \
           generator \
-          tests
+          tests \
+          widgets
 
-gui.depends = schedulers generator
+dispatcher.depends = schedulers generator widgets
 generator.depends = schedulers
 tests.depends = schedulers
+widgets.depends = schedulers

@@ -161,6 +161,16 @@ protected:
       return newState;
     }
 
+    /*
+      Цитата из методических указаний:
+      "Если очередь 1 пуста (в нашем случае 0) и приходит событие передача
+      процессом управление операционной системе, диспетчер не выполняет никаких
+      операций."
+    */
+    if (newState.queues[0].empty()) {
+      return newState;
+    }
+
     newState = pushToQueue(newState, 0, request.pid());
 
     auto next = schedule(newState);

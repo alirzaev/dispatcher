@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include <QCloseEvent>
 #include <QMainWindow>
 #include <QWidget>
 
@@ -39,4 +40,6 @@ private:
   void showHelp();
 
   void openTmpDir();
+
+  void closeEvent(QCloseEvent *event) override;
 };

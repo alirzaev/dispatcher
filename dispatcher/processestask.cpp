@@ -32,6 +32,8 @@
 
 #include "models.h"
 
+#include "fontscale.h"
+
 #include "processestask.h"
 #include "ui_processestask.h"
 
@@ -42,6 +44,10 @@ using namespace QtUtils::Literals;
 ProcessesTask::ProcessesTask(Models::ProcessesModel model, QWidget *parent)
     : QWidget(parent), ui(new Ui::ProcessesTask), _model(model) {
   ui->setupUi(this);
+
+  auto font = QApplication::font();
+  font.setPointSizeF(font.pointSizeF() * FONT_SCALE_FACTOR);
+  ui->labelRequestDescr->setFont(font);
 
   ui->processesTable->setContextMenuPolicy(Qt::CustomContextMenu);
 

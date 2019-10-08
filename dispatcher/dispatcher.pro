@@ -33,6 +33,7 @@ SOURCES += \
     aboutwindow.cpp
 
 HEADERS += \
+    fontscale.h \
     mainwindow.h \
     memorytask.h \
     models.h \

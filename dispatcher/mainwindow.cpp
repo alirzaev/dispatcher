@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <QAction>
+#include <QCloseEvent>
 #include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
@@ -183,4 +184,14 @@ void MainWindow::showHelp() {
 
 void MainWindow::openTmpDir() {
   QDesktopServices::openUrl(QUrl::fromLocalFile(QDir::tempPath()));
+}
+
+void MainWindow::closeEvent(QCloseEvent *event) {
+  auto answer = QMessageBox::question(
+      this, "Завершение работы", "Вы действительно хотите выйти?");
+  if (answer == QMessageBox::Yes) {
+    event->accept();
+  } else {
+    event->ignore();
+  }
 }

@@ -1,4 +1,6 @@
+#include <QApplication>
 #include <QDebug>
+#include <QFont>
 #include <QListWidget>
 #include <QMenu>
 #include <QMessageBox>
@@ -26,6 +28,8 @@
 #include "memorytask.h"
 #include "ui_memorytask.h"
 
+#include "fontscale.h"
+
 using namespace std::literals;
 using namespace MemoryManagement;
 using namespace QtUtils::Literals;
@@ -35,6 +39,10 @@ using std::vector;
 MemoryTask::MemoryTask(Models::MemoryModel model, QWidget *parent)
     : QWidget(parent), ui(new Ui::MemoryTask), _model(model) {
   ui->setupUi(this);
+
+  auto font = QApplication::font();
+  font.setPointSizeF(font.pointSizeF() * FONT_SCALE_FACTOR);
+  ui->labelRequestDescr->setFont(font);
 
   ui->listMemBlocks->setContextMenuPolicy(Qt::CustomContextMenu);
 

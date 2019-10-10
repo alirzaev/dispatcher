@@ -94,6 +94,10 @@ void MemoryTaskBuilder::processContextMenuAction(const QString &action,
       std::swap(requests.at(requestIndexu + 1), requests.at(requestIndexu));
       requestIndex++;
       requestIndexu++;
+    } else if (action == RequestItemMenu::DELETE) {
+      requests.erase(requests.begin() + requestIndex);
+      requestIndex = requestIndex > 0 ? requestIndex - 1 : 0;
+      requestIndexu = requestIndexu > 0 ? requestIndexu - 1 : 0;
     }
   }
 

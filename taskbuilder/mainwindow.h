@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QAction>
 #include <QMainWindow>
 
 #include <utils/tasks.h>
@@ -23,7 +24,7 @@ public:
 
   void loadTasks(const std::vector<Utils::Task> &tasks);
 
-  void createTasks();
+  void createTask(QAction *action);
 
 private:
   Ui::MainWindow *ui;

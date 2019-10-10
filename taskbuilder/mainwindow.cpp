@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QString>
 
 #include <utils/io.h>
 #include <utils/tasks.h>
@@ -27,6 +28,7 @@ MainWindow::MainWindow(QWidget *parent)
           &QListWidget::currentRowChanged,
           ui->currentTaskWidget,
           &QStackedWidget::setCurrentIndex);
+  connect(ui->menuAddTask, &QMenu::triggered, this, &MainWindow::createTask);
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -109,4 +111,95 @@ void MainWindow::loadTasks(const std::vector<Utils::Task> &tasks) {
           list->addItem("Диспетчеризация процессов");
         });
   }
+}
+
+void MainWindow::createTask(QAction *action) {
+  QWidget *widget = nullptr;
+  QString label;
+
+  if (action == ui->actionFA) {
+    Utils::Task task = Utils::MemoryTask::create(
+        MemoryManagement::FirstAppropriateStrategy::create(),
+        0,
+        MemoryManagement::MemoryState::initial(),
+        {});
+    widget = new MemoryTaskBuilder(task, this);
+    label = "Диспетчеризация памяти";
+  } else if (action == ui->actionLA) {
+    Utils::Task task = Utils::MemoryTask::create(
+        MemoryManagement::LeastAppropriateStrategy::create(),
+        0,
+        MemoryManagement::MemoryState::initial(),
+        {});
+    widget = new MemoryTaskBuilder(task, this);
+    label = "Диспетчеризация памяти";
+  } else if (action == ui->actionMA) {
+    Utils::Task task = Utils::MemoryTask::create(
+        MemoryManagement::MostAppropriateStrategy::create(),
+        0,
+        MemoryManagement::MemoryState::initial(),
+        {});
+    widget = new MemoryTaskBuilder(task, this);
+    label = "Диспетчеризация памяти";
+  } else if (action == ui->actionSJN) {
+    Utils::Task task = Utils::ProcessesTask::create(
+        ProcessesManagement::SjnStrategy::create(),
+        0,
+        ProcessesManagement::ProcessesState::initial(),
+        {});
+    widget = new ProcessesTaskBuilder(task, this);
+    label = "Диспетчеризация процессов";
+  } else if (action == ui->actionSRT) {
+    Utils::Task task = Utils::ProcessesTask::create(
+        ProcessesManagement::SrtStrategy::create(),
+        0,
+        ProcessesManagement::ProcessesState::initial(),
+        {});
+    widget = new ProcessesTaskBuilder(task, this);
+    label = "Диспетчеризация процессов";
+  } else if (action == ui->actionFCFS) {
+    Utils::Task task = Utils::ProcessesTask::create(
+        ProcessesManagement::FcfsStrategy::create(),
+        0,
+        ProcessesManagement::ProcessesState::initial(),
+        {});
+    widget = new ProcessesTaskBuilder(task, this);
+    label = "Диспетчеризация процессов";
+  } else if (action == ui->actionRoundRobin) {
+    Utils::Task task = Utils::ProcessesTask::create(
+        ProcessesManagement::RoundRobinStrategy::create(),
+        0,
+        ProcessesManagement::ProcessesState::initial(),
+        {});
+    widget = new ProcessesTaskBuilder(task, this);
+    label = "Диспетчеризация процессов";
+  } else if (action == ui->actionUNIX) {
+    Utils::Task task = Utils::ProcessesTask::create(
+        ProcessesManagement::UnixStrategy::create(),
+        0,
+        ProcessesManagement::ProcessesState::initial(),
+        {});
+    widget = new ProcessesTaskBuilder(task, this);
+    label = "Диспетчеризация процессов";
+  } else if (action == ui->actionWinNT) {
+    Utils::Task task = Utils::ProcessesTask::create(
+        ProcessesManagement::WinNtStrategy::create(),
+        0,
+        ProcessesManagement::ProcessesState::initial(),
+        {});
+    widget = new ProcessesTaskBuilder(task, this);
+    label = "Диспетчеризация процессов";
+  } else if (action == ui->actionLinux_O_1) {
+    Utils::Task task = Utils::ProcessesTask::create(
+        ProcessesManagement::LinuxO1Strategy::create(),
+        0,
+        ProcessesManagement::ProcessesState::initial(),
+        {});
+    widget = new ProcessesTaskBuilder(task, this);
+    label = "Диспетчеризация процессов";
+  }
+
+  ui->currentTaskWidget->addWidget(widget);
+  ui->tasksList->addItem(label);
+  ui->tasksList->setEnabled(true);
 }

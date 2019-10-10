@@ -14,7 +14,7 @@ class PidInputDialog : public QDialog {
   Q_OBJECT
 
 public:
-  ~PidInputDialog();
+  ~PidInputDialog() override;
 
   static tl::optional<int32_t> getPid(QWidget *parent);
 

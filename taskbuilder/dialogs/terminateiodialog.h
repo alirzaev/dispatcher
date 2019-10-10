@@ -15,7 +15,7 @@ class TerminateIoDialog : public QDialog {
   Q_OBJECT
 
 public:
-  ~TerminateIoDialog();
+  ~TerminateIoDialog() override;
 
   static tl::optional<std::pair<int32_t, std::size_t>>
   getTerminateIoInfo(QWidget *parent, bool withAugment = false);

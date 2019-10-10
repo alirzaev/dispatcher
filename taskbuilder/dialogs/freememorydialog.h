@@ -15,7 +15,7 @@ class FreeMemoryDialog : public QDialog {
   Q_OBJECT
 
 public:
-  ~FreeMemoryDialog();
+  ~FreeMemoryDialog() override;
 
   static tl::optional<std::pair<int32_t, int32_t>>
   getFreeMemoryInfo(QWidget *parent);

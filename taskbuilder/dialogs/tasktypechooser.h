@@ -1,5 +1,4 @@
-#ifndef TASKTYPECHOOSER_H
-#define TASKTYPECHOOSER_H
+#pragma once
 
 #include <utility>
 
@@ -16,7 +15,7 @@ class TaskTypeChooser : public QDialog {
 public:
   explicit TaskTypeChooser(QWidget *parent = nullptr);
 
-  ~TaskTypeChooser();
+  ~TaskTypeChooser() override;
 
   std::pair<int, QString> data;
 
@@ -31,5 +30,3 @@ private:
 
   void tryAccept();
 };
-
-#endif // TASKTYPECHOOSER_H

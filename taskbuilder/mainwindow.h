@@ -1,5 +1,4 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <QAction>
 #include <QCloseEvent>
@@ -17,7 +16,7 @@ class MainWindow : public QMainWindow {
 public:
   explicit MainWindow(QWidget *parent = nullptr);
 
-  ~MainWindow();
+  ~MainWindow() override;
 
   void openTasks();
 
@@ -32,5 +31,3 @@ public:
 private:
   Ui::MainWindow *ui;
 };
-
-#endif // MAINWINDOW_H

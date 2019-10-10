@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QAction>
+#include <QCloseEvent>
 #include <QMainWindow>
 
 #include <utils/tasks.h>
@@ -25,6 +26,8 @@ public:
   void loadTasks(const std::vector<Utils::Task> &tasks);
 
   void createTask(QAction *action);
+
+  void closeEvent(QCloseEvent *event) override;
 
 private:
   Ui::MainWindow *ui;

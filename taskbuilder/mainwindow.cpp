@@ -203,3 +203,13 @@ void MainWindow::createTask(QAction *action) {
   ui->tasksList->addItem(label);
   ui->tasksList->setEnabled(true);
 }
+
+void MainWindow::closeEvent(QCloseEvent *event) {
+  auto answer = QMessageBox::question(
+      this, "Завершение работы", "Вы действительно хотите выйти?");
+  if (answer == QMessageBox::Yes) {
+    event->accept();
+  } else {
+    event->ignore();
+  }
+}

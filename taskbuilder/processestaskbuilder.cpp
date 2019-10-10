@@ -56,8 +56,8 @@ void ProcessesTaskBuilder::loadTask(const Utils::ProcessesTask &task) {
 
   states.clear();
   for (const auto &req : task.requests()) {
-    states.push_back(state);
     state = task.strategy()->processRequest(req, state);
+    states.push_back(state);
   }
   setRequestsList(task.requests());
   setStrategy(task.strategy()->type());

@@ -10,6 +10,8 @@ requires(win32)
 
 TARGET = taskbuilder
 
+RC_ICONS = ../icon/ico/taskbuilder.ico
+
 TEMPLATE = app
 
 # Выдавать предупреждения при использовании deprecated API

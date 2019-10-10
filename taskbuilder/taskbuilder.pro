@@ -5,6 +5,9 @@ QT += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+# Конструктор заданий доступен только под Windows
+requires(win32)
+
 TARGET = taskbuilder
 
 TEMPLATE = app

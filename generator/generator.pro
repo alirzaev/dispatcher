@@ -1,15 +1,11 @@
 include(../common.pri)
 
-TEMPLATE = app
+TEMPLATE = lib
 
-CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
 INCLUDEPATH += ../schedulers
-
-SOURCES += \
-    main.cpp
 
 HEADERS += \
     generators/memory_task.h \
@@ -24,3 +20,5 @@ HEADERS += \
     generators/processes_task/task_winnt_generator.h \
     generators/processes_task/task_sjn_generator.h \
     generators/processes_task/task_unix_generator.h
+
+requires(false)

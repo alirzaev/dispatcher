@@ -2,6 +2,7 @@
 #include <exception>
 #include <map>
 #include <string>
+#include <vector>
 
 #include <QDebug>
 #include <QFlags>
@@ -42,7 +43,8 @@ using namespace ProcessesManagement;
 using namespace QtUtils::Literals;
 
 ProcessesTask::ProcessesTask(Models::ProcessesModel model, QWidget *parent)
-    : QWidget(parent), ui(new Ui::ProcessesTask), _model(model) {
+    : QWidget(parent), _model(model), currentRequest(model.task.completed()),
+      states(model.task.requests().size()), ui(new Ui::ProcessesTask) {
   ui->setupUi(this);
 
   auto font = QApplication::font();
@@ -54,127 +56,23 @@ ProcessesTask::ProcessesTask(Models::ProcessesModel model, QWidget *parent)
   ui->lineEditQueue1Push->setValidator(new QIntValidator(0, 255));
   ui->lineEditQueue2Push->setValidator(new QIntValidator(0, 255));
 
-  connectAll();
+  setupSignals();
 
+  auto state = ProcessesState::initial();
+  auto strategy = _model.task.strategy();
+  for (size_t i = 0; i < _model.task.completed(); ++i) {
+    auto request = _model.task.requests().at(i);
+    state = strategy->processRequest(request, state);
+    states[i] = state;
+  }
+
+  updateHistoryView(_model.task);
   refresh();
 }
 
 Utils::Task ProcessesTask::task() const { return _model.task; }
 
 ProcessesTask::~ProcessesTask() { delete ui; }
-
-void ProcessesTask::connectAll() {
-
-  connect(ui->acceptRequest,
-          &QPushButton::clicked,
-          this,
-          &ProcessesTask::nextRequest);
-  connect(ui->resetState, &QPushButton::clicked, this, [=]() {
-    _model.state = _model.task.state();
-    refresh();
-  });
-  connect(ui->spinBoxQueue1,
-          QOverload<int>::of(&QSpinBox::valueChanged),
-          this,
-          [=](int) { this->setQueuesLists(_model.state.queues); });
-  connect(ui->spinBoxQueue2,
-          QOverload<int>::of(&QSpinBox::valueChanged),
-          this,
-          [=](int) { this->setQueuesLists(_model.state.queues); });
-  auto push1Handler = [=]() {
-    pushToQueue(ui->lineEditQueue1Push, ui->spinBoxQueue1);
-  };
-  auto push2Handler = [=]() {
-    pushToQueue(ui->lineEditQueue2Push, ui->spinBoxQueue2);
-  };
-  connect(ui->pushButtonQueue1Push, &QPushButton::clicked, this, push1Handler);
-  connect(
-      ui->lineEditQueue1Push, &QLineEdit::returnPressed, this, push1Handler);
-  connect(ui->pushButtonQueue2Push, &QPushButton::clicked, this, push2Handler);
-  connect(
-      ui->lineEditQueue2Push, &QLineEdit::returnPressed, this, push2Handler);
-  connect(ui->pushButtonQueue1Pop, &QPushButton::clicked, this, [=]() {
-    auto queue = static_cast<std::size_t>(ui->spinBoxQueue1->value());
-
-    popFromQueue(queue, ui->lineEditQueue1Pop);
-  });
-  connect(ui->pushButtonQueue2Pop, &QPushButton::clicked, this, [=]() {
-    auto queue = static_cast<std::size_t>(ui->spinBoxQueue2->value());
-
-    popFromQueue(queue, ui->lineEditQueue2Pop);
-  });
-  connect(ui->processesTable,
-          &ProcessesTableWidget::customContextMenuRequested,
-          this,
-          &ProcessesTask::provideContextMenu);
-  connect(
-      ui->listQueue1, &ReorderableListWidget::itemsOrderChanged, this, [=]() {
-        _model.state = collectState();
-        refresh();
-      });
-}
-
-void ProcessesTask::provideContextMenu(const QPoint &pos) {
-  qDebug() << "ContextMenu";
-
-  auto *processes = ui->processesTable;
-
-  auto globalPos = processes->mapToGlobal(pos);
-  auto *item = processes->itemAt(pos);
-  auto row = item ? item->row() : -1;
-  _model.state = collectState();
-  auto process =
-      row != -1 ? tl::optional{_model.state.processes.at(mapRowToIndex(row))}
-                : tl::nullopt;
-
-  qDebug() << "ContextMenu: row " << row;
-
-  ProcessMenu menu(process);
-
-  auto action = menu.exec(globalPos);
-  if (!action) {
-    return;
-  }
-
-  if (action->text() == ProcessMenu::CREATE) {
-    qDebug() << "ContextMenu: create";
-    processActionCreate();
-  } else if (action->text() == ProcessMenu::TERMINATE && row != -1) {
-    qDebug() << "ContextMenu: terminate";
-    processActionTerminate(mapRowToIndex(row));
-  } else if (action->text() == ProcessMenu::TO_EXECUTING && row != -1) {
-    qDebug() << "ContextMenu: to executing";
-    processActionToExecuting(mapRowToIndex(row));
-  } else if (action->text() == ProcessMenu::TO_WAITING && row != -1) {
-    qDebug() << "ContextMenu: to waiting";
-    processActionToWaiting(mapRowToIndex(row));
-  } else if (action->text() == ProcessMenu::TO_ACTIVE && row != -1) {
-    qDebug() << "ContextMenu: to active";
-    processActionToActive(mapRowToIndex(row));
-  }
-}
-
-ProcessesState ProcessesTask::collectState() {
-  auto [processes, queues] = _model.state;
-
-  auto queue1Index = static_cast<size_t>(ui->spinBoxQueue1->value());
-  auto queue1Size = static_cast<size_t>(ui->listQueue1->count());
-
-  queues[queue1Index].resize(queue1Size);
-
-  for (size_t i = 0; i < queue1Size; ++i) {
-    auto itemIndex = static_cast<int>(i);
-    queues[queue1Index][i] = ui->listQueue1->item(itemIndex)->text().toInt();
-  }
-
-  return {processes, queues};
-}
-
-std::size_t ProcessesTask::mapRowToIndex(int row) {
-  auto pid = ui->processesTable->item(row, 0)->text().toInt();
-
-  return *getIndexByPid(_model.state.processes, pid);
-}
 
 void ProcessesTask::processActionCreate() {
   using Field = CreateProcessDialog::EditableField;
@@ -252,20 +150,91 @@ void ProcessesTask::processActionToActive(std::size_t index) {
   }
 }
 
-void ProcessesTask::refresh() {
-  auto [processes, queues] = _model.state;
-  setProcessesList(processes);
-  setQueuesLists(queues);
-  setStrategy(_model.task.strategy()->type());
-  setStatsInfo(_model.task.completed(),
-               _model.task.requests().size(),
-               _model.task.fails());
-  if (_model.task.done()) {
-    setRequest(_model.task.requests().back());
-  } else {
-    auto index = _model.task.completed();
-    setRequest(_model.task.requests()[index]);
+void ProcessesTask::pushToQueue(int pid, std::size_t queue) {
+  try {
+    _model.state = collectState();
+    auto tmp = _model.state;
+    tmp = changeProcessState(tmp, pid, ProcState::ACTIVE);
+    _model.state = ProcessesManagement::pushToQueue(tmp, queue, pid);
+    refresh();
+  } catch (const OperationException &ex) {
+    if (ex.what() == "NO_SUCH_PROCESS"s) {
+      warning("Процесс с таким PID не существует");
+    } else if (ex.what() == "ALREADY_IN_QUEUE"s) {
+      warning("Процесс с таким PID уже добавлен в одну из очередей");
+    } else {
+      throw;
+    }
+  } catch (const TypeException &ex) {
+    if (ex.what() == "INVALID_PRIORITY"s &&
+        _model.task.strategy()->type() == StrategyType::WINDOWS) {
+      warning(
+          "Процесс нельзя добавить в очередь с приоритетом меньше базового");
+    } else {
+      throw;
+    }
+  } catch (const std::exception &ex) {
+    warning("Неизвестная ошибка: "s + ex.what());
   }
+}
+
+int32_t ProcessesTask::popFromQueue(std::size_t queue) {
+  int32_t pid = -1;
+
+  try {
+    _model.state = collectState();
+    const auto &q = _model.state.queues[queue];
+    if (!q.empty()) {
+      pid = q.front();
+    }
+    _model.state = ProcessesManagement::popFromQueue(_model.state, queue);
+
+    refresh();
+  } catch (const OperationException &ex) {
+    if (ex.what() == "EMPTY_QUEUE"s) {
+      warning("Очередь пуста");
+    } else {
+      throw;
+    }
+  } catch (const std::exception &ex) {
+    warning("Неизвестная ошибка: "s + ex.what());
+  }
+
+  return pid;
+}
+
+void ProcessesTask::updateCurrentRequest(int index) {
+  if (index == -1) {
+    return;
+  }
+  auto indexu = static_cast<std::size_t>(index);
+  currentRequest = indexu;
+  if (indexu == _model.task.completed() && !_model.task.done()) {
+    unlockUi();
+  } else {
+    lockUi();
+  }
+  refresh();
+
+  qDebug() << "currentRequest: " << currentRequest;
+}
+
+void ProcessesTask::updateQueuesLists(int) { refresh(); }
+
+void ProcessesTask::refresh() {
+  auto request = currentRequest == _model.task.requests().size()
+                     ? _model.task.requests().back()
+                     : _model.task.requests().at(currentRequest);
+  auto state = currentRequest == _model.task.completed()
+                   ? _model.state
+                   : states[currentRequest];
+  auto strategy = _model.task.strategy();
+
+  updateMainView(state, request);
+  updateStrategyView(strategy->type());
+  updateStatsView(_model.task.completed(),
+                  _model.task.requests().size(),
+                  _model.task.fails());
 }
 
 void ProcessesTask::nextRequest() {
@@ -274,16 +243,223 @@ void ProcessesTask::nextRequest() {
   if (auto [ok, task] = _model.task.next(state); ok) {
     _model.task = task;
     _model.state = _model.task.state();
-    refresh();
+    states[currentRequest] = _model.state;
+
     if (_model.task.done()) {
       QMessageBox::information(
           this, "Внимание", "Вы успешно выполнили данное задание");
+      lockUi();
+    } else {
+      updateHistoryView(_model.task);
     }
   } else {
     _model.task = task;
-    refresh();
     warning("Заявка обработана неверно");
   }
+
+  refresh();
+
+  qDebug() << "currentRequest: " << currentRequest;
+}
+
+void ProcessesTask::setupSignals() {
+  connect(ui->acceptRequest,
+          &QPushButton::clicked,
+          this,
+          &ProcessesTask::nextRequest);
+  connect(ui->resetState, &QPushButton::clicked, this, [=]() {
+    _model.state = _model.task.state();
+    refresh();
+  });
+  connect(ui->spinBoxQueue1,
+          QOverload<int>::of(&QSpinBox::valueChanged),
+          this,
+          &ProcessesTask::updateQueuesLists);
+  connect(ui->spinBoxQueue2,
+          QOverload<int>::of(&QSpinBox::valueChanged),
+          this,
+          &ProcessesTask::updateQueuesLists);
+  auto push1Handler = [=]() {
+    pushToQueueHandler(ui->lineEditQueue1Push, ui->spinBoxQueue1);
+  };
+  auto push2Handler = [=]() {
+    pushToQueueHandler(ui->lineEditQueue2Push, ui->spinBoxQueue2);
+  };
+  connect(ui->pushButtonQueue1Push, &QPushButton::clicked, this, push1Handler);
+  connect(
+      ui->lineEditQueue1Push, &QLineEdit::returnPressed, this, push1Handler);
+  connect(ui->pushButtonQueue2Push, &QPushButton::clicked, this, push2Handler);
+  connect(
+      ui->lineEditQueue2Push, &QLineEdit::returnPressed, this, push2Handler);
+  connect(ui->pushButtonQueue1Pop, &QPushButton::clicked, this, [=]() {
+    popFromQueueHandler(ui->lineEditQueue1Pop, ui->spinBoxQueue1);
+  });
+  connect(ui->pushButtonQueue2Pop, &QPushButton::clicked, this, [=]() {
+    popFromQueueHandler(ui->lineEditQueue2Pop, ui->spinBoxQueue2);
+  });
+  connect(ui->processesTable,
+          &ProcessesTableWidget::customContextMenuRequested,
+          this,
+          &ProcessesTask::provideContextMenu);
+  connect(
+      ui->listQueue1, &ReorderableListWidget::itemsOrderChanged, this, [=]() {
+        _model.state = collectState();
+        refresh();
+      });
+  connect(ui->historyList,
+          &QListWidget::currentRowChanged,
+          this,
+          &ProcessesTask::updateCurrentRequest);
+}
+
+void ProcessesTask::lockUi() {
+  ui->resetState->setDisabled(true);
+  ui->acceptRequest->setDisabled(true);
+  ui->pushButtonQueue1Pop->setDisabled(true);
+  ui->pushButtonQueue2Pop->setDisabled(true);
+  ui->pushButtonQueue1Push->setDisabled(true);
+  ui->pushButtonQueue2Push->setDisabled(true);
+  ui->lineEditQueue1Push->setDisabled(true);
+  ui->lineEditQueue2Push->setDisabled(true);
+  ui->processesTable->setContextMenuPolicy(Qt::NoContextMenu);
+  ui->listQueue1->setDragEnabled(false);
+}
+
+void ProcessesTask::unlockUi() {
+  ui->resetState->setEnabled(true);
+  ui->acceptRequest->setEnabled(true);
+  ui->pushButtonQueue1Pop->setEnabled(true);
+  ui->pushButtonQueue2Pop->setEnabled(true);
+  ui->pushButtonQueue1Push->setEnabled(true);
+  ui->pushButtonQueue2Push->setEnabled(true);
+  ui->lineEditQueue1Push->setEnabled(true);
+  ui->lineEditQueue2Push->setEnabled(true);
+  ui->processesTable->setContextMenuPolicy(Qt::CustomContextMenu);
+  ui->listQueue1->setDragEnabled(true);
+}
+
+ProcessesState ProcessesTask::collectState() {
+  auto [processes, queues] = _model.state;
+
+  auto queue1Index = static_cast<size_t>(ui->spinBoxQueue1->value());
+  auto queue1Size = static_cast<size_t>(ui->listQueue1->count());
+
+  queues[queue1Index].resize(queue1Size);
+
+  for (size_t i = 0; i < queue1Size; ++i) {
+    auto itemIndex = static_cast<int>(i);
+    queues[queue1Index][i] = ui->listQueue1->item(itemIndex)->text().toInt();
+  }
+
+  return {processes, queues};
+}
+
+void ProcessesTask::provideContextMenu(const QPoint &pos) {
+  qDebug() << "ContextMenu";
+
+  auto *processes = ui->processesTable;
+
+  auto globalPos = processes->mapToGlobal(pos);
+  auto *item = processes->itemAt(pos);
+  auto row = item ? item->row() : -1;
+  _model.state = collectState();
+  auto process =
+      row != -1 ? tl::optional{_model.state.processes.at(mapRowToIndex(row))}
+                : tl::nullopt;
+
+  qDebug() << "ContextMenu: row " << row;
+
+  ProcessMenu menu(process);
+
+  auto action = menu.exec(globalPos);
+  if (!action) {
+    return;
+  }
+
+  if (action->text() == ProcessMenu::CREATE) {
+    qDebug() << "ContextMenu: create";
+    processActionCreate();
+  } else if (action->text() == ProcessMenu::TERMINATE && row != -1) {
+    qDebug() << "ContextMenu: terminate";
+    processActionTerminate(mapRowToIndex(row));
+  } else if (action->text() == ProcessMenu::TO_EXECUTING && row != -1) {
+    qDebug() << "ContextMenu: to executing";
+    processActionToExecuting(mapRowToIndex(row));
+  } else if (action->text() == ProcessMenu::TO_WAITING && row != -1) {
+    qDebug() << "ContextMenu: to waiting";
+    processActionToWaiting(mapRowToIndex(row));
+  } else if (action->text() == ProcessMenu::TO_ACTIVE && row != -1) {
+    qDebug() << "ContextMenu: to active";
+    processActionToActive(mapRowToIndex(row));
+  }
+}
+
+void ProcessesTask::pushToQueueHandler(QLineEdit *lineEdit, QSpinBox *spinBox) {
+  if (lineEdit->text().isEmpty()) {
+    return;
+  }
+  auto pid = lineEdit->text().toInt();
+  auto queue = static_cast<std::size_t>(spinBox->value());
+
+  pushToQueue(pid, queue);
+
+  lineEdit->clear();
+}
+
+void ProcessesTask::popFromQueueHandler(QLineEdit *lineEdit,
+                                        QSpinBox *spinBox) {
+  auto queue = static_cast<std::size_t>(spinBox->value());
+  auto pid = popFromQueue(queue);
+  if (pid != -1) {
+    lineEdit->setText("%1"_qs.arg(pid));
+  }
+}
+
+std::size_t ProcessesTask::mapRowToIndex(int row) {
+  auto pid = ui->processesTable->item(row, 0)->text().toInt();
+
+  return *getIndexByPid(_model.state.processes, pid);
+}
+
+void ProcessesTask::updateMainView(ProcessesState state, Request request) {
+  auto [processes, queues] = state;
+  setProcessesList(processes);
+  setQueuesLists(queues);
+  setRequest(request);
+}
+
+void ProcessesTask::updateStatsView(std::size_t count,
+                                    std::size_t total,
+                                    uint32_t fails) {
+  ui->statsLabel->setText(
+      "Обработано заявок: %1 из %2; ошибок: %3"_qs.arg(count).arg(total).arg(
+          fails));
+}
+
+void ProcessesTask::updateStrategyView(StrategyType type) {
+  auto *label = ui->strategyLabel;
+  std::map<StrategyType, QString> strategyMap = {
+      {StrategyType::ROUNDROBIN, "Стратегия: Round Robin"_qs},
+      {StrategyType::FCFS, "Стратегия: FCFS"_qs},
+      {StrategyType::SJN, "Стратегия: SJN"_qs},
+      {StrategyType::SRT, "Стратегия: SRT"_qs},
+      {StrategyType::WINDOWS, "Стратегия: Windows NT"_qs},
+      {StrategyType::UNIX, "Стратегия: Unix"_qs},
+      {StrategyType::LINUXO1, "Стратегия: Linux O(1)"}};
+
+  label->setText(strategyMap[type]);
+}
+
+void ProcessesTask::updateHistoryView(Utils::ProcessesTask task) {
+  ui->historyList->clear();
+  auto templ = QString("Заявка #%1");
+  for (size_t i = 0; i < task.completed(); ++i) {
+    ui->historyList->addItem(templ.arg(i + 1));
+  }
+  if (!_model.task.done()) {
+    ui->historyList->addItem(templ.arg(ui->historyList->count() + 1));
+  }
+  ui->historyList->setCurrentRow(ui->historyList->count() - 1);
 }
 
 void ProcessesTask::setProcessesList(const ProcessesList &processes) {
@@ -308,83 +484,6 @@ void ProcessesTask::setRequest(const Request &request) {
   auto description = QString::fromStdString(
       _model.task.strategy()->getRequestDescription(request));
   ui->labelRequestDescr->setText(description);
-}
-
-void ProcessesTask::setStrategy(StrategyType type) {
-  auto *label = ui->strategyLabel;
-  std::map<StrategyType, QString> strategyMap = {
-      {StrategyType::ROUNDROBIN, "Стратегия: Round Robin"_qs},
-      {StrategyType::FCFS, "Стратегия: FCFS"_qs},
-      {StrategyType::SJN, "Стратегия: SJN"_qs},
-      {StrategyType::SRT, "Стратегия: SRT"_qs},
-      {StrategyType::WINDOWS, "Стратегия: Windows NT"_qs},
-      {StrategyType::UNIX, "Стратегия: Unix"_qs},
-      {StrategyType::LINUXO1, "Стратегия: Linux O(1)"}};
-
-  label->setText(strategyMap[type]);
-}
-
-void ProcessesTask::setStatsInfo(size_t count, size_t total, uint32_t fails) {
-  ui->statsLabel->setText(
-      "Обработано заявок: %1 из %2; ошибок: %3"_qs.arg(count).arg(total).arg(
-          fails));
-}
-
-void ProcessesTask::pushToQueue(QLineEdit *lineEdit, QSpinBox *spinBox) {
-  if (lineEdit->text().isEmpty()) {
-    return;
-  }
-  auto pid = lineEdit->text().toInt();
-  auto queue = static_cast<std::size_t>(spinBox->value());
-
-  try {
-    _model.state = collectState();
-    auto tmp = _model.state;
-    tmp = changeProcessState(tmp, pid, ProcState::ACTIVE);
-    _model.state = ProcessesManagement::pushToQueue(tmp, queue, pid);
-    refresh();
-
-    lineEdit->clear();
-  } catch (const OperationException &ex) {
-    if (ex.what() == "NO_SUCH_PROCESS"s) {
-      warning("Процесс с таким PID не существует");
-    } else if (ex.what() == "ALREADY_IN_QUEUE"s) {
-      warning("Процесс с таким PID уже добавлен в одну из очередей");
-    } else {
-      throw;
-    }
-  } catch (const TypeException &ex) {
-    if (ex.what() == "INVALID_PRIORITY"s &&
-        _model.task.strategy()->type() == StrategyType::WINDOWS) {
-      warning(
-          "Процесс нельзя добавить в очередь с приоритетом меньше базового");
-    } else {
-      throw;
-    }
-  } catch (const std::exception &ex) {
-    warning("Неизвестная ошибка: "s + ex.what());
-  }
-}
-
-void ProcessesTask::popFromQueue(std::size_t queue, QLineEdit *lineEdit) {
-  try {
-    _model.state = collectState();
-    const auto &q = _model.state.queues[queue];
-    if (!q.empty()) {
-      lineEdit->setText("%1"_qs.arg(q.front()));
-    }
-    _model.state = ProcessesManagement::popFromQueue(_model.state, queue);
-
-    refresh();
-  } catch (const OperationException &ex) {
-    if (ex.what() == "EMPTY_QUEUE"s) {
-      warning("Очередь пуста");
-    } else {
-      throw;
-    }
-  } catch (const std::exception &ex) {
-    warning("Неизвестная ошибка: "s + ex.what());
-  }
 }
 
 void ProcessesTask::warning(const std::string &message) {

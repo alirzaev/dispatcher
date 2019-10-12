@@ -5,7 +5,7 @@ INCLUDEPATH += $$PWD/3rdparty
 # Проверяем, установлен ли git
 win32 {
   HAS_GIT = $$system(where /q git && echo YES || echo NO)
-} else:macx|linux {
+} else:linux {
   HAS_GIT = $$system(git --version 2> /dev/null > /dev/null && echo YES || echo NO)
 } else {
   warning("Unsupported platform")

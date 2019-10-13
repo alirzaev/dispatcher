@@ -234,7 +234,7 @@ void MemoryTask::processActionCompress(uint32_t blockIndex) {
     refresh();
   } catch (const OperationException &ex) {
     if (ex.what() == "SINGLE_BLOCK"s) {
-      warning("Следующий блок свободен или отсутствует");
+      warning("Недостаточно блоков для слияния");
     } else {
       throw;
     }

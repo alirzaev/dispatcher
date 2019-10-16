@@ -335,7 +335,9 @@ void ProcessesTask::pushToQueue(QLineEdit *lineEdit, QSpinBox *spinBox) {
 
   try {
     _model.state = collectState();
-    _model.state = ProcessesManagement::pushToQueue(_model.state, queue, pid);
+    auto tmp = _model.state;
+    tmp = changeProcessState(tmp, pid, ProcState::ACTIVE);
+    _model.state = ProcessesManagement::pushToQueue(tmp, queue, pid);
     refresh();
 
     lineEdit->clear();

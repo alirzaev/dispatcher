@@ -1,11 +1,7 @@
-#include <iostream>
-
 #include <QApplication>
-#include <QEventLoop>
 #include <QLibraryInfo>
 #include <QTranslator>
 
-#include "dialogs/tasktypechooser.h"
 #include "mainwindow.h"
 
 int main(int argc, char *argv[]) {

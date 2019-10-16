@@ -23,7 +23,6 @@ INCLUDEPATH += \
 SOURCES += \
         dialogs/freememorydialog.cpp \
         dialogs/pidinputdialog.cpp \
-        dialogs/tasktypechooser.cpp \
         dialogs/terminateiodialog.cpp \
         main.cpp \
         mainwindow.cpp \
@@ -36,7 +35,6 @@ SOURCES += \
 HEADERS += \
         dialogs/freememorydialog.h \
         dialogs/pidinputdialog.h \
-        dialogs/tasktypechooser.h \
         dialogs/terminateiodialog.h \
         mainwindow.h \
         memorytaskbuilder.h \
@@ -49,7 +47,6 @@ HEADERS += \
 FORMS += \
         dialogs/freememorydialog.ui \
         dialogs/pidinputdialog.ui \
-        dialogs/tasktypechooser.ui \
         dialogs/terminateiodialog.ui \
         mainwindow.ui \
         memorytaskbuilder.ui \

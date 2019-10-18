@@ -47,6 +47,11 @@ inline MemoryTask loadMemoryTask(const nlohmann::json &obj) {
 
   uint32_t completed = obj["completed"];
 
+  uint32_t fails = 0;
+  if (obj.contains("fails")) {
+    fails = obj["fails"];
+  }
+
   std::vector<Request> requests;
   for (auto req : obj["requests"]) {
     if (req["type"] == "CREATE_PROCESS") {
@@ -74,7 +79,7 @@ inline MemoryTask loadMemoryTask(const nlohmann::json &obj) {
   }
 
   return MemoryTask::create(
-      strategy, completed, {blocks, freeBlocks}, requests);
+      strategy, completed, fails, {blocks, freeBlocks}, requests);
 }
 
 /**
@@ -114,6 +119,11 @@ inline ProcessesTask loadProcessesTask(const nlohmann::json &obj) {
   StrategyPtr strategy = strategies[strategyType];
 
   uint32_t completed = obj["completed"];
+
+  uint32_t fails = 0;
+  if (obj.contains("fails")) {
+    fails = obj["fails"];
+  }
 
   std::vector<Request> requests;
   for (auto req : obj["requests"]) {
@@ -166,7 +176,7 @@ inline ProcessesTask loadProcessesTask(const nlohmann::json &obj) {
   }
 
   return ProcessesTask::create(
-      strategy, completed, {processes, queues}, requests);
+      strategy, completed, fails, {processes, queues}, requests);
 }
 } // namespace Utils::details
 

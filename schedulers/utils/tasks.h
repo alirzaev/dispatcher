@@ -34,20 +34,24 @@ private:
 
   std::vector<Memory::Request> _requests;
 
+  uint32_t _fails;
+
   /**
    *  @brief Создает объект задания "Диспетчеризация памяти".
    *
    *  @param strategy Стратегия выбора блока памяти.
    *  @param completed Количество обработанных заявок.
+   *  @param fails Количество допущенных пользователем ошибок.
    *  @param state Дескриптор состояния памяти.
    *  @param requests Список заявок для обработки.
    */
   MemoryTask(Memory::StrategyPtr strategy,
              uint32_t completed,
+             uint32_t fails,
              const Memory::MemoryState &state,
              const std::vector<Memory::Request> requests)
       : _strategy(strategy), _completed(completed), _state(state),
-        _requests(requests) {}
+        _requests(requests), _fails(fails) {}
 
 public:
   /**
@@ -57,10 +61,26 @@ public:
    */
   static MemoryTask create(Memory::StrategyPtr strategy,
                            uint32_t completed,
+                           uint32_t fails,
                            const Memory::MemoryState &state,
                            const std::vector<Memory::Request> requests) {
     validate(strategy, completed, state, requests);
-    return {strategy, completed, state, requests};
+    return {strategy, completed, fails, state, requests};
+  }
+
+  /**
+   *  @brief Создает объект задания "Диспетчеризация памяти".
+   *
+   *  Количество допущенных пользователем ошибок по умолчанию - 0.
+   *
+   *  @see Utils::MemoryTask::MemoryTask().
+   */
+  static MemoryTask create(Memory::StrategyPtr strategy,
+                           uint32_t completed,
+                           const Memory::MemoryState &state,
+                           const std::vector<Memory::Request> requests) {
+    validate(strategy, completed, state, requests);
+    return {strategy, completed, 0, state, requests};
   }
 
   /**
@@ -109,6 +129,8 @@ public:
 
   const std::vector<Memory::Request> &requests() const { return _requests; }
 
+  uint32_t fails() const { return _fails; }
+
   /**
    *  Возвращает задание в виде JSON-объекта.
    */
@@ -122,6 +144,8 @@ public:
     obj["completed"] = completed();
 
     obj["state"] = state().dump();
+
+    obj["fails"] = fails();
 
     obj["requests"] = nlohmann::json::array();
 
@@ -157,7 +181,8 @@ public:
       auto request = _requests[_completed];
       auto expected = _strategy->processRequest(request, _state);
       if (expected == state) {
-        return MemoryTask{_strategy, _completed + 1, expected, _requests};
+        return MemoryTask{
+            _strategy, _completed + 1, _fails, expected, _requests};
       } else {
         return tl::nullopt;
       }
@@ -180,20 +205,24 @@ private:
 
   std::vector<Processes::Request> _requests;
 
+  uint32_t _fails;
+
   /**
    *  @brief Создает объект задания "Диспетчеризация процессов".
    *
    *  @param strategy Планировщик.
    *  @param completed Количество обработанных заявок.
+   *  @param fails Количество допущенных пользователем ошибок.
    *  @param state Дескриптор состояния процессов.
    *  @param requests Список заявок для обработки.
    */
   ProcessesTask(Processes::StrategyPtr strategy,
                 uint32_t completed,
+                uint32_t fails,
                 const Processes::ProcessesState &state,
                 const std::vector<Processes::Request> requests)
       : _strategy(strategy), _completed(completed), _state(state),
-        _requests(requests) {}
+        _requests(requests), _fails(fails) {}
 
 public:
   /**
@@ -203,10 +232,26 @@ public:
    */
   static ProcessesTask create(Processes::StrategyPtr strategy,
                               uint32_t completed,
+                              uint32_t fails,
                               const Processes::ProcessesState &state,
                               const std::vector<Processes::Request> requests) {
     validate(strategy, completed, state, requests);
-    return {strategy, completed, state, requests};
+    return {strategy, completed, fails, state, requests};
+  }
+
+  /**
+   *  @brief Создает объект задания "Диспетчеризация процессов".
+   *
+   *  Количество допущенных пользователем ошибок по умолчанию - 0.
+   *
+   *  @see Utils::ProcessesTask::ProcessesTask().
+   */
+  static ProcessesTask create(Processes::StrategyPtr strategy,
+                              uint32_t completed,
+                              const Processes::ProcessesState &state,
+                              const std::vector<Processes::Request> requests) {
+    validate(strategy, completed, state, requests);
+    return {strategy, completed, 0, state, requests};
   }
 
   /**
@@ -261,6 +306,8 @@ public:
 
     obj["state"] = state().dump();
 
+    obj["fails"] = fails();
+
     obj["requests"] = nlohmann::json::array();
 
     for (auto request : requests()) {
@@ -278,6 +325,8 @@ public:
   const Processes::ProcessesState &state() const { return _state; }
 
   const std::vector<Processes::Request> &requests() const { return _requests; }
+
+  uint32_t fails() const { return _fails; }
 
   /**
    *  Проверяет, выполнено ли задание полностью.
@@ -304,7 +353,8 @@ public:
       auto request = _requests[_completed];
       auto expected = _strategy->processRequest(request, _state);
       if (expected == state) {
-        return ProcessesTask{_strategy, _completed + 1, expected, _requests};
+        return ProcessesTask{
+            _strategy, _completed + 1, _fails, expected, _requests};
       } else {
         return tl::nullopt;
       }

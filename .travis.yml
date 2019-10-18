@@ -18,7 +18,7 @@ matrix:
       install:
         - sudo add-apt-repository ppa:beineri/opt-qt-5.11.0-xenial -y
         - sudo apt-get update -q
-        - sudo apt-get install qt511base qtchooser -y -q
+        - sudo apt-get install qt511base qt511translations qt511tools qtchooser -y -q
 
       before_script:
         - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 1

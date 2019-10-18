@@ -257,7 +257,9 @@ void ProcessesTask::refresh() {
   setProcessesList(processes);
   setQueuesLists(queues);
   setStrategy(_model.task.strategy()->type());
-  setCompletedTaskCount(_model.task.completed(), _model.task.requests().size());
+  setStatsInfo(_model.task.completed(),
+               _model.task.requests().size(),
+               _model.task.fails());
   if (_model.task.done()) {
     setRequest(_model.task.requests().back());
   } else {
@@ -278,6 +280,8 @@ void ProcessesTask::nextRequest() {
           this, "Внимание", "Вы успешно выполнили данное задание");
     }
   } else {
+    _model.task = task;
+    refresh();
     warning("Заявка обработана неверно");
   }
 }
@@ -320,10 +324,10 @@ void ProcessesTask::setStrategy(StrategyType type) {
   label->setText(strategyMap[type]);
 }
 
-void ProcessesTask::setCompletedTaskCount(std::size_t count,
-                                          std::size_t total) {
-  ui->completeTaskLabel->setText(
-      "Обработано заявок: %1 из %2"_qs.arg(count).arg(total));
+void ProcessesTask::setStatsInfo(size_t count, size_t total, uint32_t fails) {
+  ui->statsLabel->setText(
+      "Обработано заявок: %1 из %2; ошибок: %3"_qs.arg(count).arg(total).arg(
+          fails));
 }
 
 void ProcessesTask::pushToQueue(QLineEdit *lineEdit, QSpinBox *spinBox) {

@@ -61,7 +61,7 @@ private:
 
   void setStrategy(MemoryManagement::StrategyType type);
 
-  void setCompletedTaskCount(std::size_t count, std::size_t total);
+  void setStatsInfo(std::size_t count, std::size_t total, uint32_t fails);
 
   void warning(const std::string &message);
 };

@@ -30,7 +30,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="completeTaskLabel">
+      <widget class="QLabel" name="statsLabel">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -255,15 +255,15 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>ReorderableListWidget</class>
+   <extends>QListWidget</extends>
+   <header>../widgets/reorderablelistwidget.h</header>
+  </customwidget>
+  <customwidget>
    <class>ProcessesTableWidget</class>
    <extends>QWidget</extends>
    <header>../widgets/processestablewidget.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ReorderableListWidget</class>
-   <extends>QListWidget</extends>
-   <header>../widgets/reorderablelistwidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

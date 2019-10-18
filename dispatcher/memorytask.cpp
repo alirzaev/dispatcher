@@ -260,8 +260,8 @@ void MemoryTask::refresh() {
 void MemoryTask::nextRequest() {
   _model.state = collectState();
 
-  if (auto task = _model.task.next(_model.state); task.has_value()) {
-    _model.task = task.value();
+  if (auto [ok, task] = _model.task.next(_model.state); ok) {
+    _model.task = task;
     _model.state = _model.task.state();
     refresh();
     if (_model.task.done()) {

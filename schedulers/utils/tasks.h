@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <memory>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 #include <mapbox/variant.hpp>
@@ -167,27 +168,35 @@ public:
    *
    *  @param state Дескриптор состояния памяти после обработки заявки.
    *
-   *  @return Новый объект задания или tl::nullopt, если заявка обработана
-   *  неправильно.
+   *  @return Пара <bool ok, MemoryTask task>.
    *
-   *  Если заявка была обработана правильно, то @a _completed увеличивается
-   *  на 1.
+   *  Если заявка была обработана правильно, то @a ok == true, а в @a task
+   *  хранится новый объект задания с обновленными состоянием памяти и
+   *  счетчиком завершенных заданий (увеличивается на 1). Если задание выполнено
+   *  полностью, то в @a task будет хранится текущий объект задания.
+   *
+   *  Если заявка была обработана неправильно, то @a ok == false, а в @a task
+   *  хранится текущий объект задания с увеличенным на единицу счетчиком ошибок.
    */
-  tl::optional<MemoryTask> next(const Memory::MemoryState &state) const {
+  std::pair<bool, MemoryTask> next(const Memory::MemoryState &state) const {
     if (done()) {
-      return *this;
+      return {true, *this};
     }
     try {
       auto request = _requests[_completed];
       auto expected = _strategy->processRequest(request, _state);
       if (expected == state) {
-        return MemoryTask{
-            _strategy, _completed + 1, _fails, expected, _requests};
+        return {
+            true,
+            MemoryTask{_strategy, _completed + 1, _fails, expected, _requests}};
       } else {
-        return tl::nullopt;
+        return {
+            false,
+            MemoryTask{_strategy, _completed, _fails + 1, _state, _requests}};
       }
     } catch (...) {
-      return tl::nullopt;
+      return {false,
+              MemoryTask{_strategy, _completed, _fails + 1, _state, _requests}};
     }
   }
 };
@@ -338,28 +347,37 @@ public:
    *
    *  @param state Дескриптор состояния процессов после обработки заявки.
    *
-   *  @return Новый объект задания или tl::nullopt, если заявка обработана
-   *  неправильно.
+   *  @return Пара <bool ok, ProcessesTask task>.
    *
-   *  Если заявка была обработана правильно, то @a _completed увеличивается
-   *  на 1.
+   *  Если заявка была обработана правильно, то @a ok == true, а в @a task
+   *  хранится новый объект задания с обновленными состоянием процессов и
+   *  счетчиком завершенных заданий (увеличивается на 1). Если задание выполнено
+   *  полностью, то в @a task будет хранится текущий объект задания.
+   *
+   *  Если заявка была обработана неправильно, то @a ok == false, а в @a task
+   *  хранится текущий объект задания с увеличенным на единицу счетчиком ошибок.
    */
-  tl::optional<ProcessesTask>
+  std::pair<bool, ProcessesTask>
   next(const Processes::ProcessesState &state) const {
     if (done()) {
-      return *this;
+      return {true, *this};
     }
     try {
       auto request = _requests[_completed];
       auto expected = _strategy->processRequest(request, _state);
       if (expected == state) {
-        return ProcessesTask{
-            _strategy, _completed + 1, _fails, expected, _requests};
+        return {true,
+                ProcessesTask{
+                    _strategy, _completed + 1, _fails, expected, _requests}};
       } else {
-        return tl::nullopt;
+        return {false,
+                ProcessesTask{
+                    _strategy, _completed, _fails + 1, _state, _requests}};
       }
     } catch (...) {
-      return tl::nullopt;
+      return {
+          false,
+          ProcessesTask{_strategy, _completed, _fails + 1, _state, _requests}};
     }
   }
 };

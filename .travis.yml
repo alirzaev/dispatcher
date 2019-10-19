@@ -1,44 +1,5 @@
 matrix:
   include:
-    - os: osx
-
-      osx_image: xcode10.3
-
-      language: generic
-
-      addons:
-        homebrew:
-          packages:
-          - qt
-          - make
-          - p7zip
-          - curl
-
-      before_script:
-        - export PATH="/usr/local/opt/make/libexec/gnubin:$PATH"
-        - export PATH="/usr/local/opt/qt/bin:$PATH"
-        - export VERSION=`git rev-parse --short HEAD`
-
-      script:
-        - mkdir build
-        - cd build
-        - qmake ../dispatcher.pro
-        - make -j 2
-        - ./tests/tests
-
-      before_deploy:
-        - cd dispatcher
-        - macdeployqt dispatcher.app
-        - 7z a -tzip dispatcher-git.$VERSION.zip dispatcher.app
-
-      deploy:
-        provider: script
-        skip_cleanup: true
-        script: curl --upload-file dispatcher*.zip https://transfer.sh/dispatcher-git.$VERSION.zip
-        on:
-          tags: false
-          all_branches: true
-
     - os: linux
 
       dist: xenial
@@ -57,7 +18,7 @@ matrix:
       install:
         - sudo add-apt-repository ppa:beineri/opt-qt-5.11.0-xenial -y
         - sudo apt-get update -q
-        - sudo apt-get install qt511base qtchooser -y -q
+        - sudo apt-get install qt511base qt511translations qt511tools qtchooser -y -q
 
       before_script:
         - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 1

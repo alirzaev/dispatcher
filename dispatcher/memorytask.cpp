@@ -126,9 +126,10 @@ void MemoryTask::setStrategy(StrategyType type) {
   }
 }
 
-void MemoryTask::setCompletedTaskCount(std::size_t count, std::size_t total) {
-  ui->completeTaskLabel->setText(
-      "Обработано заявок: %1 из %2"_qs.arg(count).arg(total));
+void MemoryTask::setStatsInfo(size_t count, size_t total, uint32_t fails) {
+  ui->statsLabel->setText(
+      "Обработано заявок: %1 из %2; ошибок: %3"_qs.arg(count).arg(total).arg(
+          fails));
 }
 
 void MemoryTask::provideContextMenu(const QPoint &pos) {
@@ -234,7 +235,7 @@ void MemoryTask::processActionCompress(uint32_t blockIndex) {
     refresh();
   } catch (const OperationException &ex) {
     if (ex.what() == "SINGLE_BLOCK"s) {
-      warning("Следующий блок свободен или отсутствует");
+      warning("Недостаточно блоков для слияния");
     } else {
       throw;
     }
@@ -248,7 +249,9 @@ void MemoryTask::refresh() {
   setMemoryBlocks(blocks);
   setFreeMemoryBlocks(freeBlocks);
   setStrategy(_model.task.strategy()->type);
-  setCompletedTaskCount(_model.task.completed(), _model.task.requests().size());
+  setStatsInfo(_model.task.completed(),
+               _model.task.requests().size(),
+               _model.task.fails());
   if (_model.task.done()) {
     setRequest(_model.task.requests().back());
   } else {
@@ -260,8 +263,8 @@ void MemoryTask::refresh() {
 void MemoryTask::nextRequest() {
   _model.state = collectState();
 
-  if (auto task = _model.task.next(_model.state); task.has_value()) {
-    _model.task = task.value();
+  if (auto [ok, task] = _model.task.next(_model.state); ok) {
+    _model.task = task;
     _model.state = _model.task.state();
     refresh();
     if (_model.task.done()) {
@@ -269,6 +272,8 @@ void MemoryTask::nextRequest() {
           this, "Внимание", "Вы успешно выполнили данное задание");
     }
   } else {
+    _model.task = task;
+    refresh();
     warning("Заявка обработана неверно");
   }
 }

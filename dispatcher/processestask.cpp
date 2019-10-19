@@ -257,7 +257,9 @@ void ProcessesTask::refresh() {
   setProcessesList(processes);
   setQueuesLists(queues);
   setStrategy(_model.task.strategy()->type());
-  setCompletedTaskCount(_model.task.completed(), _model.task.requests().size());
+  setStatsInfo(_model.task.completed(),
+               _model.task.requests().size(),
+               _model.task.fails());
   if (_model.task.done()) {
     setRequest(_model.task.requests().back());
   } else {
@@ -269,8 +271,8 @@ void ProcessesTask::refresh() {
 void ProcessesTask::nextRequest() {
   auto state = updateTimer(collectState());
 
-  if (auto task = _model.task.next(state); task.has_value()) {
-    _model.task = task.value();
+  if (auto [ok, task] = _model.task.next(state); ok) {
+    _model.task = task;
     _model.state = _model.task.state();
     refresh();
     if (_model.task.done()) {
@@ -278,6 +280,8 @@ void ProcessesTask::nextRequest() {
           this, "Внимание", "Вы успешно выполнили данное задание");
     }
   } else {
+    _model.task = task;
+    refresh();
     warning("Заявка обработана неверно");
   }
 }
@@ -320,10 +324,10 @@ void ProcessesTask::setStrategy(StrategyType type) {
   label->setText(strategyMap[type]);
 }
 
-void ProcessesTask::setCompletedTaskCount(std::size_t count,
-                                          std::size_t total) {
-  ui->completeTaskLabel->setText(
-      "Обработано заявок: %1 из %2"_qs.arg(count).arg(total));
+void ProcessesTask::setStatsInfo(size_t count, size_t total, uint32_t fails) {
+  ui->statsLabel->setText(
+      "Обработано заявок: %1 из %2; ошибок: %3"_qs.arg(count).arg(total).arg(
+          fails));
 }
 
 void ProcessesTask::pushToQueue(QLineEdit *lineEdit, QSpinBox *spinBox) {
@@ -335,7 +339,9 @@ void ProcessesTask::pushToQueue(QLineEdit *lineEdit, QSpinBox *spinBox) {
 
   try {
     _model.state = collectState();
-    _model.state = ProcessesManagement::pushToQueue(_model.state, queue, pid);
+    auto tmp = _model.state;
+    tmp = changeProcessState(tmp, pid, ProcState::ACTIVE);
+    _model.state = ProcessesManagement::pushToQueue(tmp, queue, pid);
     refresh();
 
     lineEdit->clear();

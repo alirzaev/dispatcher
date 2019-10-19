@@ -5,7 +5,7 @@ INCLUDEPATH += $$PWD/3rdparty
 # Проверяем, установлен ли git
 win32 {
   HAS_GIT = $$system(where /q git && echo YES || echo NO)
-} else:macx|linux {
+} else:linux {
   HAS_GIT = $$system(git --version 2> /dev/null > /dev/null && echo YES || echo NO)
 } else {
   warning("Unsupported platform")
@@ -21,7 +21,7 @@ equals(HAS_GIT, "YES") {
 
 DEFINES += DISPATCHER_MAJOR="0"
 DEFINES += DISPATCHER_MINOR="5"
-DEFINES += DISPATCHER_PATCH="5"
+DEFINES += DISPATCHER_PATCH="6"
 DEFINES += GIT_REV="\\\"$$GIT_REV\\\""
 
 # Отвести сгенерированным файлам отдельные директории

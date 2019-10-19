@@ -11,7 +11,7 @@ MemoryBlockMenu::MemoryBlockMenu(const MemoryManagement::MemoryBlock &block,
     : QMenu(parent) {
   addAction(ACTION_ALLOCATE)->setEnabled(block.pid() == -1);
   addAction(ACTION_FREE)->setEnabled(block.pid() != -1);
-  addAction(ACTION_COMPRESS);
+  addAction(ACTION_COMPRESS)->setEnabled(block.pid() == -1);
   addAction(ACTION_DEFRAGMENT);
 }
 

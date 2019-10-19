@@ -17,6 +17,7 @@
 | type | String | Тип задания. Значение: `MEMORY_TASK` |
 | strategy | String | Название стратегии. Допустимые значения: `FIRST_APPROPRIATE`, `MOST_APPROPRIATE`, `LEAST_APPROPRIATE` |
 | completed | Number | Количество обработанных заявок |
+| fails | Количество допущенных пользователем ошибок |
 | state | [MemoryState](#memorystate) | Объект, описывающий состояние памяти |
 | requests | [[CreateProcess](#createprocess) \| [TerminateProcess](#terminateprocess) \| [AllocateMemory](#allocatememory) \| [FreeMemory](#freememory)] | Массив заявок, которые диспетчер должен обработать |
 
@@ -131,6 +132,7 @@
 | type | String | Тип задания. Значение: `PROCESSES_TASK` |
 | strategy | String | Название стратегии. Допустимые значения: `ROUNDROBIN`, `FCFS`, `SJN`, `SRT`, `WINNT` |
 | completed | Number | Количество обработанных заявок |
+| fails | Количество допущенных пользователем ошибок |
 | state | [ProcessesState](#processesstate) | Объект, описывающий состояние процессов |
 | requests | [[CreateProcessReq](#createprocessreq) \| [TerminateProcessReq](#terminateprocessreq) \| [InitIO](#initio) \| [TerminateIO](#terminateio)] \| [TransferControl](#transfercontrol) \| [TimeQuantumExpired](#timequantumexpired) | Массив заявок, которые диспетчер должен обработать |
 

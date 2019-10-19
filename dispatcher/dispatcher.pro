@@ -16,8 +16,6 @@ TARGET = dispatcher
 
 RC_ICONS = ../icon/ico/dispatcher.ico
 
-ICON = ../icon/icns/dispatcher.icns
-
 # Выдавать предупреждения при использовании deprecated API
 DEFINES += QT_DEPRECATED_WARNINGS
 

@@ -1,6 +1,6 @@
 # Модель диспетчера задач операционной системы
 
-[![Linux & macOS Build Status](https://img.shields.io/travis/alirzaev/dispatcher?label=Linux%20%26%20macOS%20Build%20Status)](https://travis-ci.org/alirzaev/dispatcher)
+[![Linux Build Status](https://img.shields.io/travis/alirzaev/dispatcher?label=Linux%20Build%20Status)](https://travis-ci.org/alirzaev/dispatcher)
 [![Windows Build Status](https://img.shields.io/appveyor/ci/alirzaev/dispatcher?label=Windows%20Build%20Status)](https://ci.appveyor.com/project/alirzaev/dispatcher)
 
 Программная модель диспетчера задач для лабораторной работы по дисциплине "Операционные системы"
@@ -40,12 +40,6 @@
   - Разработка классических приложений на C++
 
   - Debugging Tools for Windows
-
-### macOS
-
-- Qt 5.11 или новее
-
-- Xcode 10 (Command Line Tools)
 
 ### Ubuntu
 

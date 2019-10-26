@@ -50,6 +50,8 @@ private:
   void updateTaskView(const MemoryManagement::MemoryState &state,
                       const MemoryManagement::Request &request);
 
+  void clearTaskView();
+
   void provideContextMenu(const QPoint &pos);
 
   void setMemoryState(const MemoryManagement::MemoryState &state);

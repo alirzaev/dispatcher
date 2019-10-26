@@ -126,7 +126,11 @@ void ProcessesTaskBuilder::processContextMenuAction(const QString &action,
   if (requestIndex == -1) {
     selectCurrentRequest(static_cast<int>(requests.size() - 1));
   } else {
-    selectCurrentRequest(requestIndex);
+    if (requests.empty()) {
+      clearTaskView();
+    } else {
+      selectCurrentRequest(requestIndex);
+    }
   }
 }
 
@@ -199,6 +203,13 @@ void ProcessesTaskBuilder::updateTaskView(const ProcessesState &state,
   setProcessesList(state.processes);
   setQueuesLists(state.queues);
   setRequest(request);
+}
+
+void ProcessesTaskBuilder::clearTaskView() {
+  auto state = ProcessesState::initial();
+  setProcessesList(state.processes);
+  setQueuesLists(state.queues);
+  ui->labelRequestDescr->clear();
 }
 
 void ProcessesTaskBuilder::provideContextMenu(const QPoint &pos) {

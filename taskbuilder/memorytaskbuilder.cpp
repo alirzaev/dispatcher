@@ -112,7 +112,11 @@ void MemoryTaskBuilder::processContextMenuAction(const QString &action,
   if (requestIndex == -1) {
     selectCurrentRequest(static_cast<int>(requests.size() - 1));
   } else {
-    selectCurrentRequest(requestIndex);
+    if (requests.empty()) {
+      clearTaskView();
+    } else {
+      selectCurrentRequest(requestIndex);
+    }
   }
 }
 
@@ -156,6 +160,12 @@ void MemoryTaskBuilder::updateTaskView(const MemoryState &state,
                                        const Request &request) {
   setMemoryState(state);
   setRequest(request);
+}
+
+void MemoryTaskBuilder::clearTaskView() {
+  ui->listMemBlocks->clear();
+  ui->listFreeBlocks->clear();
+  ui->labelRequestDescr->clear();
 }
 
 void MemoryTaskBuilder::provideContextMenu(const QPoint &pos) {

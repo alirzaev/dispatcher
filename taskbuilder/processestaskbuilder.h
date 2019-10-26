@@ -58,6 +58,8 @@ private:
   void updateTaskView(const ProcessesManagement::ProcessesState &state,
                       const ProcessesManagement::Request &request);
 
+  void clearTaskView();
+
   void provideContextMenu(const QPoint &pos);
 
   void setProcessesList(const ProcessesList &processes);

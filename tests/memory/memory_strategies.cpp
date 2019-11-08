@@ -18,7 +18,7 @@ TEST_CASE("MemoryManagement::FirstAppropriateStrategy") {
 
   SECTION("Обработать заявку CreateProcessReq") {
     auto strategy = mm::FirstAppropriateStrategy::create();
-    auto request = mm::CreateProcessReq(3, 4 * 4096, 4);
+    auto request = mm::CreateProcessReq(3, 4 * 4096);
 
     auto state = mm::MemoryState{
         {{0, 0, 12}, //
@@ -43,7 +43,7 @@ TEST_CASE("MemoryManagement::FirstAppropriateStrategy") {
 
   SECTION("Обработать заявку CreateProcessReq (с дефрагментацией)") {
     auto strategy = mm::FirstAppropriateStrategy::create();
-    auto request = mm::CreateProcessReq(3, 21 * 4096, 21);
+    auto request = mm::CreateProcessReq(3, 21 * 4096);
 
     auto state =
         mm::MemoryState{{
@@ -70,7 +70,7 @@ TEST_CASE("MemoryManagement::FirstAppropriateStrategy") {
 
   SECTION("Обработать заявку CreateProcessReq (недостаточно памяти)") {
     auto strategy = mm::FirstAppropriateStrategy::create();
-    auto request = mm::CreateProcessReq(3, 28 * 4096, 28);
+    auto request = mm::CreateProcessReq(3, 28 * 4096);
 
     auto state = mm::MemoryState{{{0, 0, 12},   //
                                   {2, 12, 3},   //
@@ -87,7 +87,7 @@ TEST_CASE("MemoryManagement::FirstAppropriateStrategy") {
 
   SECTION("Обработать заявку CreateProcessReq (процесс уже создан)") {
     auto strategy = mm::FirstAppropriateStrategy::create();
-    auto request = mm::CreateProcessReq(2, 4 * 4096, 4);
+    auto request = mm::CreateProcessReq(2, 4 * 4096);
 
     auto state = mm::MemoryState{{{0, 0, 12},   //
                                   {2, 12, 3},   //
@@ -141,7 +141,7 @@ TEST_CASE("MemoryManagement::FirstAppropriateStrategy") {
 
   SECTION("Обработать заявку AllocateMemory") {
     auto strategy = mm::FirstAppropriateStrategy::create();
-    auto request = mm::AllocateMemory(2, 4 * 4096, 4);
+    auto request = mm::AllocateMemory(2, 4 * 4096);
 
     auto state = mm::MemoryState{
         {{0, 0, 12}, //
@@ -166,7 +166,7 @@ TEST_CASE("MemoryManagement::FirstAppropriateStrategy") {
 
   SECTION("Обработать заявку AllocateMemory (с дефрагментацией)") {
     auto strategy = mm::FirstAppropriateStrategy::create();
-    auto request = mm::AllocateMemory(2, 21 * 4096, 21);
+    auto request = mm::AllocateMemory(2, 21 * 4096);
 
     auto state =
         mm::MemoryState{{
@@ -193,7 +193,7 @@ TEST_CASE("MemoryManagement::FirstAppropriateStrategy") {
 
   SECTION("Обработать заявку AllocateMemory (недостаточно памяти)") {
     auto strategy = mm::FirstAppropriateStrategy::create();
-    auto request = mm::AllocateMemory(2, 28 * 4096, 28);
+    auto request = mm::AllocateMemory(2, 28 * 4096);
 
     auto state = mm::MemoryState{{{0, 0, 12},   //
                                   {2, 12, 3},   //
@@ -210,7 +210,7 @@ TEST_CASE("MemoryManagement::FirstAppropriateStrategy") {
 
   SECTION("Обработать заявку AllocateMemory (процесс не существует)") {
     auto strategy = mm::FirstAppropriateStrategy::create();
-    auto request = mm::AllocateMemory(3, 4 * 4096, 4);
+    auto request = mm::AllocateMemory(3, 4 * 4096);
 
     auto state = mm::MemoryState{{{0, 0, 12},   //
                                   {2, 12, 3},   //
@@ -298,7 +298,7 @@ TEST_CASE("MemoryManagement::MostAppropriateStrategy") {
 
   SECTION("Обработать заявку CreateProcessReq") {
     auto strategy = mm::MostAppropriateStrategy::create();
-    auto request = mm::CreateProcessReq(3, 4 * 4096, 4);
+    auto request = mm::CreateProcessReq(3, 4 * 4096);
 
     auto state = mm::MemoryState{
         {
@@ -327,7 +327,7 @@ TEST_CASE("MemoryManagement::MostAppropriateStrategy") {
 
   SECTION("Обработать заявку CreateProcessReq (с дефрагментацией)") {
     auto strategy = mm::MostAppropriateStrategy::create();
-    auto request = mm::CreateProcessReq(3, 21 * 4096, 21);
+    auto request = mm::CreateProcessReq(3, 21 * 4096);
 
     auto state =
         mm::MemoryState{{
@@ -354,7 +354,7 @@ TEST_CASE("MemoryManagement::MostAppropriateStrategy") {
 
   SECTION("Обработать заявку CreateProcessReq (недостаточно памяти)") {
     auto strategy = mm::MostAppropriateStrategy::create();
-    auto request = mm::CreateProcessReq(3, 28 * 4096, 28);
+    auto request = mm::CreateProcessReq(3, 28 * 4096);
 
     auto state = mm::MemoryState{{{0, 0, 12},   //
                                   {2, 12, 3},   //
@@ -371,7 +371,7 @@ TEST_CASE("MemoryManagement::MostAppropriateStrategy") {
 
   SECTION("Обработать заявку CreateProcessReq (процесс уже создан)") {
     auto strategy = mm::MostAppropriateStrategy::create();
-    auto request = mm::CreateProcessReq(2, 4 * 4096, 4);
+    auto request = mm::CreateProcessReq(2, 4 * 4096);
 
     auto state = mm::MemoryState{{{0, 0, 12},   //
                                   {2, 12, 3},   //
@@ -425,7 +425,7 @@ TEST_CASE("MemoryManagement::MostAppropriateStrategy") {
 
   SECTION("Обработать заявку AllocateMemory") {
     auto strategy = mm::MostAppropriateStrategy::create();
-    auto request = mm::AllocateMemory(2, 4 * 4096, 4);
+    auto request = mm::AllocateMemory(2, 4 * 4096);
 
     auto state = mm::MemoryState{
         {
@@ -454,7 +454,7 @@ TEST_CASE("MemoryManagement::MostAppropriateStrategy") {
 
   SECTION("Обработать заявку AllocateMemory (с дефрагментацией)") {
     auto strategy = mm::MostAppropriateStrategy::create();
-    auto request = mm::AllocateMemory(2, 21 * 4096, 21);
+    auto request = mm::AllocateMemory(2, 21 * 4096);
 
     auto state =
         mm::MemoryState{{
@@ -481,7 +481,7 @@ TEST_CASE("MemoryManagement::MostAppropriateStrategy") {
 
   SECTION("Обработать заявку AllocateMemory (недостаточно памяти)") {
     auto strategy = mm::MostAppropriateStrategy::create();
-    auto request = mm::AllocateMemory(2, 28 * 4096, 28);
+    auto request = mm::AllocateMemory(2, 28 * 4096);
 
     auto state = mm::MemoryState{{{0, 0, 12},   //
                                   {2, 12, 3},   //
@@ -498,7 +498,7 @@ TEST_CASE("MemoryManagement::MostAppropriateStrategy") {
 
   SECTION("Обработать заявку AllocateMemory (процесс не существует)") {
     auto strategy = mm::MostAppropriateStrategy::create();
-    auto request = mm::AllocateMemory(3, 4 * 4096, 4);
+    auto request = mm::AllocateMemory(3, 4 * 4096);
 
     auto state = mm::MemoryState{{{0, 0, 12},   //
                                   {2, 12, 3},   //
@@ -586,7 +586,7 @@ TEST_CASE("MemoryManagement::LeastAppropriateStrategy") {
 
   SECTION("Обработать заявку CreateProcessReq") {
     auto strategy = mm::LeastAppropriateStrategy::create();
-    auto request = mm::CreateProcessReq(3, 4 * 4096, 4);
+    auto request = mm::CreateProcessReq(3, 4 * 4096);
 
     auto state = mm::MemoryState{
         {
@@ -615,7 +615,7 @@ TEST_CASE("MemoryManagement::LeastAppropriateStrategy") {
 
   SECTION("Обработать заявку CreateProcessReq (с дефрагментацией)") {
     auto strategy = mm::LeastAppropriateStrategy::create();
-    auto request = mm::CreateProcessReq(3, 21 * 4096, 21);
+    auto request = mm::CreateProcessReq(3, 21 * 4096);
 
     auto state =
         mm::MemoryState{{
@@ -642,7 +642,7 @@ TEST_CASE("MemoryManagement::LeastAppropriateStrategy") {
 
   SECTION("Обработать заявку CreateProcessReq (недостаточно памяти)") {
     auto strategy = mm::LeastAppropriateStrategy::create();
-    auto request = mm::CreateProcessReq(3, 28 * 4096, 28);
+    auto request = mm::CreateProcessReq(3, 28 * 4096);
 
     auto state = mm::MemoryState{{{0, 0, 12},   //
                                   {2, 12, 3},   //
@@ -659,7 +659,7 @@ TEST_CASE("MemoryManagement::LeastAppropriateStrategy") {
 
   SECTION("Обработать заявку CreateProcessReq (процесс уже создан)") {
     auto strategy = mm::LeastAppropriateStrategy::create();
-    auto request = mm::CreateProcessReq(2, 4 * 4096, 4);
+    auto request = mm::CreateProcessReq(2, 4 * 4096);
 
     auto state = mm::MemoryState{{{0, 0, 12},   //
                                   {2, 12, 3},   //
@@ -713,7 +713,7 @@ TEST_CASE("MemoryManagement::LeastAppropriateStrategy") {
 
   SECTION("Обработать заявку AllocateMemory") {
     auto strategy = mm::LeastAppropriateStrategy::create();
-    auto request = mm::AllocateMemory(2, 4 * 4096, 4);
+    auto request = mm::AllocateMemory(2, 4 * 4096);
 
     auto state = mm::MemoryState{
         {
@@ -742,7 +742,7 @@ TEST_CASE("MemoryManagement::LeastAppropriateStrategy") {
 
   SECTION("Обработать заявку AllocateMemory (с дефрагментацией)") {
     auto strategy = mm::LeastAppropriateStrategy::create();
-    auto request = mm::AllocateMemory(2, 21 * 4096, 21);
+    auto request = mm::AllocateMemory(2, 21 * 4096);
 
     auto state =
         mm::MemoryState{{
@@ -769,7 +769,7 @@ TEST_CASE("MemoryManagement::LeastAppropriateStrategy") {
 
   SECTION("Обработать заявку AllocateMemory (недостаточно памяти)") {
     auto strategy = mm::LeastAppropriateStrategy::create();
-    auto request = mm::AllocateMemory(2, 28 * 4096, 28);
+    auto request = mm::AllocateMemory(2, 28 * 4096);
 
     auto state = mm::MemoryState{{{0, 0, 12},   //
                                   {2, 12, 3},   //
@@ -786,7 +786,7 @@ TEST_CASE("MemoryManagement::LeastAppropriateStrategy") {
 
   SECTION("Обработать заявку AllocateMemory (процесс не существует)") {
     auto strategy = mm::LeastAppropriateStrategy::create();
-    auto request = mm::AllocateMemory(3, 4 * 4096, 4);
+    auto request = mm::AllocateMemory(3, 4 * 4096);
 
     auto state = mm::MemoryState{{{0, 0, 12},   //
                                   {2, 12, 3},   //

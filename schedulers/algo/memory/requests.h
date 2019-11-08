@@ -20,8 +20,6 @@ private:
 
   int32_t _bytes;
 
-  int32_t _pages;
-
 public:
   CreateProcessReq &operator=(const CreateProcessReq &rhs) = default;
 
@@ -29,16 +27,15 @@ public:
 
   int32_t bytes() const { return _bytes; }
 
-  int32_t pages() const { return _pages; }
+  int32_t pages() const {
+    return _bytes % 4096 == 0 ? _bytes / 4096 : (_bytes + 4096) / 4096;
+  }
 
   /**
    *  Возвращает заявку в виде JSON-объекта.
    */
   nlohmann::json dump() const {
-    return {{"type", "CREATE_PROCESS"},
-            {"pid", _pid},
-            {"bytes", _bytes},
-            {"pages", _pages}};
+    return {{"type", "CREATE_PROCESS"}, {"pid", _pid}, {"bytes", _bytes}};
   }
 
   /**
@@ -46,23 +43,15 @@ public:
    *
    *  @param pid Идентификатор процесса.
    *  @param bytes Количество байт для выделения процессу в памяти.
-   *  @param pages Количества страниц для выделения процессу в памяти.
    *
    *  @throws MemoryManagement::RequestException Исключение возникает, если
    *  переданные параметры не соответствуют заданным ограничениям.
    */
-  CreateProcessReq(int32_t pid, int32_t bytes, int32_t pages)
-      : _pid(pid), _bytes(bytes), _pages(pages) {
+  CreateProcessReq(int32_t pid, int32_t bytes) : _pid(pid), _bytes(bytes) {
     if (pid < 0 || pid > 255) {
       throw RequestException("INVALID_PID");
     }
     if (bytes < 1 || bytes > 256 * 4096) {
-      throw RequestException("INVALID_BYTES");
-    }
-    if (pages < 1 || pages > 256) {
-      throw RequestException("INVALID_PAGES");
-    }
-    if (bytes <= (pages - 1) * 4096 || bytes > pages * 4096) {
       throw RequestException("INVALID_BYTES");
     }
   }
@@ -111,14 +100,14 @@ private:
 
   int32_t _bytes;
 
-  int32_t _pages;
-
 public:
   int32_t pid() const { return _pid; }
 
   int32_t bytes() const { return _bytes; }
 
-  int32_t pages() const { return _pages; }
+  int32_t pages() const {
+    return _bytes % 4096 == 0 ? _bytes / 4096 : (_bytes + 4096) / 4096;
+  }
 
   AllocateMemory &operator=(const AllocateMemory &rhs) = default;
 
@@ -126,10 +115,7 @@ public:
    *  Возвращает заявку в виде JSON-объекта.
    */
   nlohmann::json dump() const {
-    return {{"type", "ALLOCATE_MEMORY"},
-            {"pid", _pid},
-            {"bytes", _bytes},
-            {"pages", _pages}};
+    return {{"type", "ALLOCATE_MEMORY"}, {"pid", _pid}, {"bytes", _bytes}};
   }
 
   /**
@@ -142,18 +128,11 @@ public:
    *  @throws MemoryManagement::RequestException Исключение возникает, если
    *  переданные параметры не соответствуют заданным ограничениям.
    */
-  AllocateMemory(int32_t pid, int32_t bytes, int32_t pages)
-      : _pid(pid), _bytes(bytes), _pages(pages) {
+  AllocateMemory(int32_t pid, int32_t bytes) : _pid(pid), _bytes(bytes) {
     if (pid < 0 || pid > 255) {
       throw RequestException("INVALID_PID");
     }
     if (bytes < 1 || bytes > 256 * 4096) {
-      throw RequestException("INVALID_BYTES");
-    }
-    if (pages < 1 || pages > 256) {
-      throw RequestException("INVALID_PAGES");
-    }
-    if (bytes <= (pages - 1) * 4096 || bytes > pages * 4096) {
       throw RequestException("INVALID_BYTES");
     }
   }

@@ -55,13 +55,11 @@ inline MemoryTask loadMemoryTask(const nlohmann::json &obj) {
   std::vector<Request> requests;
   for (auto req : obj["requests"]) {
     if (req["type"] == "CREATE_PROCESS") {
-      requests.push_back(
-          CreateProcessReq(req["pid"], req["bytes"], req["pages"]));
+      requests.push_back(CreateProcessReq(req["pid"], req["bytes"]));
     } else if (req["type"] == "TERMINATE_PROCESS") {
       requests.push_back(TerminateProcessReq(req["pid"]));
     } else if (req["type"] == "ALLOCATE_MEMORY") {
-      requests.push_back(
-          AllocateMemory(req["pid"], req["bytes"], req["pages"]));
+      requests.push_back(AllocateMemory(req["pid"], req["bytes"]));
     } else if (req["type"] == "FREE_MEMORY") {
       requests.push_back(FreeMemory(req["pid"], req["address"]));
     } else {

@@ -8,7 +8,7 @@ namespace mm = MemoryManagement;
 
 TEST_CASE("MemoryManagement::CreateProcessReq") {
   SECTION("Создать экземпляр CreateProcessReq") {
-    auto request = mm::CreateProcessReq(0, 4096, 1);
+    auto request = mm::CreateProcessReq(0, 4096);
 
     REQUIRE(request.pid() == 0);
     REQUIRE(request.bytes() == 4096);
@@ -16,12 +16,11 @@ TEST_CASE("MemoryManagement::CreateProcessReq") {
   }
 
   SECTION("Получить JSON экземпляра CreateProcessReq") {
-    auto request = mm::CreateProcessReq(0, 4096, 1);
+    auto request = mm::CreateProcessReq(0, 4096);
 
     auto expected = nlohmann::json{{"type", "CREATE_PROCESS"}, //
                                    {"pid", 0},                 //
-                                   {"bytes", 4096},            //
-                                   {"pages", 1}};
+                                   {"bytes", 4096}};
     auto actual = request.dump();
 
     REQUIRE(actual == expected);
@@ -29,21 +28,13 @@ TEST_CASE("MemoryManagement::CreateProcessReq") {
 
   SECTION("Ограничения на параметры CreateProcessReq") {
     // Некорректный PID
-    REQUIRE_THROWS_AS(mm::CreateProcessReq(-1, 4096, 1), mm::RequestException);
-    REQUIRE_THROWS_AS(mm::CreateProcessReq(256, 4096, 1), mm::RequestException);
+    REQUIRE_THROWS_AS(mm::CreateProcessReq(-1, 4096), mm::RequestException);
+    REQUIRE_THROWS_AS(mm::CreateProcessReq(256, 4096), mm::RequestException);
 
     // Некорректный размер памяти в байтах
-    REQUIRE_THROWS_AS(mm::CreateProcessReq(0, -1, 1), mm::RequestException);
-    REQUIRE_THROWS_AS(mm::CreateProcessReq(0, 257 * 4096, 1),
+    REQUIRE_THROWS_AS(mm::CreateProcessReq(0, -1), mm::RequestException);
+    REQUIRE_THROWS_AS(mm::CreateProcessReq(0, 257 * 4096),
                       mm::RequestException);
-
-    // Некорректный размер памяти в страницах
-    REQUIRE_THROWS_AS(mm::CreateProcessReq(0, 4096, 0), mm::RequestException);
-    REQUIRE_THROWS_AS(mm::CreateProcessReq(0, 4096, 257), mm::RequestException);
-
-    // Несоответствие между рамером в байтах и в страницах
-    REQUIRE_THROWS_AS(mm::CreateProcessReq(0, 4097, 1), mm::RequestException);
-    REQUIRE_THROWS_AS(mm::CreateProcessReq(0, 4096, 2), mm::RequestException);
   }
 }
 
@@ -73,7 +64,7 @@ TEST_CASE("MemoryManagement::TerminateProcessReq") {
 
 TEST_CASE("MemoryManagement::AllocateMemory") {
   SECTION("Создать экземпляр AllocateMemory") {
-    auto request = mm::AllocateMemory(0, 4096, 1);
+    auto request = mm::AllocateMemory(0, 4096);
 
     REQUIRE(request.pid() == 0);
     REQUIRE(request.bytes() == 4096);
@@ -81,12 +72,11 @@ TEST_CASE("MemoryManagement::AllocateMemory") {
   }
 
   SECTION("Получить JSON экземпляра AllocateMemory") {
-    auto request = mm::AllocateMemory(0, 4096, 1);
+    auto request = mm::AllocateMemory(0, 4096);
 
     auto expected = nlohmann::json{{"type", "ALLOCATE_MEMORY"}, //
                                    {"pid", 0},                  //
-                                   {"bytes", 4096},             //
-                                   {"pages", 1}};
+                                   {"bytes", 4096}};
     auto actual = request.dump();
 
     REQUIRE(actual == expected);
@@ -94,21 +84,12 @@ TEST_CASE("MemoryManagement::AllocateMemory") {
 
   SECTION("Ограничения на параметры AllocateMemory") {
     // Некорректный PID
-    REQUIRE_THROWS_AS(mm::AllocateMemory(-1, 4096, 1), mm::RequestException);
-    REQUIRE_THROWS_AS(mm::AllocateMemory(256, 4096, 1), mm::RequestException);
+    REQUIRE_THROWS_AS(mm::AllocateMemory(-1, 4096), mm::RequestException);
+    REQUIRE_THROWS_AS(mm::AllocateMemory(256, 4096), mm::RequestException);
 
     // Некорректный размер памяти в байтах
-    REQUIRE_THROWS_AS(mm::AllocateMemory(0, -1, 1), mm::RequestException);
-    REQUIRE_THROWS_AS(mm::AllocateMemory(0, 257 * 4096, 1),
-                      mm::RequestException);
-
-    // Некорректный размер памяти в страницах
-    REQUIRE_THROWS_AS(mm::AllocateMemory(0, 4096, 0), mm::RequestException);
-    REQUIRE_THROWS_AS(mm::AllocateMemory(0, 4096, 257), mm::RequestException);
-
-    // Несоответствие между рамером в байтах и в страницах
-    REQUIRE_THROWS_AS(mm::AllocateMemory(0, 4097, 1), mm::RequestException);
-    REQUIRE_THROWS_AS(mm::AllocateMemory(0, 4096, 2), mm::RequestException);
+    REQUIRE_THROWS_AS(mm::AllocateMemory(0, -1), mm::RequestException);
+    REQUIRE_THROWS_AS(mm::AllocateMemory(0, 257 * 4096), mm::RequestException);
   }
 }
 

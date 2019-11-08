@@ -92,12 +92,12 @@ inline optional<Request> genCreateProcess(const MemoryState &state,
     auto [pages, bytes] = genRequestedMemory(freePages);
     auto newPid = randChoice(availabePids);
 
-    return CreateProcessReq(newPid, bytes, pages);
+    return CreateProcessReq(newPid, bytes);
   } else if (!valid && !usedPids.empty()) {
     auto [pages, bytes] = genRequestedMemory(randRange(1, 255));
     auto newPid = randChoice(usedPids);
 
-    return CreateProcessReq(newPid, bytes, pages);
+    return CreateProcessReq(newPid, bytes);
   } else {
     return tl::nullopt;
   }
@@ -135,18 +135,18 @@ inline optional<Request> genAllocateMemory(const MemoryState &state,
     auto [pages, bytes] = genRequestedMemory(freePages);
     auto newPid = randChoice(usedPids);
 
-    return AllocateMemory(newPid, bytes, pages);
+    return AllocateMemory(newPid, bytes);
   } else if (!valid) {
     if (!availabePids.empty()) {
       auto [pages, bytes] = genRequestedMemory(randRange(1, 255));
       auto newPid = randChoice(availabePids);
 
-      return AllocateMemory(newPid, bytes, pages);
+      return AllocateMemory(newPid, bytes);
     } else if (!usedPids.empty() && freePages < 255) {
       auto [pages, bytes] = genRequestedMemory(randRange(freePages, 255));
       auto newPid = randChoice(usedPids);
 
-      return AllocateMemory(newPid, bytes, pages);
+      return AllocateMemory(newPid, bytes);
     } else {
       return tl::nullopt;
     }

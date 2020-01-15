@@ -1,5 +1,9 @@
 include(../common.pri)
 
+skipTests {
+  requires(false)
+}
+
 TEMPLATE = app
 
 CONFIG += console

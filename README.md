@@ -74,6 +74,19 @@ make
 
 <details>
 <summary>
+Исключение тестов из процесса сборки проекта
+</summary>
+
+Для отключения сборки тестов необходимо передать в `qmake` параметр
+`"CONFIG+=skipTests"`:
+
+```
+qmake "CONFIG+=skipTests" ../dispatcher.pro
+```
+</details>
+
+<details>
+<summary>
 Режим ограниченной функциональности
 </summary>
 

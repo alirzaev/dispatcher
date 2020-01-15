@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QDebug>
 #include <QFont>
+#include <QFontDatabase>
 #include <QListWidget>
 #include <QMenu>
 #include <QMessageBox>
@@ -44,6 +45,11 @@ MemoryTask::MemoryTask(Models::MemoryModel model, QWidget *parent)
   auto font = QApplication::font();
   font.setPointSizeF(font.pointSizeF() * FONT_SCALE_FACTOR);
   ui->labelRequestDescr->setFont(font);
+
+  auto fixedFont = QFont("Cascadia Mono");
+  fixedFont.setPointSize(10);
+  ui->listMemBlocks->setFont(fixedFont);
+  ui->listFreeBlocks->setFont(fixedFont);
 
   ui->listMemBlocks->setContextMenuPolicy(Qt::CustomContextMenu);
 

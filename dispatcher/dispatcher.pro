@@ -45,6 +45,9 @@ FORMS += \
     processestask.ui \
     aboutwindow.ui
 
+RESOURCES += \
+    ../fonts/fonts.qrc
+
 # UI компоненты
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../widgets/release/ -lwidgets
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../widgets/debug/ -lwidgets

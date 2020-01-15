@@ -56,6 +56,10 @@
 - [Mapbox Variant 1.1.6](https://github.com/mapbox/variant)
 - [TartanLlama optional 1.0.0](https://github.com/TartanLlama/optional)
 
+## Используемые сторонние шрифты
+
+- [Microsoft Cascadia Code 1911.21](https://github.com/microsoft/cascadia-code)
+
 ## Сборка
 
 Проект собирается штатными средствами Qt: либо открываем `dispatcher.pro` через QtCreator, либо

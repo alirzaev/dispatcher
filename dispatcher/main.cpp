@@ -10,8 +10,7 @@ int main(int argc, char *argv[]) {
   a.setAttribute(Qt::AA_DisableWindowContextHelpButton);
 
   QTranslator translator;
-  if (translator.load("qt_" + QLocale::system().name(),
-                      QLibraryInfo::location(QLibraryInfo::TranslationsPath))) {
+  if (translator.load("qt_ru", ":/translations")) {
     a.installTranslator(&translator);
   }
 

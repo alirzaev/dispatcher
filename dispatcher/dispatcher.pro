@@ -46,7 +46,8 @@ FORMS += \
     aboutwindow.ui
 
 RESOURCES += \
-    ../fonts/fonts.qrc
+    ../fonts/fonts.qrc \
+    ../translations/translations.qrc
 
 # UI компоненты
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../widgets/release/ -lwidgets

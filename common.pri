@@ -24,6 +24,10 @@ DEFINES += DISPATCHER_MINOR="5"
 DEFINES += DISPATCHER_PATCH="6"
 DEFINES += GIT_REV="\\\"$$GIT_REV\\\""
 
+CONFIG(debug, debug|release) {
+  DEFINES += DISPATCHER_DEBUG
+}
+
 # Отвести сгенерированным файлам отдельные директории
 UI_DIR = uics
 MOC_DIR = mocs

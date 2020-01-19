@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iomanip>
 #include <istream>
 #include <map>
 #include <ostream>
@@ -224,6 +225,10 @@ inline void saveTasks(const std::vector<Task> &tasks, std::ostream &os) {
     obj.push_back(task_json);
   }
 
-  os << obj;
+  os
+#ifdef DISPATCHER_DEBUG
+      << std::setw(2)
+#endif
+      << obj;
 }
 } // namespace Utils

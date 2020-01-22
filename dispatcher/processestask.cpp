@@ -8,6 +8,7 @@
 #include <QFlags>
 #include <QIntValidator>
 #include <QLineEdit>
+#include <QListWidgetItem>
 #include <QMessageBox>
 #include <QPoint>
 #include <QPushButton>
@@ -42,8 +43,16 @@ using namespace std::string_literals;
 using namespace ProcessesManagement;
 using namespace QtUtils::Literals;
 
+static const QString ACTIONS_TEMPL("Действия пользователя:%1");
+
+static const QString ACTIONS_UNAVAILABLE("\n<нет информации>");
+
+static const QString NO_ACTIONS("\n<нет>");
+
 ProcessesTask::ProcessesTask(Models::ProcessesModel model, QWidget *parent)
     : QWidget(parent), _model(model), currentRequest(model.task.completed()),
+
+      currentActions(""), actions(model.task.completed(), ""),
       states(model.task.requests().size()), ui(new Ui::ProcessesTask) {
   ui->setupUi(this);
 
@@ -66,11 +75,33 @@ ProcessesTask::ProcessesTask(Models::ProcessesModel model, QWidget *parent)
     states[i] = state;
   }
 
-  updateHistoryView(_model.task);
+  for (size_t i = 0; i < _model.task.completed(); ++i) {
+    QString action;
+    if (i < _model.task.actions().size()) {
+      actions[i] = QString::fromStdString(_model.task.actions()[i]);
+    } else {
+      actions[i] = ACTIONS_UNAVAILABLE;
+    }
+  }
+
+  updateHistoryView(_model.task, actions);
   refresh();
 }
 
-Utils::Task ProcessesTask::task() const { return _model.task; }
+Utils::Task ProcessesTask::task() const {
+  std::vector<std::string> stdStrActions(actions.size());
+  for (size_t i = 0; i < actions.size(); ++i) {
+    stdStrActions[i] = actions[i].toStdString();
+  }
+
+  const auto &task = _model.task;
+  return Utils::ProcessesTask::create(task.strategy(),
+                                      task.completed(),
+                                      task.fails(),
+                                      task.state(),
+                                      task.requests(),
+                                      stdStrActions);
+}
 
 ProcessesTask::~ProcessesTask() { delete ui; }
 
@@ -100,6 +131,9 @@ void ProcessesTask::processActionCreate() {
 
   try {
     _model.state = addProcess(_model.state, *process);
+    currentActions +=
+        "\nСоздан новый процесс (PID=%1, PPID=%2)"_qs.arg(process->pid())
+            .arg(process->ppid());
     refresh();
   } catch (const std::exception &ex) {
     warning("Неизвестная ошибка: "s + ex.what());
@@ -111,6 +145,7 @@ void ProcessesTask::processActionTerminate(std::size_t index) {
     _model.state = collectState();
     auto pid = _model.state.processes.at(index).pid();
     _model.state = terminateProcess(_model.state, pid, false);
+    currentActions += "\nУдаление из списка процесса PID=%1"_qs.arg(pid);
     refresh();
   } catch (const std::exception &ex) {
     warning("Неизвестная ошибка: "s + ex.what());
@@ -122,6 +157,7 @@ void ProcessesTask::processActionToExecuting(std::size_t index) {
     _model.state = collectState();
     auto pid = _model.state.processes.at(index).pid();
     _model.state = switchTo(_model.state, pid);
+    currentActions += "\nПереключение на процесс PID=%1"_qs.arg(pid);
     refresh();
   } catch (const std::exception &ex) {
     warning("Неизвестная ошибка: "s + ex.what());
@@ -133,6 +169,8 @@ void ProcessesTask::processActionToWaiting(std::size_t index) {
     _model.state = collectState();
     auto pid = _model.state.processes.at(index).pid();
     _model.state = changeProcessState(_model.state, pid, ProcState::WAITING);
+    currentActions +=
+        "\nПереключение процесса PID=%1 в состояние ожидания"_qs.arg(pid);
     refresh();
   } catch (const std::exception &ex) {
     warning("Неизвестная ошибка: "s + ex.what());
@@ -144,6 +182,7 @@ void ProcessesTask::processActionToActive(std::size_t index) {
     _model.state = collectState();
     auto pid = _model.state.processes.at(index).pid();
     _model.state = changeProcessState(_model.state, pid, ProcState::ACTIVE);
+    currentActions += "\nPID=%1 готов к выполнению"_qs.arg(pid);
     refresh();
   } catch (const std::exception &ex) {
     warning("Неизвестная ошибка: "s + ex.what());
@@ -156,6 +195,8 @@ void ProcessesTask::pushToQueue(int pid, std::size_t queue) {
     auto tmp = _model.state;
     tmp = changeProcessState(tmp, pid, ProcState::ACTIVE);
     _model.state = ProcessesManagement::pushToQueue(tmp, queue, pid);
+    currentActions +=
+        "\nДобавление процесса PID=%1 в очередь #%2"_qs.arg(pid).arg(queue);
     refresh();
   } catch (const OperationException &ex) {
     if (ex.what() == "NO_SUCH_PROCESS"s) {
@@ -188,6 +229,7 @@ int32_t ProcessesTask::popFromQueue(std::size_t queue) {
       pid = q.front();
     }
     _model.state = ProcessesManagement::popFromQueue(_model.state, queue);
+    currentActions += "\nЧтение из очереди #%1, PID=%2"_qs.arg(queue).arg(pid);
 
     refresh();
   } catch (const OperationException &ex) {
@@ -235,6 +277,7 @@ void ProcessesTask::refresh() {
   updateStatsView(_model.task.completed(),
                   _model.task.requests().size(),
                   _model.task.fails());
+  updateCurrentActionsView(_model.task, currentActions);
 }
 
 void ProcessesTask::nextRequest() {
@@ -249,9 +292,10 @@ void ProcessesTask::nextRequest() {
       QMessageBox::information(
           this, "Внимание", "Вы успешно выполнили данное задание");
       lockUi();
-    } else {
-      updateHistoryView(_model.task);
     }
+    actions.push_back(currentActions);
+    currentActions = "";
+    updateHistoryView(_model.task, actions);
   } else {
     _model.task = task;
     warning("Заявка обработана неверно");
@@ -303,6 +347,7 @@ void ProcessesTask::setupSignals() {
           &ProcessesTask::provideContextMenu);
   connect(
       ui->listQueue1, &ReorderableListWidget::itemsOrderChanged, this, [=]() {
+        currentActions.clear();
         _model.state = collectState();
         refresh();
       });
@@ -450,16 +495,30 @@ void ProcessesTask::updateStrategyView(StrategyType type) {
   label->setText(strategyMap[type]);
 }
 
-void ProcessesTask::updateHistoryView(Utils::ProcessesTask task) {
+void ProcessesTask::updateHistoryView(Utils::ProcessesTask task,
+                                      const std::vector<QString> &actions) {
   ui->historyList->clear();
   auto templ = QString("Заявка #%1");
   for (size_t i = 0; i < task.completed(); ++i) {
-    ui->historyList->addItem(templ.arg(i + 1));
+    auto *item = new QListWidgetItem();
+    item->setText(templ.arg(i + 1));
+    item->setToolTip(
+        ACTIONS_TEMPL.arg(actions[i].isEmpty() ? NO_ACTIONS : actions[i]));
+    ui->historyList->addItem(item);
   }
   if (!_model.task.done()) {
     ui->historyList->addItem(templ.arg(ui->historyList->count() + 1));
   }
   ui->historyList->setCurrentRow(ui->historyList->count() - 1);
+}
+
+void ProcessesTask::updateCurrentActionsView(Utils::ProcessesTask task,
+                                             const QString actions) {
+  if (auto *item = ui->historyList->item(ui->historyList->count() - 1);
+      item && !task.done()) {
+    item->setToolTip(
+        ACTIONS_TEMPL.arg(actions.isEmpty() ? NO_ACTIONS : actions));
+  }
 }
 
 void ProcessesTask::setProcessesList(const ProcessesList &processes) {

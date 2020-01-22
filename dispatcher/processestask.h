@@ -7,6 +7,7 @@
 #include <QLineEdit>
 #include <QPoint>
 #include <QSpinBox>
+#include <QString>
 #include <QWidget>
 
 #include <algo/processes/strategies.h>
@@ -43,6 +44,10 @@ private:
   Models::ProcessesModel _model;
 
   std::size_t currentRequest;
+
+  QString currentActions;
+
+  std::vector<QString> actions;
 
   std::vector<ProcessesManagement::ProcessesState> states;
 
@@ -95,7 +100,11 @@ private:
 
   void updateStrategyView(ProcessesManagement::StrategyType type);
 
-  void updateHistoryView(Utils::ProcessesTask task);
+  void updateHistoryView(Utils::ProcessesTask task,
+                         const std::vector<QString> &actions);
+
+  void updateCurrentActionsView(Utils::ProcessesTask task,
+                                const QString actions);
 
   void setProcessesList(const ProcessesList &processes);
 

@@ -3,6 +3,7 @@
 #include <QFont>
 #include <QFontDatabase>
 #include <QListWidget>
+#include <QListWidgetItem>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPoint>
@@ -37,8 +38,15 @@ using namespace QtUtils::Literals;
 
 using std::vector;
 
+static const QString ACTIONS_TEMPL("Действия пользователя:%1");
+
+static const QString ACTIONS_UNAVAILABLE("\n<нет информации>");
+
+static const QString NO_ACTIONS("\n<нет>");
+
 MemoryTask::MemoryTask(Models::MemoryModel model, QWidget *parent)
     : QWidget(parent), _model(model), currentRequest(model.task.completed()),
+      currentActions(""), actions(model.task.completed(), ""),
       states(model.task.requests().size()), ui(new Ui::MemoryTask) {
   ui->setupUi(this);
 
@@ -60,6 +68,7 @@ MemoryTask::MemoryTask(Models::MemoryModel model, QWidget *parent)
   connect(
       ui->acceptRequest, &QPushButton::clicked, this, &MemoryTask::nextRequest);
   connect(ui->resetState, &QPushButton::clicked, this, [=]() {
+    currentActions.clear();
     _model.state = _model.task.state();
     refresh();
   });
@@ -83,11 +92,33 @@ MemoryTask::MemoryTask(Models::MemoryModel model, QWidget *parent)
     states[i] = state;
   }
 
-  updateHistoryView(_model.task);
+  for (size_t i = 0; i < _model.task.completed(); ++i) {
+    QString action;
+    if (i < _model.task.actions().size()) {
+      actions[i] = QString::fromStdString(_model.task.actions()[i]);
+    } else {
+      actions[i] = ACTIONS_UNAVAILABLE;
+    }
+  }
+
+  updateHistoryView(_model.task, actions);
   refresh();
 }
 
-Utils::Task MemoryTask::task() const { return _model.task; }
+Utils::Task MemoryTask::task() const {
+  std::vector<std::string> stdStrActions(actions.size());
+  for (size_t i = 0; i < actions.size(); ++i) {
+    stdStrActions[i] = actions[i].toStdString();
+  }
+
+  const auto &task = _model.task;
+  return Utils::MemoryTask::create(task.strategy(),
+                                   task.completed(),
+                                   task.fails(),
+                                   task.state(),
+                                   task.requests(),
+                                   stdStrActions);
+}
 
 MemoryTask::~MemoryTask() { delete ui; }
 
@@ -104,6 +135,10 @@ void MemoryTask::processActionAllocate(const MemoryBlock &block,
   try {
     _model.state = collectState();
     _model.state = allocateMemory(_model.state, blockIndex, pid, size);
+    currentActions += "\nВыделен блок памяти (address=%1, pages=%2, pid=%3)"_qs
+                          .arg(block.address())
+                          .arg(size)
+                          .arg(pid);
     refresh();
   } catch (const std::exception &ex) {
     warning("Неизвестная ошибка: "s + ex.what());
@@ -117,6 +152,8 @@ void MemoryTask::processActionFree(const MemoryBlock &block,
   try {
     _model.state = collectState();
     _model.state = freeMemory(_model.state, pid, blockIndex);
+    currentActions +=
+        "\nОсвобожден блок памяти (address=%1)"_qs.arg(block.address());
     refresh();
   } catch (const std::exception &ex) {
     warning("Неизвестная ошибка: "s + ex.what());
@@ -127,6 +164,7 @@ void MemoryTask::processActionCompress(uint32_t blockIndex) {
   try {
     _model.state = collectState();
     _model.state = compressMemory(_model.state, blockIndex);
+    currentActions += "\nОбъединены блоки (start=#%1)"_qs.arg(blockIndex);
     refresh();
   } catch (const OperationException &ex) {
     if (ex.what() == "SINGLE_BLOCK"s) {
@@ -143,6 +181,7 @@ void MemoryTask::processActionDefragment() {
   try {
     _model.state = collectState();
     _model.state = defragmentMemory(_model.state);
+    currentActions += "\nПамять дефрагментирована"_qs;
     refresh();
   } catch (const std::exception &ex) {
     warning("Неизвестная ошибка: "s + ex.what());
@@ -177,9 +216,11 @@ void MemoryTask::nextRequest() {
       QMessageBox::information(
           this, "Внимание", "Вы успешно выполнили данное задание");
       lockUi();
-    } else {
-      updateHistoryView(_model.task);
     }
+    actions.push_back(currentActions);
+    currentActions = "";
+    updateHistoryView(_model.task, actions);
+
   } else {
     _model.task = task;
     warning("Заявка обработана неверно");
@@ -204,6 +245,7 @@ void MemoryTask::refresh() {
   updateStatsView(_model.task.completed(),
                   _model.task.requests().size(),
                   _model.task.fails());
+  updateCurrentActionsView(_model.task, currentActions);
 }
 
 void MemoryTask::lockUi() {
@@ -308,16 +350,30 @@ void MemoryTask::updateStrategyView(StrategyType type) {
   }
 }
 
-void MemoryTask::updateHistoryView(Utils::MemoryTask task) {
+void MemoryTask::updateHistoryView(Utils::MemoryTask task,
+                                   const std::vector<QString> &actions) {
   ui->historyList->clear();
   auto templ = QString("Заявка #%1");
   for (size_t i = 0; i < task.completed(); ++i) {
-    ui->historyList->addItem(templ.arg(i + 1));
+    auto *item = new QListWidgetItem();
+    item->setText(templ.arg(i + 1));
+    item->setToolTip(
+        ACTIONS_TEMPL.arg(actions[i].isEmpty() ? NO_ACTIONS : actions[i]));
+    ui->historyList->addItem(item);
   }
   if (!_model.task.done()) {
     ui->historyList->addItem(templ.arg(ui->historyList->count() + 1));
   }
   ui->historyList->setCurrentRow(ui->historyList->count() - 1);
+}
+
+void MemoryTask::updateCurrentActionsView(Utils::MemoryTask task,
+                                          const QString actions) {
+  if (auto *item = ui->historyList->item(ui->historyList->count() - 1);
+      item && !task.done()) {
+    item->setToolTip(
+        ACTIONS_TEMPL.arg(actions.isEmpty() ? NO_ACTIONS : actions));
+  }
 }
 
 void MemoryTask::setMemoryBlocks(const vector<MemoryBlock> &blocks) {

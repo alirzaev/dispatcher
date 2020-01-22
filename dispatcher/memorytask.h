@@ -2,8 +2,10 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
 #include <QPoint>
+#include <QString>
 #include <QWidget>
 
 #include <algo/memory/requests.h>
@@ -34,6 +36,10 @@ private:
   Models::MemoryModel _model;
 
   std::size_t currentRequest;
+
+  QString currentActions;
+
+  std::vector<QString> actions;
 
   std::vector<MemoryManagement::MemoryState> states;
 
@@ -72,7 +78,10 @@ private:
 
   void updateStrategyView(MemoryManagement::StrategyType type);
 
-  void updateHistoryView(Utils::MemoryTask task);
+  void updateHistoryView(Utils::MemoryTask task,
+                         const std::vector<QString> &actions);
+
+  void updateCurrentActionsView(Utils::MemoryTask task, const QString actions);
 
   void
   setMemoryBlocks(const std::vector<MemoryManagement::MemoryBlock> &blocks);

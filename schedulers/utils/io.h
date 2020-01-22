@@ -77,8 +77,22 @@ inline MemoryTask loadMemoryTask(const nlohmann::json &obj) {
         blockObj["pid"], blockObj["address"], blockObj["size"]);
   }
 
+  std::vector<std::string> actions(0);
+
+  /*
+   * Если размер массива actions не совпадает с количеством
+   * выполненных заданий (completed) или ни одно задание не выполнено,
+   * то информация из массива отбрасывается.
+   */
+  if (obj.contains("actions") && obj["actions"].is_array() &&
+      !(completed == 0 || completed != obj["actions"].size())) {
+    for (const std::string action : obj["actions"]) {
+      actions.push_back(action);
+    }
+  }
+
   return MemoryTask::create(
-      strategy, completed, fails, {blocks, freeBlocks}, requests);
+      strategy, completed, fails, {blocks, freeBlocks}, requests, actions);
 }
 
 /**
@@ -174,8 +188,22 @@ inline ProcessesTask loadProcessesTask(const nlohmann::json &obj) {
     }
   }
 
+  std::vector<std::string> actions(0);
+
+  /*
+   * Если размер массива actions не совпадает с количеством
+   * выполненных заданий (completed) или ни одно задание не выполнено,
+   * то информация из массива отбрасывается.
+   */
+  if (obj.contains("actions") && obj["actions"].is_array() &&
+      !(completed == 0 || completed != obj["actions"].size())) {
+    for (const std::string action : obj["actions"]) {
+      actions.push_back(action);
+    }
+  }
+
   return ProcessesTask::create(
-      strategy, completed, fails, {processes, queues}, requests);
+      strategy, completed, fails, {processes, queues}, requests, actions);
 }
 } // namespace Utils::details
 

@@ -20,6 +20,7 @@
 | fails | Number | Количество допущенных пользователем ошибок |
 | state | [MemoryState](#memorystate) | Объект, описывающий состояние памяти |
 | requests | [[CreateProcess](#createprocess) \| [TerminateProcess](#terminateprocess) \| [AllocateMemory](#allocatememory) \| [FreeMemory](#freememory)] | Массив заявок, которые диспетчер должен обработать |
+| actions | \[String\] | Массив строк, содержащих информацию о действиях пользователя для каждой заявки |
 
 ## MemoryState
 

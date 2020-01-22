@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <memory>
 #include <stdexcept>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -37,6 +38,8 @@ private:
 
   uint32_t _fails;
 
+  std::vector<std::string> _actions;
+
   /**
    *  @brief Создает объект задания "Диспетчеризация памяти".
    *
@@ -45,14 +48,17 @@ private:
    *  @param fails Количество допущенных пользователем ошибок.
    *  @param state Дескриптор состояния памяти.
    *  @param requests Список заявок для обработки.
+   *  @param actions Массив строк с информацией о действиях пользователя для
+   *  каждой заявки.
    */
   MemoryTask(Memory::StrategyPtr strategy,
              uint32_t completed,
              uint32_t fails,
              const Memory::MemoryState &state,
-             const std::vector<Memory::Request> requests)
+             const std::vector<Memory::Request> requests,
+             const std::vector<std::string> actions)
       : _strategy(strategy), _completed(completed), _state(state),
-        _requests(requests), _fails(fails) {}
+        _requests(requests), _fails(fails), _actions(actions) {}
 
 public:
   /**
@@ -64,15 +70,17 @@ public:
                            uint32_t completed,
                            uint32_t fails,
                            const Memory::MemoryState &state,
-                           const std::vector<Memory::Request> requests) {
+                           const std::vector<Memory::Request> requests,
+                           const std::vector<std::string> actions) {
     validate(strategy, completed, state, requests);
-    return {strategy, completed, fails, state, requests};
+    return {strategy, completed, fails, state, requests, actions};
   }
 
   /**
    *  @brief Создает объект задания "Диспетчеризация памяти".
    *
    *  Количество допущенных пользователем ошибок по умолчанию - 0.
+   *  Массив действий actions пользователя по умолчанию пуст.
    *
    *  @see Utils::MemoryTask::MemoryTask().
    */
@@ -81,7 +89,7 @@ public:
                            const Memory::MemoryState &state,
                            const std::vector<Memory::Request> requests) {
     validate(strategy, completed, state, requests);
-    return {strategy, completed, 0, state, requests};
+    return {strategy, completed, 0, state, requests, {}};
   }
 
   /**
@@ -132,6 +140,8 @@ public:
 
   uint32_t fails() const { return _fails; }
 
+  const std::vector<std::string> actions() const { return _actions; }
+
   /**
    *  Возвращает задание в виде JSON-объекта.
    */
@@ -154,6 +164,8 @@ public:
       auto req_json = request.match([](const auto &req) { return req.dump(); });
       obj["requests"].push_back(req_json);
     }
+
+    obj["actions"] = nlohmann::json(_actions);
 
     return obj;
   }
@@ -186,17 +198,27 @@ public:
       auto request = _requests[_completed];
       auto expected = _strategy->processRequest(request, _state);
       if (expected == state) {
-        return {
-            true,
-            MemoryTask{_strategy, _completed + 1, _fails, expected, _requests}};
+        return {true,
+                MemoryTask{_strategy,
+                           _completed + 1,
+                           _fails,
+                           expected,
+                           _requests,
+                           _actions}};
       } else {
-        return {
-            false,
-            MemoryTask{_strategy, _completed, _fails + 1, _state, _requests}};
+        return {false,
+                MemoryTask{_strategy,
+                           _completed,
+                           _fails + 1,
+                           _state,
+                           _requests,
+                           _actions}};
       }
     } catch (...) {
-      return {false,
-              MemoryTask{_strategy, _completed, _fails + 1, _state, _requests}};
+      return {
+          false,
+          MemoryTask{
+              _strategy, _completed, _fails + 1, _state, _requests, _actions}};
     }
   }
 };
@@ -216,6 +238,8 @@ private:
 
   uint32_t _fails;
 
+  std::vector<std::string> _actions;
+
   /**
    *  @brief Создает объект задания "Диспетчеризация процессов".
    *
@@ -224,14 +248,17 @@ private:
    *  @param fails Количество допущенных пользователем ошибок.
    *  @param state Дескриптор состояния процессов.
    *  @param requests Список заявок для обработки.
+   *  @param actions Массив строк с информацией о действиях пользователя для
+   *  каждой заявки.
    */
   ProcessesTask(Processes::StrategyPtr strategy,
                 uint32_t completed,
                 uint32_t fails,
                 const Processes::ProcessesState &state,
-                const std::vector<Processes::Request> requests)
+                const std::vector<Processes::Request> requests,
+                const std::vector<std::string> actions)
       : _strategy(strategy), _completed(completed), _state(state),
-        _requests(requests), _fails(fails) {}
+        _requests(requests), _fails(fails), _actions(actions) {}
 
 public:
   /**
@@ -243,15 +270,17 @@ public:
                               uint32_t completed,
                               uint32_t fails,
                               const Processes::ProcessesState &state,
-                              const std::vector<Processes::Request> requests) {
+                              const std::vector<Processes::Request> requests,
+                              const std::vector<std::string> actions) {
     validate(strategy, completed, state, requests);
-    return {strategy, completed, fails, state, requests};
+    return {strategy, completed, fails, state, requests, actions};
   }
 
   /**
    *  @brief Создает объект задания "Диспетчеризация процессов".
    *
    *  Количество допущенных пользователем ошибок по умолчанию - 0.
+   *  Массив действий actions пользователя по умолчанию пуст.
    *
    *  @see Utils::ProcessesTask::ProcessesTask().
    */
@@ -260,7 +289,7 @@ public:
                               const Processes::ProcessesState &state,
                               const std::vector<Processes::Request> requests) {
     validate(strategy, completed, state, requests);
-    return {strategy, completed, 0, state, requests};
+    return {strategy, completed, 0, state, requests, {}};
   }
 
   /**
@@ -324,6 +353,8 @@ public:
       obj["requests"].push_back(req_json);
     }
 
+    obj["actions"] = nlohmann::json(_actions);
+
     return obj;
   }
 
@@ -336,6 +367,8 @@ public:
   const std::vector<Processes::Request> &requests() const { return _requests; }
 
   uint32_t fails() const { return _fails; }
+
+  const std::vector<std::string> actions() const { return _actions; }
 
   /**
    *  Проверяет, выполнено ли задание полностью.
@@ -367,17 +400,26 @@ public:
       auto expected = _strategy->processRequest(request, _state);
       if (expected == state) {
         return {true,
-                ProcessesTask{
-                    _strategy, _completed + 1, _fails, expected, _requests}};
+                ProcessesTask{_strategy,
+                              _completed + 1,
+                              _fails,
+                              expected,
+                              _requests,
+                              _actions}};
       } else {
         return {false,
-                ProcessesTask{
-                    _strategy, _completed, _fails + 1, _state, _requests}};
+                ProcessesTask{_strategy,
+                              _completed,
+                              _fails + 1,
+                              _state,
+                              _requests,
+                              _actions}};
       }
     } catch (...) {
       return {
           false,
-          ProcessesTask{_strategy, _completed, _fails + 1, _state, _requests}};
+          ProcessesTask{
+              _strategy, _completed, _fails + 1, _state, _requests, _actions}};
     }
   }
 };

@@ -64,7 +64,7 @@ image::memory-m8t/tp-r-2.png[title="Завершение процесса - Ос
 
 image::memory-m8t/tp-r-3.png[title="Завершение процесса - Объединение блоков",caption="",width=512]
 
-image::memory-m8t/tp-r-4.png[title="Создание нового процесса - Конечный результат",caption="",width=512]
+image::memory-m8t/tp-r-4.png[title="Завершение процесса - Конечный результат",caption="",width=512]
 
 <<<
 

@@ -361,7 +361,7 @@ void MemoryTask::updateHistoryView(Utils::MemoryTask task,
         ACTIONS_TEMPL.arg(actions[i].isEmpty() ? NO_ACTIONS : actions[i]));
     ui->historyList->addItem(item);
   }
-  if (!_model.task.done()) {
+  if (!task.done()) {
     ui->historyList->addItem(templ.arg(ui->historyList->count() + 1));
   }
   ui->historyList->setCurrentRow(ui->historyList->count() - 1);

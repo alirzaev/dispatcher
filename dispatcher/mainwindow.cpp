@@ -12,16 +12,21 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QString>
 #include <QUrl>
 
 #include <mapbox/variant.hpp>
+
+#include <botan/exceptn.h>
 
 #include <generators/memory_task.h>
 #include <generators/processes_task.h>
 #include <utils/io.h>
 #include <utils/tasks.h>
 
+#include <qtutils/cryptography.h>
 #include <qtutils/fileio.h>
+#include <qtutils/literals.h>
 
 #include "models.h"
 #include "taskgetter.h"
@@ -33,8 +38,10 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow) {
+using namespace QtUtils::Literals;
+
+MainWindow::MainWindow(const QString &student, QWidget *parent)
+    : QMainWindow(parent), ui(new Ui::MainWindow), student(student) {
   ui->setupUi(this);
 
   connect(
@@ -51,28 +58,45 @@ MainWindow::MainWindow(QWidget *parent)
       ui->actionOpenTmpDir, &QAction::triggered, this, &MainWindow::openTmpDir);
   connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::showHelp);
 
+  setWindowTitle("%1 (%2)"_qs.arg(windowTitle()).arg(student));
   ui->actionSaveTask->setDisabled(true);
 }
 
 MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::openTasks() {
-  auto fileName = QFileDialog::getOpenFileName(
-      this, "Открыть файл задания", "", "JSON (*.json)");
+  auto fileName =
+      QFileDialog::getOpenFileName(this,
+                                   "Открыть файл задания",
+                                   "",
+                                   "Encrypted JSON (*.ejson);;JSON (*.json)");
   if (fileName.isEmpty()) {
     return;
   }
 
+  bool decryptionRequired = false;
+  if (fileName.endsWith(".ejson")) {
+    decryptionRequired = true;
+  }
+
   try {
-    std::ifstream file = QtUtils::FileIO::openStdIfstream(fileName);
-    if (!file) {
+    auto data = QtUtils::FileIO::readAll(fileName);
+    if (data.empty()) {
       QMessageBox::warning(this, "Ошибка", "Невозможно открыть файл задания");
       return;
     }
 
+    std::stringstream ss;
+    if (decryptionRequired) {
+      auto decrypted = QtUtils::Cryptography::decrypt(data, student);
+      ss.str(decrypted);
+    } else {
+      ss.str(data);
+    }
+
     std::vector<Utils::Task> tasks;
     unsigned int total_count = 0;
-    for (auto task : Utils::loadTasks(file)) {
+    for (auto task : Utils::loadTasks(ss)) {
       total_count++;
       bool empty =
           task.match([](const auto &t) { return t.requests().empty(); });
@@ -90,6 +114,12 @@ void MainWindow::openTasks() {
 
     loadTasks(tasks);
     ui->actionSaveTask->setDisabled(false);
+  } catch (const Botan::Exception &ex) {
+    qDebug() << ex.what();
+    QMessageBox::warning(
+        this,
+        "Ошибка",
+        "Невозможно загрузить задания: файл принадлежит другому студенту");
   } catch (const std::exception &ex) {
     qDebug() << ex.what();
     QMessageBox::warning(
@@ -99,13 +129,13 @@ void MainWindow::openTasks() {
 
 void MainWindow::saveTasks() {
   auto fileName = QFileDialog::getSaveFileName(
-      this, "Сохранить задание в файл", "", "JSON (*.json)");
+      this, "Сохранить задание в файл", "", "Encrypted JSON (*.ejson)");
   if (fileName.isEmpty()) {
     return;
   }
 
-  if (!fileName.endsWith(".json")) {
-    fileName.append(".json");
+  if (!fileName.endsWith(".ejson")) {
+    fileName.append(".ejson");
   }
 
   try {
@@ -119,7 +149,13 @@ void MainWindow::saveTasks() {
       tasks.push_back(task);
     }
 
-    Utils::saveTasks(tasks, file);
+    std::stringstream ss;
+
+    Utils::saveTasks(tasks, ss);
+
+    auto encrypted = QtUtils::Cryptography::encrypt(ss.str(), student);
+    file << encrypted;
+    file.flush();
   } catch (const std::exception &ex) {
     qDebug() << ex.what();
     QMessageBox::warning(this, "Ошибка", "Невозможно сохранить задания");

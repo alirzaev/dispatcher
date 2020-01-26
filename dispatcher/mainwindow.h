@@ -4,6 +4,7 @@
 
 #include <QCloseEvent>
 #include <QMainWindow>
+#include <QString>
 #include <QWidget>
 
 #include <utils/tasks.h>
@@ -18,12 +19,14 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
 
 public:
-  explicit MainWindow(QWidget *parent = nullptr);
+  explicit MainWindow(const QString &student, QWidget *parent = nullptr);
 
   ~MainWindow() override;
 
 private:
   Ui::MainWindow *ui;
+
+  QString student;
 
   void openTasks();
 

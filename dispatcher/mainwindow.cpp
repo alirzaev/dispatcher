@@ -39,16 +39,8 @@ MainWindow::MainWindow(QWidget *parent)
 
   connect(
       ui->actionOpenTask, &QAction::triggered, this, &MainWindow::openTasks);
-
-#ifdef RESTRICTED_MODE
-  ui->actionSaveTask->setVisible(false);
-
-  auto title = this->windowTitle();
-  this->setWindowTitle(title + " (режим ограниченной функциональности)");
-#else
   connect(
       ui->actionSaveTask, &QAction::triggered, this, &MainWindow::saveTasks);
-#endif
 
   connect(ui->actionGenerateTask,
           &QAction::triggered,
@@ -102,7 +94,6 @@ void MainWindow::openTasks() {
   }
 }
 
-#ifndef RESTRICTED_MODE
 void MainWindow::saveTasks() {
   auto fileName = QFileDialog::getSaveFileName(
       this, "Сохранить задание в файл", "", "JSON (*.json)");
@@ -131,7 +122,6 @@ void MainWindow::saveTasks() {
     QMessageBox::warning(this, "Ошибка", "Невозможно сохранить задания");
   }
 }
-#endif
 
 void MainWindow::loadTasks(const std::vector<Utils::Task> &tasks) {
   auto *tabs = ui->tabWidget;

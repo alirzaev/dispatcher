@@ -5,11 +5,6 @@ QT += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-restricted {
-  DEFINES += RESTRICTED_MODE
-  message("Restricted mode is enabled")
-}
-
 TEMPLATE = app
 
 TARGET = dispatcher

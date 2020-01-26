@@ -27,9 +27,7 @@ private:
 
   void openTasks();
 
-#ifndef RESTRICTED_MODE
   void saveTasks();
-#endif
 
   void loadTasks(const std::vector<Utils::Task> &tasks);
 

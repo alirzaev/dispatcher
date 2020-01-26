@@ -5,9 +5,11 @@ SUBDIRS += \
           schedulers \
           generator \
           dispatcher \
-          tests
+          tests \
+          taskbuilder
 
 dispatcher.depends = schedulers generator widgets
 generator.depends = schedulers
 tests.depends = schedulers
 widgets.depends = schedulers
+taskbuilder.depends = schedulers widgets

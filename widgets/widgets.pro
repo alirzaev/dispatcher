@@ -1,5 +1,4 @@
 include(../common.pri)
-include(../qtutils.pri)
 
 QT += core gui
 
@@ -13,7 +12,8 @@ CONFIG += staticlib
 DEFINES += QT_DEPRECATED_WARNINGS
 
 INCLUDEPATH += \
-    ../schedulers
+    ../schedulers \
+    ../qtutils
 
 SOURCES += \
     dialogs/allocatememorydialog.cpp \

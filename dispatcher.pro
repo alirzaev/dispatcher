@@ -1,6 +1,7 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
+          qtutils \
           widgets \
           schedulers \
           generator \
@@ -8,8 +9,8 @@ SUBDIRS += \
           tests \
           taskbuilder
 
-dispatcher.depends = schedulers generator widgets
+dispatcher.depends = schedulers generator qtutils widgets
 generator.depends = schedulers
 tests.depends = schedulers
-widgets.depends = schedulers
-taskbuilder.depends = schedulers widgets
+widgets.depends = schedulers qtutils
+taskbuilder.depends = schedulers qtutils widgets

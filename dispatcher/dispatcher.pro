@@ -1,5 +1,4 @@
 include(../common.pri)
-include(../qtutils.pri)
 
 QT += core gui
 
@@ -16,7 +15,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 INCLUDEPATH += \
     ../schedulers \
-    ../generator
+    ../generator \
+    ../qtutils
 
 SOURCES += \
     main.cpp \

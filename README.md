@@ -13,6 +13,8 @@
 
 - dispatcher.pro - Файл основного проекта
 
+  - qtutils/qtutils.pro - Библиотека со вспомогательными функциями
+
   - schedulers/schedulers.pro - Библиотека с алгоритмами работы диспетчера задач
 
   - tests/tests.pro - Тесты

@@ -50,6 +50,8 @@ MainWindow::MainWindow(QWidget *parent)
   connect(
       ui->actionOpenTmpDir, &QAction::triggered, this, &MainWindow::openTmpDir);
   connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::showHelp);
+
+  ui->actionSaveTask->setDisabled(true);
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -87,6 +89,7 @@ void MainWindow::openTasks() {
     }
 
     loadTasks(tasks);
+    ui->actionSaveTask->setDisabled(false);
   } catch (const std::exception &ex) {
     qDebug() << ex.what();
     QMessageBox::warning(
@@ -152,6 +155,7 @@ void MainWindow::createTasks() {
 
   dumpTasks(tasks);
   loadTasks(tasks);
+  ui->actionSaveTask->setDisabled(false);
 }
 
 void MainWindow::dumpTasks(const std::vector<Utils::Task> &tasks) {

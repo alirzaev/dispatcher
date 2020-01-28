@@ -16,14 +16,14 @@
 #include "processestaskbuilder.h"
 #include "ui_processestaskbuilder.h"
 
-using namespace std::string_literals;
 using namespace ProcessesManagement;
 using namespace QtUtils::Literals;
 
 ProcessesTaskBuilder::ProcessesTaskBuilder(const Utils::Task &task,
                                            QWidget *parent)
-    : QWidget(parent), _task(task.get<Utils::ProcessesTask>()),
-      currentRequest(-1), ui(new Ui::ProcessesTaskBuilder) {
+    : AbstractTaskBuilder(parent), HistoryNavigator(task),
+      _task(task.get<Utils::ProcessesTask>()), currentRequest(-1),
+      ui(new Ui::ProcessesTaskBuilder) {
   ui->setupUi(this);
 
   connect(ui->requestsList,
@@ -84,6 +84,7 @@ void ProcessesTaskBuilder::currentRequestChanged(int index) {
 void ProcessesTaskBuilder::processContextMenuAction(const QString &action,
                                                     int requestIndex) {
   auto requests = _task.requests();
+  bool changed = false;
 
   if (requestIndex != -1) {
     auto requestIndexu = static_cast<std::size_t>(requestIndex);
@@ -94,34 +95,45 @@ void ProcessesTaskBuilder::processContextMenuAction(const QString &action,
       requests.insert(requests.begin(), request);
       requestIndex = 0;
       requestIndexu = 0u;
+      changed = true;
     } else if (action == RequestItemMenu::TO_BOTTOM) {
       requests.erase(requests.begin() + requestIndex);
       requests.push_back(request);
       requestIndex = static_cast<int>(requests.size() - 1);
       requestIndexu = requests.size() - 1;
+      changed = true;
     } else if (action == RequestItemMenu::MOVE_UP && requestIndex > 0) {
       std::swap(requests.at(requestIndexu - 1), requests.at(requestIndexu));
       requestIndex--;
       requestIndexu--;
+      changed = true;
     } else if (action == RequestItemMenu::MOVE_DOWN &&
                requestIndexu < requests.size() - 1) {
       std::swap(requests.at(requestIndexu + 1), requests.at(requestIndexu));
       requestIndex++;
       requestIndexu++;
+      changed = true;
     } else if (action == RequestItemMenu::DELETE) {
       requests.erase(requests.begin() + requestIndex);
       requestIndex = requestIndex > 0 ? requestIndex - 1 : 0;
       requestIndexu = requestIndexu > 0 ? requestIndexu - 1 : 0;
+      changed = true;
     }
   }
 
   if (auto request = processAddRequestMenuAction(action); request.has_value()) {
     requests.push_back(*request);
+    changed = true;
   }
 
   _task = Utils::ProcessesTask::create(
       _task.strategy(), 0, ProcessesState::initial(), requests);
   loadTask(_task);
+
+  if (changed) {
+    push(_task);
+    emit historyStateChanged();
+  }
 
   if (requestIndex == -1) {
     selectCurrentRequest(static_cast<int>(requests.size() - 1));
@@ -279,7 +291,15 @@ void ProcessesTaskBuilder::setStrategy(StrategyType type) {
       {StrategyType::SRT, "Стратегия: SRT"_qs},
       {StrategyType::WINDOWS, "Стратегия: Windows NT"_qs},
       {StrategyType::UNIX, "Стратегия: Unix"_qs},
-      {StrategyType::LINUXO1, "Стратегия: Linux O(1)"}};
+      {StrategyType::LINUXO1, "Стратегия: Linux O(1)"_qs}};
 
   label->setText(strategyMap[type]);
+}
+
+void ProcessesTaskBuilder::loadTaskFromHistory(Utils::Task task) {
+  _task = task.get<Utils::ProcessesTask>();
+  loadTask(_task);
+  clearTaskView();
+  selectCurrentRequest(0);
+  emit historyStateChanged();
 }

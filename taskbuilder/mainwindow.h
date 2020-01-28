@@ -28,6 +28,12 @@ public:
 
   void closeEvent(QCloseEvent *event) override;
 
+  void undoAction();
+
+  void redoAction();
+
+  void updateMenuEditState();
+
 private:
   Ui::MainWindow *ui;
 };

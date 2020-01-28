@@ -10,15 +10,17 @@
 #include <algo/memory/types.h>
 #include <utils/tasks.h>
 
+#include "abstracttaskbuilder.h"
+#include "historynavigator.h"
 #include "taskgetter.h"
 
 namespace Ui {
 class MemoryTaskBuilder;
 }
 
-class MemoryTaskBuilder : public QWidget, public TaskGetter {
-  Q_OBJECT
-
+class MemoryTaskBuilder : public AbstractTaskBuilder,
+                          public TaskGetter,
+                          public HistoryNavigator {
 public:
   explicit MemoryTaskBuilder(const Utils::Task &task,
                              QWidget *parent = nullptr);
@@ -61,4 +63,8 @@ private:
   void setRequestsList(const std::vector<MemoryManagement::Request> &requests);
 
   void setStrategy(MemoryManagement::StrategyType type);
+
+protected:
+  /* HistoryNavigator interface */
+  void loadTaskFromHistory(Utils::Task task) override;
 };

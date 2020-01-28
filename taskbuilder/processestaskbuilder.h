@@ -10,15 +10,17 @@
 #include <algo/processes/types.h>
 #include <utils/tasks.h>
 
+#include "abstracttaskbuilder.h"
+#include "historynavigator.h"
 #include "taskgetter.h"
 
 namespace Ui {
 class ProcessesTaskBuilder;
 }
 
-class ProcessesTaskBuilder : public QWidget, public TaskGetter {
-  Q_OBJECT
-
+class ProcessesTaskBuilder : public AbstractTaskBuilder,
+                             public TaskGetter,
+                             public HistoryNavigator {
 public:
   explicit ProcessesTaskBuilder(const Utils::Task &task,
                                 QWidget *parent = nullptr);
@@ -74,4 +76,8 @@ private:
   setRequestsList(const std::vector<ProcessesManagement::Request> &requests);
 
   void setStrategy(ProcessesManagement::StrategyType type);
+
+protected:
+  /* HistoryNavigator interface */
+  void loadTaskFromHistory(Utils::Task task) override;
 };

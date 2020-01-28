@@ -1,4 +1,5 @@
 #include <fstream>
+#include <utility>
 
 #include <QDebug>
 #include <QFileDialog>
@@ -9,12 +10,17 @@
 #include <utils/tasks.h>
 
 #include <qtutils/fileio.h>
+#include <qtutils/literals.h>
 
 #include "memorytaskbuilder.h"
 #include "processestaskbuilder.h"
 
+#include "historynavigator.h"
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+
+using namespace QtUtils::Literals;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -28,7 +34,17 @@ MainWindow::MainWindow(QWidget *parent)
           &QListWidget::currentRowChanged,
           ui->currentTaskWidget,
           &QStackedWidget::setCurrentIndex);
+  connect(ui->currentTaskWidget,
+          &QStackedWidget::currentChanged,
+          this,
+          &MainWindow::updateMenuEditState);
   connect(ui->menuAddTask, &QMenu::triggered, this, &MainWindow::createTask);
+
+  connect(ui->actionUndo, &QAction::triggered, this, &MainWindow::undoAction);
+  connect(ui->actionRedo, &QAction::triggered, this, &MainWindow::redoAction);
+
+  ui->actionUndo->setDisabled(true);
+  ui->actionRedo->setDisabled(true);
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -99,17 +115,22 @@ void MainWindow::loadTasks(const std::vector<Utils::Task> &tasks) {
   list->clear();
 
   for (const auto &task : tasks) {
-    task.match(
-        [stack, list, this](const Utils::MemoryTask &task) {
-          auto *taskWidget = new MemoryTaskBuilder(task, this);
-          stack->addWidget(taskWidget);
-          list->addItem("Диспетчеризация памяти");
+    auto [widget, label] = task.match(
+        [this](const Utils::MemoryTask &task) {
+          AbstractTaskBuilder *widget = new MemoryTaskBuilder(task, this);
+          return std::pair{widget, "Диспетчеризация памяти"_qs};
         },
-        [stack, list, this](const Utils::ProcessesTask &task) {
-          auto *taskWidget = new ProcessesTaskBuilder(task, this);
-          stack->addWidget(taskWidget);
-          list->addItem("Диспетчеризация процессов");
+        [this](const Utils::ProcessesTask &task) {
+          AbstractTaskBuilder *widget = new ProcessesTaskBuilder(task, this);
+          return std::pair{widget, "Диспетчеризация процессов"_qs};
         });
+    connect(widget,
+            &AbstractTaskBuilder::historyStateChanged,
+            this,
+            &MainWindow::updateMenuEditState);
+
+    stack->addWidget(dynamic_cast<QWidget *>(widget));
+    list->addItem(label);
   }
 }
 
@@ -199,6 +220,11 @@ void MainWindow::createTask(QAction *action) {
     label = "Диспетчеризация процессов";
   }
 
+  connect(dynamic_cast<AbstractTaskBuilder *>(widget),
+          &AbstractTaskBuilder::historyStateChanged,
+          this,
+          &MainWindow::updateMenuEditState);
+
   ui->currentTaskWidget->addWidget(widget);
   ui->tasksList->addItem(label);
   ui->tasksList->setEnabled(true);
@@ -212,4 +238,27 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   } else {
     event->ignore();
   }
+}
+
+void MainWindow::undoAction() {
+  if (auto *navigator = dynamic_cast<HistoryNavigator *>(
+          ui->currentTaskWidget->currentWidget());
+      navigator) {
+    navigator->backward();
+  }
+}
+
+void MainWindow::redoAction() {
+  if (auto *navigator = dynamic_cast<HistoryNavigator *>(
+          ui->currentTaskWidget->currentWidget());
+      navigator) {
+    navigator->forward();
+  }
+}
+
+void MainWindow::updateMenuEditState() {
+  auto *navigator =
+      dynamic_cast<HistoryNavigator *>(ui->currentTaskWidget->currentWidget());
+  ui->actionUndo->setDisabled(!navigator || !navigator->hasPrevious());
+  ui->actionRedo->setDisabled(!navigator || !navigator->hasNext());
 }

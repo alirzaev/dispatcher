@@ -23,8 +23,8 @@ using namespace MemoryManagement;
 using namespace QtUtils::Literals;
 
 MemoryTaskBuilder::MemoryTaskBuilder(const Utils::Task &task, QWidget *parent)
-    : QWidget(parent), _task(task.get<Utils::MemoryTask>()),
-      ui(new Ui::MemoryTaskBuilder) {
+    : AbstractTaskBuilder(parent), HistoryNavigator(task),
+      _task(task.get<Utils::MemoryTask>()), ui(new Ui::MemoryTaskBuilder) {
   ui->setupUi(this);
 
   connect(ui->requestsList,
@@ -70,6 +70,7 @@ void MemoryTaskBuilder::currentRequestChanged(int index) {
 void MemoryTaskBuilder::processContextMenuAction(const QString &action,
                                                  int requestIndex) {
   auto requests = _task.requests();
+  bool changed = false;
 
   if (requestIndex != -1) {
     auto requestIndexu = static_cast<std::size_t>(requestIndex);
@@ -80,11 +81,13 @@ void MemoryTaskBuilder::processContextMenuAction(const QString &action,
       requests.insert(requests.begin(), request);
       requestIndex = 0;
       requestIndexu = 0u;
+      changed = true;
     } else if (action == RequestItemMenu::TO_BOTTOM) {
       requests.erase(requests.begin() + requestIndex);
       requests.push_back(request);
       requestIndex = static_cast<int>(requests.size() - 1);
       requestIndexu = requests.size() - 1;
+      changed = true;
     } else if (action == RequestItemMenu::MOVE_UP && requestIndex > 0) {
       std::swap(requests.at(requestIndexu - 1), requests.at(requestIndexu));
       requestIndex--;
@@ -94,20 +97,28 @@ void MemoryTaskBuilder::processContextMenuAction(const QString &action,
       std::swap(requests.at(requestIndexu + 1), requests.at(requestIndexu));
       requestIndex++;
       requestIndexu++;
+      changed = true;
     } else if (action == RequestItemMenu::DELETE) {
       requests.erase(requests.begin() + requestIndex);
       requestIndex = requestIndex > 0 ? requestIndex - 1 : 0;
       requestIndexu = requestIndexu > 0 ? requestIndexu - 1 : 0;
+      changed = true;
     }
   }
 
   if (auto request = processAddRequestMenuAction(action); request.has_value()) {
     requests.push_back(*request);
+    changed = true;
   }
 
   _task = Utils::MemoryTask::create(
       _task.strategy(), 0, MemoryState::initial(), requests);
   loadTask(_task);
+
+  if (changed) {
+    push(_task);
+    emit historyStateChanged();
+  }
 
   if (requestIndex == -1) {
     selectCurrentRequest(static_cast<int>(requests.size() - 1));
@@ -253,4 +264,12 @@ void MemoryTaskBuilder::setStrategy(StrategyType type) {
   } else if (type == StrategyType::LEAST_APPROPRIATE) {
     label->setText("Стратегия: наименее подходящий");
   }
+}
+
+void MemoryTaskBuilder::loadTaskFromHistory(Utils::Task task) {
+  _task = task.get<Utils::MemoryTask>();
+  loadTask(_task);
+  clearTaskView();
+  selectCurrentRequest(0);
+  emit historyStateChanged();
 }

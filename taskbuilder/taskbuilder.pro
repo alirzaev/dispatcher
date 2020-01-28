@@ -1,5 +1,4 @@
 include(../common.pri)
-include(../qtutils.pri)
 
 QT += core gui
 
@@ -18,7 +17,8 @@ TEMPLATE = app
 DEFINES += QT_DEPRECATED_WARNINGS
 
 INCLUDEPATH += \
-    ../schedulers
+    ../schedulers \
+    ../qtutils
 
 SOURCES += \
         dialogs/freememorydialog.cpp \
@@ -33,9 +33,11 @@ SOURCES += \
         processestaskbuilder.cpp
 
 HEADERS += \
+        abstracttaskbuilder.h \
         dialogs/freememorydialog.h \
         dialogs/pidinputdialog.h \
         dialogs/terminateiodialog.h \
+        historynavigator.h \
         mainwindow.h \
         memorytaskbuilder.h \
         menus/memorytaskaddrequestmenu.h \

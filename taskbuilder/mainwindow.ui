@@ -75,7 +75,7 @@
      <height>20</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menu">
+   <widget class="QMenu" name="menuTask">
     <property name="title">
      <string>Задание</string>
     </property>
@@ -112,7 +112,15 @@
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
-   <addaction name="menu"/>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>&amp;Правка</string>
+    </property>
+    <addaction name="actionUndo"/>
+    <addaction name="actionRedo"/>
+   </widget>
+   <addaction name="menuTask"/>
+   <addaction name="menuEdit"/>
   </widget>
   <action name="actionSaveTask">
    <property name="text">
@@ -186,6 +194,22 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="text">
+    <string>Отменить</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="text">
+    <string>Повторить</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Y</string>
    </property>
   </action>
  </widget>

@@ -3,8 +3,11 @@
 #include <QAction>
 #include <QCloseEvent>
 #include <QMainWindow>
+#include <QString>
 
 #include <utils/tasks.h>
+
+#include "abstracttaskbuilder.h"
 
 namespace Ui {
 class MainWindow;
@@ -26,6 +29,10 @@ public:
 
   void createTask(QAction *action);
 
+  void removeTasks();
+
+  void attachTask(AbstractTaskBuilder *taskWidget, const QString label);
+
   void closeEvent(QCloseEvent *event) override;
 
   void undoAction();
@@ -33,6 +40,8 @@ public:
   void redoAction();
 
   void updateMenuEditState();
+
+  void updateTaskPreview();
 
 private:
   Ui::MainWindow *ui;

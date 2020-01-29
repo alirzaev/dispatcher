@@ -12,22 +12,18 @@
 
 #include "abstracttaskbuilder.h"
 #include "historynavigator.h"
-#include "taskgetter.h"
 
 namespace Ui {
 class ProcessesTaskBuilder;
 }
 
 class ProcessesTaskBuilder : public AbstractTaskBuilder,
-                             public TaskGetter,
                              public HistoryNavigator {
 public:
   explicit ProcessesTaskBuilder(const Utils::Task &task,
                                 QWidget *parent = nullptr);
 
   ~ProcessesTaskBuilder() override;
-
-  Utils::Task task() const override;
 
 private:
   using ProcessesList =
@@ -80,4 +76,12 @@ private:
 protected:
   /* HistoryNavigator interface */
   void loadTaskFromHistory(Utils::Task task) override;
+
+  // AbstractTaskBuilder interface
+public:
+  QString strategy() override;
+
+  // AbstractTaskBuilder interface
+public:
+  Utils::Task task() override;
 };

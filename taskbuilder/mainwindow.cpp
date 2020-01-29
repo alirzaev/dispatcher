@@ -3,6 +3,7 @@
 
 #include <QDebug>
 #include <QFileDialog>
+#include <QListWidgetItem>
 #include <QMessageBox>
 #include <QString>
 
@@ -90,7 +91,7 @@ void MainWindow::saveTasks() {
 
     for (int i = 0; i < ui->currentTaskWidget->count(); ++i) {
       auto *widget =
-          dynamic_cast<TaskGetter *>(ui->currentTaskWidget->widget(i));
+          dynamic_cast<AbstractTaskBuilder *>(ui->currentTaskWidget->widget(i));
       auto task = widget->task();
       tasks.push_back(task);
     }
@@ -103,16 +104,7 @@ void MainWindow::saveTasks() {
 }
 
 void MainWindow::loadTasks(const std::vector<Utils::Task> &tasks) {
-  auto *stack = ui->currentTaskWidget;
-  while (stack->count() > 0) {
-    auto *widget = stack->widget(0);
-    stack->removeWidget(widget);
-    delete widget;
-  }
-
-  auto *list = ui->tasksList;
-  list->setEnabled(true);
-  list->clear();
+  removeTasks();
 
   for (const auto &task : tasks) {
     auto [widget, label] = task.match(
@@ -124,18 +116,13 @@ void MainWindow::loadTasks(const std::vector<Utils::Task> &tasks) {
           AbstractTaskBuilder *widget = new ProcessesTaskBuilder(task, this);
           return std::pair{widget, "Диспетчеризация процессов"_qs};
         });
-    connect(widget,
-            &AbstractTaskBuilder::historyStateChanged,
-            this,
-            &MainWindow::updateMenuEditState);
 
-    stack->addWidget(dynamic_cast<QWidget *>(widget));
-    list->addItem(label);
+    attachTask(widget, label);
   }
 }
 
 void MainWindow::createTask(QAction *action) {
-  QWidget *widget = nullptr;
+  AbstractTaskBuilder *widget = nullptr;
   QString label;
 
   if (action == ui->actionFA) {
@@ -220,13 +207,41 @@ void MainWindow::createTask(QAction *action) {
     label = "Диспетчеризация процессов";
   }
 
-  connect(dynamic_cast<AbstractTaskBuilder *>(widget),
+  attachTask(widget, label);
+}
+
+void MainWindow::removeTasks() {
+  auto *stack = ui->currentTaskWidget;
+  while (stack->count() > 0) {
+    auto *widget = stack->widget(0);
+    stack->removeWidget(widget);
+    delete widget;
+  }
+
+  auto *list = ui->tasksList;
+  list->clear();
+}
+
+void MainWindow::attachTask(AbstractTaskBuilder *taskWidget,
+                            const QString label) {
+  connect(taskWidget,
           &AbstractTaskBuilder::historyStateChanged,
           this,
           &MainWindow::updateMenuEditState);
+  connect(taskWidget,
+          &AbstractTaskBuilder::historyStateChanged,
+          this,
+          &MainWindow::updateTaskPreview);
 
-  ui->currentTaskWidget->addWidget(widget);
-  ui->tasksList->addItem(label);
+  auto *listItem = new QListWidgetItem();
+  listItem->setText(label);
+  listItem->setToolTip(
+      "Стратегия: %1. Заявок: %2"_qs.arg(taskWidget->strategy())
+          .arg(taskWidget->task().match(
+              [](const auto &task) { return task.requests().size(); })));
+
+  ui->currentTaskWidget->addWidget(taskWidget);
+  ui->tasksList->addItem(listItem);
   ui->tasksList->setEnabled(true);
 }
 
@@ -261,4 +276,18 @@ void MainWindow::updateMenuEditState() {
       dynamic_cast<HistoryNavigator *>(ui->currentTaskWidget->currentWidget());
   ui->actionUndo->setDisabled(!navigator || !navigator->hasPrevious());
   ui->actionRedo->setDisabled(!navigator || !navigator->hasNext());
+}
+
+void MainWindow::updateTaskPreview() {
+  auto index = ui->currentTaskWidget->currentIndex();
+  if (index == -1) {
+    return;
+  }
+  auto *taskWidget = dynamic_cast<AbstractTaskBuilder *>(
+      ui->currentTaskWidget->currentWidget());
+  auto *listItem = ui->tasksList->item(index);
+  listItem->setToolTip(
+      "Стратегия: %1. Заявок: %2"_qs.arg(taskWidget->strategy())
+          .arg(taskWidget->task().match(
+              [](const auto &task) { return task.requests().size(); })));
 }

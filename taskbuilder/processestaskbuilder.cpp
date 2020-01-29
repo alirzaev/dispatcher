@@ -19,6 +19,15 @@
 using namespace ProcessesManagement;
 using namespace QtUtils::Literals;
 
+static std::map<StrategyType, QString> strategyMap = {
+    {StrategyType::ROUNDROBIN, "Round Robin"_qs},
+    {StrategyType::FCFS, "FCFS"_qs},
+    {StrategyType::SJN, "SJN"_qs},
+    {StrategyType::SRT, "SRT"_qs},
+    {StrategyType::WINDOWS, "Windows NT"_qs},
+    {StrategyType::UNIX, "Unix"_qs},
+    {StrategyType::LINUXO1, "Linux O(1)"_qs}};
+
 ProcessesTaskBuilder::ProcessesTaskBuilder(const Utils::Task &task,
                                            QWidget *parent)
     : AbstractTaskBuilder(parent), HistoryNavigator(task),
@@ -48,8 +57,6 @@ ProcessesTaskBuilder::ProcessesTaskBuilder(const Utils::Task &task,
 }
 
 ProcessesTaskBuilder::~ProcessesTaskBuilder() { delete ui; }
-
-Utils::Task ProcessesTaskBuilder::task() const { return _task; }
 
 void ProcessesTaskBuilder::loadTask(const Utils::ProcessesTask &task) {
   auto state = ProcessesState::initial();
@@ -283,17 +290,7 @@ void ProcessesTaskBuilder::setRequestsList(
 }
 
 void ProcessesTaskBuilder::setStrategy(StrategyType type) {
-  auto *label = ui->strategyLabel;
-  std::map<StrategyType, QString> strategyMap = {
-      {StrategyType::ROUNDROBIN, "Стратегия: Round Robin"_qs},
-      {StrategyType::FCFS, "Стратегия: FCFS"_qs},
-      {StrategyType::SJN, "Стратегия: SJN"_qs},
-      {StrategyType::SRT, "Стратегия: SRT"_qs},
-      {StrategyType::WINDOWS, "Стратегия: Windows NT"_qs},
-      {StrategyType::UNIX, "Стратегия: Unix"_qs},
-      {StrategyType::LINUXO1, "Стратегия: Linux O(1)"_qs}};
-
-  label->setText(strategyMap[type]);
+  ui->strategyLabel->setText("Стратегия: %1"_qs.arg(strategyMap.at(type)));
 }
 
 void ProcessesTaskBuilder::loadTaskFromHistory(Utils::Task task) {
@@ -303,3 +300,9 @@ void ProcessesTaskBuilder::loadTaskFromHistory(Utils::Task task) {
   selectCurrentRequest(0);
   emit historyStateChanged();
 }
+
+QString ProcessesTaskBuilder::strategy() {
+  return strategyMap.at(_task.strategy()->type());
+}
+
+Utils::Task ProcessesTaskBuilder::task() { return _task; }

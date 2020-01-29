@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <map>
 
 #include <QDebug>
 
@@ -22,6 +23,11 @@
 using namespace MemoryManagement;
 using namespace QtUtils::Literals;
 
+static std::map<StrategyType, QString> strategyMap = {
+    {StrategyType::FIRST_APPROPRIATE, "первый подходящий"},
+    {StrategyType::MOST_APPROPRIATE, "наиболее подходящий"},
+    {StrategyType::LEAST_APPROPRIATE, "наименее подходящий"}};
+
 MemoryTaskBuilder::MemoryTaskBuilder(const Utils::Task &task, QWidget *parent)
     : AbstractTaskBuilder(parent), HistoryNavigator(task),
       _task(task.get<Utils::MemoryTask>()), ui(new Ui::MemoryTaskBuilder) {
@@ -41,8 +47,6 @@ MemoryTaskBuilder::MemoryTaskBuilder(const Utils::Task &task, QWidget *parent)
 }
 
 MemoryTaskBuilder::~MemoryTaskBuilder() { delete ui; }
-
-Utils::Task MemoryTaskBuilder::task() const { return _task; }
 
 void MemoryTaskBuilder::loadTask(const Utils::MemoryTask &task) {
   auto state = MemoryState::initial();
@@ -255,15 +259,7 @@ void MemoryTaskBuilder::setRequestsList(const std::vector<Request> &requests) {
 }
 
 void MemoryTaskBuilder::setStrategy(StrategyType type) {
-  auto *label = ui->strategyLabel;
-
-  if (type == StrategyType::FIRST_APPROPRIATE) {
-    label->setText("Стратегия: первый подходящий");
-  } else if (type == StrategyType::MOST_APPROPRIATE) {
-    label->setText("Стратегия: наиболее подходящий");
-  } else if (type == StrategyType::LEAST_APPROPRIATE) {
-    label->setText("Стратегия: наименее подходящий");
-  }
+  ui->strategyLabel->setText("Стратегия: %1"_qs.arg(strategyMap.at(type)));
 }
 
 void MemoryTaskBuilder::loadTaskFromHistory(Utils::Task task) {
@@ -273,3 +269,9 @@ void MemoryTaskBuilder::loadTaskFromHistory(Utils::Task task) {
   selectCurrentRequest(0);
   emit historyStateChanged();
 }
+
+QString MemoryTaskBuilder::strategy() {
+  return strategyMap.at(_task.strategy()->type);
+}
+
+Utils::Task MemoryTaskBuilder::task() { return _task; }

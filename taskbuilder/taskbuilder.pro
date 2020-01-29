@@ -43,8 +43,7 @@ HEADERS += \
         menus/memorytaskaddrequestmenu.h \
         menus/processtaskaddrequestmenu.h \
         menus/requestitemmenu.h \
-        processestaskbuilder.h \
-        taskgetter.h
+        processestaskbuilder.h
 
 FORMS += \
         dialogs/freememorydialog.ui \

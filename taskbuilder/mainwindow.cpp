@@ -104,12 +104,12 @@ void MainWindow::saveTasks() {
 
 void MainWindow::loadTasks(const std::vector<Utils::Task> &tasks) {
   auto *stack = ui->currentTaskWidget;
-  int count = stack->count();
-  for (int i = 0; i < count; ++i) {
-    auto *widget = stack->widget(i);
+  while (stack->count() > 0) {
+    auto *widget = stack->widget(0);
     stack->removeWidget(widget);
     delete widget;
   }
+
   auto *list = ui->tasksList;
   list->setEnabled(true);
   list->clear();

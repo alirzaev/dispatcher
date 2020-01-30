@@ -409,8 +409,9 @@ void ProcessesTask::provideContextMenu(const QPoint &pos) {
   auto row = item ? item->row() : -1;
   _model.state = collectState();
   auto process =
-      row != -1 ? tl::optional{_model.state.processes.at(mapRowToIndex(row))}
-                : tl::nullopt;
+      row != -1
+          ? tl::optional<Process>{_model.state.processes.at(mapRowToIndex(row))}
+          : tl::nullopt;
 
   qDebug() << "ContextMenu: row " << row;
 

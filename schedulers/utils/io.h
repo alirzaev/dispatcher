@@ -9,6 +9,8 @@
 
 #include <mapbox/variant.hpp>
 
+#include <config.h>
+
 #include "../algo/processes/types.h"
 #include "tasks.h"
 

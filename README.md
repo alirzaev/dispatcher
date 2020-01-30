@@ -8,19 +8,19 @@
 
 # Структура проекта
 
-- dispatcher.pro - Файл основного проекта
+- qtutils - Библиотека со вспомогательными функциями
 
-  - qtutils/qtutils.pro - Библиотека со вспомогательными функциями
+- schedulers - Библиотека с алгоритмами работы диспетчера задач
 
-  - schedulers/schedulers.pro - Библиотека с алгоритмами работы диспетчера задач
+- tests - Тесты
 
-  - tests/tests.pro - Тесты
+- generator - Библиотека для генерации заданий
 
-  - generator/generator.pro - Библиотека для генерации заданий
+- dispatcher - Программная модель с графическим интерфейсом
 
-  - dispatcher/dispatcher.pro - Программная модель с графическим интерфейсом
+- taskbuilder - Конструктор заданий
 
-  - widgets/widgets.pro - Библиотека с UI-компонентами
+- widgets - Библиотека с UI-компонентами
 
 # Файл задания
 
@@ -32,6 +32,8 @@
 
 ### Windows
 
+- CMake 3.10 или новее
+
 - Qt 5.11 или новее
 
 - Visual Studio 2017 или новее со следующими компонентами:
@@ -42,7 +44,9 @@
 
 ### Ubuntu
 
-- Минимальная версия Ubuntu - 16.04
+- Минимальная версия Ubuntu - 18.04
+
+- CMake 3.10 или новее
 
 - Qt 5.11 или новее
 
@@ -61,28 +65,17 @@
 
 ## Сборка
 
-Проект собирается штатными средствами Qt: либо открываем `dispatcher.pro` через QtCreator, либо
-собираем с помощью qmake:
+Проект собирается штатными средствами Qt: либо открываем `CMkaeLists.txt` через QtCreator, либо
+собираем с помощью CMake:
 
 ```
 mkdir build
 cd build
-qmake ../dispatcher.pro
+cmake -DCMAKE_PREFIX_PATH="<Qt root dir>/lib/cmake" -DDISPATCHER_DEBUG=1 ..
 make
 ```
 
-<details>
-<summary>
-Исключение тестов из процесса сборки проекта
-</summary>
-
-Для отключения сборки тестов необходимо передать в `qmake` параметр
-`"CONFIG+=skipTests"`:
-
-```
-qmake "CONFIG+=skipTests" ../dispatcher.pro
-```
-</details>
+`DISPATCHER_DEBUG=1` - включение дополнительной отладочной информации.
 
 # В случае возникновения проблем
 

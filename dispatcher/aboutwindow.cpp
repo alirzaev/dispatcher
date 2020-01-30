@@ -1,5 +1,7 @@
 #include <qtutils/literals.h>
 
+#include <config.h>
+
 #include "aboutwindow.h"
 #include "ui_aboutwindow.h"
 

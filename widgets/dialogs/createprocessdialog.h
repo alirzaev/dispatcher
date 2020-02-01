@@ -33,17 +33,21 @@ public:
   static tl::optional<ProcessesManagement::Process>
   getProcess(QWidget *parent,
              const ProcessesList &processes,
-             const QFlags<EditableField> &editableFields);
+             const QFlags<EditableField> &editableFields,
+             bool basicValidation = false);
 
   ~CreateProcessDialog() override;
 
 private:
   explicit CreateProcessDialog(const ProcessesList &processes,
                                const QFlags<EditableField> &editableFields,
+                               bool basicValidation = false,
                                QWidget *parent = nullptr);
   ProcessesList processes;
 
   ProcessesManagement::Process data;
+
+  bool basicValidation;
 
   Ui::CreateProcessDialog *ui;
 

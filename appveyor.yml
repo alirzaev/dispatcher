@@ -20,3 +20,5 @@ test_script:
 artifacts:
   - path: build\dispatcher\release\dispatcher.exe
     name: dispatcher-x64-windows.exe
+  - path: build\taskbuilder\release\taskbuilder.exe
+    name: taskbuilder-x64-windows.exe

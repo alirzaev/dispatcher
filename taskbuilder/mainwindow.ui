@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>900</width>
+    <height>427</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Конструктор заданий</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QLabel" name="tasksLabel">
+        <property name="text">
+         <string>Задания</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QListWidget" name="tasksList">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>230</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::CustomContextMenu</enum>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QStackedWidget" name="currentTaskWidget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="currentIndex">
+       <number>-1</number>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>900</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuTask">
+    <property name="title">
+     <string>Задание</string>
+    </property>
+    <widget class="QMenu" name="menuAddTask">
+     <property name="title">
+      <string>Добавить</string>
+     </property>
+     <widget class="QMenu" name="menuMemoryTask">
+      <property name="title">
+       <string>Память</string>
+      </property>
+      <addaction name="actionFA"/>
+      <addaction name="actionMA"/>
+      <addaction name="actionLA"/>
+     </widget>
+     <widget class="QMenu" name="menuProcessesTask">
+      <property name="title">
+       <string>Процессы</string>
+      </property>
+      <addaction name="actionFCFS"/>
+      <addaction name="actionSJN"/>
+      <addaction name="actionSRT"/>
+      <addaction name="actionRoundRobin"/>
+      <addaction name="actionUNIX"/>
+      <addaction name="actionWinNT"/>
+      <addaction name="actionLinux_O_1"/>
+     </widget>
+     <addaction name="menuMemoryTask"/>
+     <addaction name="menuProcessesTask"/>
+    </widget>
+    <addaction name="menuAddTask"/>
+    <addaction name="actionOpenTask"/>
+    <addaction name="actionSaveTask"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuit"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>&amp;Правка</string>
+    </property>
+    <addaction name="actionUndo"/>
+    <addaction name="actionRedo"/>
+   </widget>
+   <addaction name="menuTask"/>
+   <addaction name="menuEdit"/>
+  </widget>
+  <action name="actionSaveTask">
+   <property name="text">
+    <string>Сохранить</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Выйти</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionFA">
+   <property name="text">
+    <string>Первый подходящий</string>
+   </property>
+  </action>
+  <action name="actionMA">
+   <property name="text">
+    <string>Наиболее подходящий</string>
+   </property>
+  </action>
+  <action name="actionLA">
+   <property name="text">
+    <string>Наименее подходящий</string>
+   </property>
+  </action>
+  <action name="actionFCFS">
+   <property name="text">
+    <string>FCFS</string>
+   </property>
+  </action>
+  <action name="actionSJN">
+   <property name="text">
+    <string>SJN</string>
+   </property>
+  </action>
+  <action name="actionSRT">
+   <property name="text">
+    <string>SRT</string>
+   </property>
+  </action>
+  <action name="actionRoundRobin">
+   <property name="text">
+    <string>RoundRobin</string>
+   </property>
+  </action>
+  <action name="actionUNIX">
+   <property name="text">
+    <string>UNIX</string>
+   </property>
+  </action>
+  <action name="actionWinNT">
+   <property name="text">
+    <string>WinNT</string>
+   </property>
+  </action>
+  <action name="actionLinux_O_1">
+   <property name="text">
+    <string>Linux O(1)</string>
+   </property>
+  </action>
+  <action name="actionOpenTask">
+   <property name="text">
+    <string>Открыть</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="text">
+    <string>Отменить</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="text">
+    <string>Повторить</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Y</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>

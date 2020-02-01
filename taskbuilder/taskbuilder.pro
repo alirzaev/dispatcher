@@ -30,6 +30,7 @@ SOURCES += \
         menus/memorytaskaddrequestmenu.cpp \
         menus/processtaskaddrequestmenu.cpp \
         menus/requestitemmenu.cpp \
+        menus/taskitemmenu.cpp \
         processestaskbuilder.cpp
 
 HEADERS += \
@@ -43,6 +44,7 @@ HEADERS += \
         menus/memorytaskaddrequestmenu.h \
         menus/processtaskaddrequestmenu.h \
         menus/requestitemmenu.h \
+        menus/taskitemmenu.h \
         processestaskbuilder.h
 
 FORMS += \

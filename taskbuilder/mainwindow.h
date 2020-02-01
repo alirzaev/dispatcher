@@ -3,6 +3,7 @@
 #include <QAction>
 #include <QCloseEvent>
 #include <QMainWindow>
+#include <QPoint>
 #include <QString>
 
 #include <utils/tasks.h>
@@ -31,7 +32,7 @@ public:
 
   void removeTasks();
 
-  void attachTask(AbstractTaskBuilder *taskWidget, const QString label);
+  void attachTask(AbstractTaskBuilder *taskWidget);
 
   void closeEvent(QCloseEvent *event) override;
 
@@ -41,7 +42,11 @@ public:
 
   void updateMenuEditState();
 
-  void updateTaskPreview();
+  void updateTaskPreview(int index);
+
+  void processContextMenuAction(const QString &action, int taskIndex);
+
+  void provideContextMenu(const QPoint &pos);
 
 private:
   Ui::MainWindow *ui;

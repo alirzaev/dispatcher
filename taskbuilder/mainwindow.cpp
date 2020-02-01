@@ -14,6 +14,8 @@
 #include <qtutils/literals.h>
 
 #include "memorytaskbuilder.h"
+#include "menus/requestitemmenu.h"
+#include "menus/taskitemmenu.h"
 #include "processestaskbuilder.h"
 
 #include "historynavigator.h"
@@ -43,6 +45,11 @@ MainWindow::MainWindow(QWidget *parent)
 
   connect(ui->actionUndo, &QAction::triggered, this, &MainWindow::undoAction);
   connect(ui->actionRedo, &QAction::triggered, this, &MainWindow::redoAction);
+
+  connect(ui->tasksList,
+          &QListWidget::customContextMenuRequested,
+          this,
+          &MainWindow::provideContextMenu);
 
   ui->actionUndo->setDisabled(true);
   ui->actionRedo->setDisabled(true);
@@ -107,23 +114,22 @@ void MainWindow::loadTasks(const std::vector<Utils::Task> &tasks) {
   removeTasks();
 
   for (const auto &task : tasks) {
-    auto [widget, label] = task.match(
+    auto widget = task.match(
         [this](const Utils::MemoryTask &task) {
           AbstractTaskBuilder *widget = new MemoryTaskBuilder(task, this);
-          return std::pair{widget, "Диспетчеризация памяти"_qs};
+          return widget;
         },
         [this](const Utils::ProcessesTask &task) {
           AbstractTaskBuilder *widget = new ProcessesTaskBuilder(task, this);
-          return std::pair{widget, "Диспетчеризация процессов"_qs};
+          return widget;
         });
 
-    attachTask(widget, label);
+    attachTask(widget);
   }
 }
 
 void MainWindow::createTask(QAction *action) {
   AbstractTaskBuilder *widget = nullptr;
-  QString label;
 
   if (action == ui->actionFA) {
     Utils::Task task = Utils::MemoryTask::create(
@@ -132,7 +138,6 @@ void MainWindow::createTask(QAction *action) {
         MemoryManagement::MemoryState::initial(),
         {});
     widget = new MemoryTaskBuilder(task, this);
-    label = "Диспетчеризация памяти";
   } else if (action == ui->actionLA) {
     Utils::Task task = Utils::MemoryTask::create(
         MemoryManagement::LeastAppropriateStrategy::create(),
@@ -140,7 +145,6 @@ void MainWindow::createTask(QAction *action) {
         MemoryManagement::MemoryState::initial(),
         {});
     widget = new MemoryTaskBuilder(task, this);
-    label = "Диспетчеризация памяти";
   } else if (action == ui->actionMA) {
     Utils::Task task = Utils::MemoryTask::create(
         MemoryManagement::MostAppropriateStrategy::create(),
@@ -148,7 +152,6 @@ void MainWindow::createTask(QAction *action) {
         MemoryManagement::MemoryState::initial(),
         {});
     widget = new MemoryTaskBuilder(task, this);
-    label = "Диспетчеризация памяти";
   } else if (action == ui->actionSJN) {
     Utils::Task task = Utils::ProcessesTask::create(
         ProcessesManagement::SjnStrategy::create(),
@@ -156,7 +159,6 @@ void MainWindow::createTask(QAction *action) {
         ProcessesManagement::ProcessesState::initial(),
         {});
     widget = new ProcessesTaskBuilder(task, this);
-    label = "Диспетчеризация процессов";
   } else if (action == ui->actionSRT) {
     Utils::Task task = Utils::ProcessesTask::create(
         ProcessesManagement::SrtStrategy::create(),
@@ -164,7 +166,6 @@ void MainWindow::createTask(QAction *action) {
         ProcessesManagement::ProcessesState::initial(),
         {});
     widget = new ProcessesTaskBuilder(task, this);
-    label = "Диспетчеризация процессов";
   } else if (action == ui->actionFCFS) {
     Utils::Task task = Utils::ProcessesTask::create(
         ProcessesManagement::FcfsStrategy::create(),
@@ -172,7 +173,6 @@ void MainWindow::createTask(QAction *action) {
         ProcessesManagement::ProcessesState::initial(),
         {});
     widget = new ProcessesTaskBuilder(task, this);
-    label = "Диспетчеризация процессов";
   } else if (action == ui->actionRoundRobin) {
     Utils::Task task = Utils::ProcessesTask::create(
         ProcessesManagement::RoundRobinStrategy::create(),
@@ -180,7 +180,6 @@ void MainWindow::createTask(QAction *action) {
         ProcessesManagement::ProcessesState::initial(),
         {});
     widget = new ProcessesTaskBuilder(task, this);
-    label = "Диспетчеризация процессов";
   } else if (action == ui->actionUNIX) {
     Utils::Task task = Utils::ProcessesTask::create(
         ProcessesManagement::UnixStrategy::create(),
@@ -188,7 +187,6 @@ void MainWindow::createTask(QAction *action) {
         ProcessesManagement::ProcessesState::initial(),
         {});
     widget = new ProcessesTaskBuilder(task, this);
-    label = "Диспетчеризация процессов";
   } else if (action == ui->actionWinNT) {
     Utils::Task task = Utils::ProcessesTask::create(
         ProcessesManagement::WinNtStrategy::create(),
@@ -196,7 +194,6 @@ void MainWindow::createTask(QAction *action) {
         ProcessesManagement::ProcessesState::initial(),
         {});
     widget = new ProcessesTaskBuilder(task, this);
-    label = "Диспетчеризация процессов";
   } else if (action == ui->actionLinux_O_1) {
     Utils::Task task = Utils::ProcessesTask::create(
         ProcessesManagement::LinuxO1Strategy::create(),
@@ -204,10 +201,9 @@ void MainWindow::createTask(QAction *action) {
         ProcessesManagement::ProcessesState::initial(),
         {});
     widget = new ProcessesTaskBuilder(task, this);
-    label = "Диспетчеризация процессов";
   }
 
-  attachTask(widget, label);
+  attachTask(widget);
 }
 
 void MainWindow::removeTasks() {
@@ -222,8 +218,7 @@ void MainWindow::removeTasks() {
   list->clear();
 }
 
-void MainWindow::attachTask(AbstractTaskBuilder *taskWidget,
-                            const QString label) {
+void MainWindow::attachTask(AbstractTaskBuilder *taskWidget) {
   connect(taskWidget,
           &AbstractTaskBuilder::historyStateChanged,
           this,
@@ -231,18 +226,13 @@ void MainWindow::attachTask(AbstractTaskBuilder *taskWidget,
   connect(taskWidget,
           &AbstractTaskBuilder::historyStateChanged,
           this,
-          &MainWindow::updateTaskPreview);
-
-  auto *listItem = new QListWidgetItem();
-  listItem->setText(label);
-  listItem->setToolTip(
-      "Стратегия: %1. Заявок: %2"_qs.arg(taskWidget->strategy())
-          .arg(taskWidget->task().match(
-              [](const auto &task) { return task.requests().size(); })));
+          [this]() { this->updateTaskPreview(ui->tasksList->currentRow()); });
 
   ui->currentTaskWidget->addWidget(taskWidget);
-  ui->tasksList->addItem(listItem);
+  ui->tasksList->addItem(new QListWidgetItem());
   ui->tasksList->setEnabled(true);
+
+  updateTaskPreview(ui->currentTaskWidget->count() - 1);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -278,16 +268,80 @@ void MainWindow::updateMenuEditState() {
   ui->actionRedo->setDisabled(!navigator || !navigator->hasNext());
 }
 
-void MainWindow::updateTaskPreview() {
-  auto index = ui->currentTaskWidget->currentIndex();
-  if (index == -1) {
+void MainWindow::updateTaskPreview(int index) {
+
+  auto *taskWidget =
+      dynamic_cast<AbstractTaskBuilder *>(ui->currentTaskWidget->widget(index));
+
+  QString taskType = taskWidget->task().match(
+      [](const Utils::MemoryTask &) { return "Диспетчеризация памяти"; },
+      [](const Utils::ProcessesTask &) { return "Диспетчеризация процессов"; });
+  auto requestsCount = taskWidget->task().match(
+      [](const auto &task) { return task.requests().size(); });
+  auto strategy = taskWidget->strategy();
+
+  auto *listItem = ui->tasksList->item(index);
+  listItem->setText("Задание #%1"_qs.arg(index + 1));
+  listItem->setToolTip(
+      "%1\nСтратегия: %2. Заявок: %3"_qs.arg(taskType).arg(strategy).arg(
+          requestsCount));
+}
+
+void MainWindow::processContextMenuAction(const QString &action,
+                                          int taskIndex) {
+  auto *stack = ui->currentTaskWidget;
+
+  if (action == RequestItemMenu::TO_TOP) {
+    auto *taskWidget = stack->widget(taskIndex);
+    stack->removeWidget(taskWidget);
+    stack->insertWidget(0, taskWidget);
+  } else if (action == RequestItemMenu::TO_BOTTOM) {
+    auto *taskWidget = stack->widget(taskIndex);
+    stack->removeWidget(taskWidget);
+    stack->addWidget(taskWidget);
+  } else if (action == RequestItemMenu::MOVE_UP && taskIndex > 0) {
+    auto *taskWidget = stack->widget(taskIndex);
+    stack->removeWidget(taskWidget);
+    stack->insertWidget(taskIndex - 1, taskWidget);
+  } else if (action == RequestItemMenu::MOVE_DOWN &&
+             taskIndex < stack->count() - 1) {
+    auto *taskWidget = stack->widget(taskIndex);
+    stack->removeWidget(taskWidget);
+    stack->insertWidget(taskIndex + 1, taskWidget);
+  } else if (action == RequestItemMenu::DELETE) {
+    auto answer = QMessageBox::question(
+        this,
+        "Удаление задания",
+        "Вы действительно хотите удалить задание? Это действие необратимо.");
+    if (answer == QMessageBox::Yes) {
+      auto *taskWidget = stack->widget(taskIndex);
+      stack->removeWidget(taskWidget);
+      delete taskWidget;
+
+      auto *listItem = ui->tasksList->takeItem(taskIndex);
+      delete listItem;
+    }
+  }
+
+  for (int i = 0; i < ui->tasksList->count(); ++i) {
+    updateTaskPreview(i);
+  }
+}
+
+void MainWindow::provideContextMenu(const QPoint &pos) {
+  qDebug() << "ContextMenu";
+
+  auto globalPos = ui->tasksList->mapToGlobal(pos);
+  auto row = ui->tasksList->indexAt(pos).row();
+
+  qDebug() << "ContextMenu:" << row;
+
+  TaskItemMenu menu(row != -1);
+
+  auto action = menu.exec(globalPos);
+  if (!action) {
     return;
   }
-  auto *taskWidget = dynamic_cast<AbstractTaskBuilder *>(
-      ui->currentTaskWidget->currentWidget());
-  auto *listItem = ui->tasksList->item(index);
-  listItem->setToolTip(
-      "Стратегия: %1. Заявок: %2"_qs.arg(taskWidget->strategy())
-          .arg(taskWidget->task().match(
-              [](const auto &task) { return task.requests().size(); })));
+
+  processContextMenuAction(action->text(), row);
 }

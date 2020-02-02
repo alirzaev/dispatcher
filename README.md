@@ -1,8 +1,5 @@
 # Модель диспетчера задач операционной системы
 
-[![Linux Build Status](https://img.shields.io/travis/alirzaev/dispatcher?label=Linux%20Build%20Status)](https://travis-ci.org/alirzaev/dispatcher)
-[![Windows Build Status](https://img.shields.io/appveyor/ci/alirzaev/dispatcher?label=Windows%20Build%20Status)](https://ci.appveyor.com/project/alirzaev/dispatcher)
-
 Программная модель диспетчера задач для лабораторной работы по дисциплине "Операционные системы"
 
 Руководство пользователя: [HTML](https://alirzaev.github.io/dispatcher/user-manual), [PDF](https://alirzaev.github.io/dispatcher/user-manual.pdf)

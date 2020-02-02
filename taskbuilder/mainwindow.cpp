@@ -226,7 +226,9 @@ void MainWindow::attachTask(AbstractTaskBuilder *taskWidget) {
   connect(taskWidget,
           &AbstractTaskBuilder::historyStateChanged,
           this,
-          [this]() { this->updateTaskPreview(ui->tasksList->currentRow()); });
+          [this]() {
+            this->updateTaskPreview(ui->currentTaskWidget->currentIndex());
+          });
 
   ui->currentTaskWidget->addWidget(taskWidget);
   ui->tasksList->addItem(new QListWidgetItem());

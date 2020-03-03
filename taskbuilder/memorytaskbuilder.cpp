@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <map>
 
+#include <QFont>
+#include <QFontDatabase>
 #include <QDebug>
 
 #include <tl/optional.hpp>
@@ -32,6 +34,11 @@ MemoryTaskBuilder::MemoryTaskBuilder(const Utils::Task &task, QWidget *parent)
     : AbstractTaskBuilder(parent), HistoryNavigator(task),
       _task(task.get<Utils::MemoryTask>()), ui(new Ui::MemoryTaskBuilder) {
   ui->setupUi(this);
+
+  auto fixedFont = QFont("Cascadia Mono");
+  fixedFont.setPointSize(10);
+  ui->listMemBlocks->setFont(fixedFont);
+  ui->listFreeBlocks->setFont(fixedFont);
 
   connect(ui->requestsList,
           &QListWidget::currentRowChanged,

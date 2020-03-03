@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QFontDatabase>
 #include <QLibraryInfo>
 #include <QTranslator>
 
@@ -12,6 +13,8 @@ int main(int argc, char *argv[]) {
   if (translator.load("qt_ru", ":/translations")) {
     a.installTranslator(&translator);
   }
+
+  QFontDatabase::addApplicationFont(":/fonts/CascadiaMono.ttf");
 
   MainWindow w;
   w.show();

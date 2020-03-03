@@ -9,7 +9,10 @@ find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
 file(GLOB_RECURSE HEADERS "*.h")
 file(GLOB_RECURSE SOURCES "*.cpp")
 file(GLOB_RECURSE FORMS "*.ui")
-set(RESOURCES "${PROJECT_SOURCE_DIR}/translations/translations.qrc")
+set(RESOURCES
+        "${PROJECT_SOURCE_DIR}/fonts/fonts.qrc"
+        "${PROJECT_SOURCE_DIR}/translations/translations.qrc"
+        )
 
 if (WIN32)
     set(RESOURCES ${RESOURCES} resources.rc)

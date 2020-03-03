@@ -21,6 +21,7 @@
 #include <algo/memory/types.h>
 
 #include <qtutils/literals.h>
+#include <qtutils/fontscale.h>
 
 #include <dialogs/allocatememorydialog.h>
 #include <listitems/memoryblockitem.h>
@@ -29,8 +30,6 @@
 
 #include "memorytask.h"
 #include "ui_memorytask.h"
-
-#include "fontscale.h"
 
 using namespace std::literals;
 using namespace MemoryManagement;

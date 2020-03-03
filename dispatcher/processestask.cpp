@@ -26,6 +26,7 @@
 #include <algo/processes/types.h>
 
 #include <qtutils/literals.h>
+#include <qtutils/fontscale.h>
 
 #include <dialogs/createprocessdialog.h>
 #include <menus/processmenu.h>
@@ -33,8 +34,6 @@
 #include <reorderablelistwidget.h>
 
 #include "models.h"
-
-#include "fontscale.h"
 
 #include "processestask.h"
 #include "ui_processestask.h"

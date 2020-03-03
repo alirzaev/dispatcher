@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <map>
 
+#include <QApplication>
 #include <QFont>
 #include <QFontDatabase>
 #include <QDebug>
@@ -11,6 +12,7 @@
 #include <algo/memory/types.h>
 
 #include <qtutils/literals.h>
+#include <qtutils/fontscale.h>
 
 #include <listitems/memoryblockitem.h>
 
@@ -34,6 +36,10 @@ MemoryTaskBuilder::MemoryTaskBuilder(const Utils::Task &task, QWidget *parent)
     : AbstractTaskBuilder(parent), HistoryNavigator(task),
       _task(task.get<Utils::MemoryTask>()), ui(new Ui::MemoryTaskBuilder) {
   ui->setupUi(this);
+
+  auto font = QApplication::font();
+  font.setPointSizeF(font.pointSizeF() * FONT_SCALE_FACTOR);
+  ui->labelRequestDescr->setFont(font);
 
   auto fixedFont = QFont("Cascadia Mono");
   fixedFont.setPointSize(10);

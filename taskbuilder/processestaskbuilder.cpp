@@ -1,10 +1,12 @@
 #include <map>
 
+#include <QApplication>
 #include <QDebug>
 
 #include <utils/tasks.h>
 
 #include <qtutils/literals.h>
+#include <qtutils/fontscale.h>
 
 #include <dialogs/createprocessdialog.h>
 
@@ -34,6 +36,10 @@ ProcessesTaskBuilder::ProcessesTaskBuilder(const Utils::Task &task,
       _task(task.get<Utils::ProcessesTask>()), currentRequest(-1),
       ui(new Ui::ProcessesTaskBuilder) {
   ui->setupUi(this);
+
+  auto font = QApplication::font();
+  font.setPointSizeF(font.pointSizeF() * FONT_SCALE_FACTOR);
+  ui->labelRequestDescr->setFont(font);
 
   connect(ui->requestsList,
           &QListWidget::currentRowChanged,

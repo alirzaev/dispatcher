@@ -13,6 +13,7 @@
 #include <qtutils/fileio.h>
 #include <qtutils/literals.h>
 
+#include "aboutwindow.h"
 #include "memorytaskbuilder.h"
 #include "menus/requestitemmenu.h"
 #include "menus/taskitemmenu.h"
@@ -45,6 +46,8 @@ MainWindow::MainWindow(QWidget *parent)
 
   connect(ui->actionUndo, &QAction::triggered, this, &MainWindow::undoAction);
   connect(ui->actionRedo, &QAction::triggered, this, &MainWindow::redoAction);
+
+  connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::showHelp);
 
   connect(ui->tasksList,
           &QListWidget::customContextMenuRequested,
@@ -235,6 +238,11 @@ void MainWindow::attachTask(AbstractTaskBuilder *taskWidget) {
   ui->tasksList->setEnabled(true);
 
   updateTaskPreview(ui->currentTaskWidget->count() - 1);
+}
+
+void MainWindow::showHelp() {
+  auto window = AboutWindow(this);
+  window.exec();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {

@@ -34,6 +34,8 @@ public:
 
   void attachTask(AbstractTaskBuilder *taskWidget);
 
+  void showHelp();
+
   void closeEvent(QCloseEvent *event) override;
 
   void undoAction();

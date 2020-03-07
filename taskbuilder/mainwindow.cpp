@@ -47,6 +47,7 @@ MainWindow::MainWindow(QWidget *parent)
   connect(ui->actionUndo, &QAction::triggered, this, &MainWindow::undoAction);
   connect(ui->actionRedo, &QAction::triggered, this, &MainWindow::redoAction);
 
+  connect(ui->actionQuit, &QAction::triggered, this, &QMainWindow::close);
   connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::showHelp);
 
   connect(ui->tasksList,

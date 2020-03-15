@@ -110,7 +110,7 @@
      <item>
       <widget class="QLabel" name="labelLink">
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;2018-2019 Али Рзаев (&lt;a href=&quot;mailto:alirzaev1996@gmail.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#007af4;&quot;&gt;alirzaev1996@gmail.com&lt;/span&gt;&lt;/a&gt;)&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/alirzaev/dispatcher&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#007af4;&quot;&gt;github.com/alirzaev/dispatcher&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;2018-2020 Али Рзаев (&lt;a href=&quot;mailto:alirzaev1996@gmail.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#007af4;&quot;&gt;alirzaev1996@gmail.com&lt;/span&gt;&lt;/a&gt;)&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/alirzaev/dispatcher&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#007af4;&quot;&gt;github.com/alirzaev/dispatcher&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="textFormat">
         <enum>Qt::RichText</enum>

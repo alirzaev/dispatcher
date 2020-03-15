@@ -6,20 +6,26 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>637</width>
+    <width>775</width>
     <height>380</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2">
-   <item>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="0" column="0">
     <layout class="QHBoxLayout" name="topHorizontalLayout">
      <item>
       <widget class="QLabel" name="strategyLabel">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -53,7 +59,7 @@
      </item>
     </layout>
    </item>
-   <item>
+   <item row="1" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QLabel" name="labelRequestDescr">
@@ -106,7 +112,17 @@
      </item>
     </layout>
    </item>
-   <item>
+   <item row="0" column="1">
+    <widget class="QLabel" name="labelHistory">
+     <property name="text">
+      <string>История заявок</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="1">
       <widget class="QLabel" name="labelFreeBlocks">
@@ -123,21 +139,10 @@
       </widget>
      </item>
      <item row="1" column="0">
-      <widget class="QListWidget" name="listMemBlocks">
-       <property name="font">
-        <font>
-         <family>Consolas</family>
-        </font>
-       </property>
-      </widget>
+      <widget class="QListWidget" name="listMemBlocks"/>
      </item>
      <item row="1" column="1">
       <widget class="ReorderableListWidget" name="listFreeBlocks">
-       <property name="font">
-        <font>
-         <family>Consolas</family>
-        </font>
-       </property>
        <property name="dragEnabled">
         <bool>true</bool>
        </property>
@@ -153,6 +158,29 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLabel" name="labelAvailableMemory">
+     <property name="text">
+      <string>Всего доступно памяти:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1" rowspan="2">
+    <widget class="QListWidget" name="historyList">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>160</width>
+       <height>16777215</height>
+      </size>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

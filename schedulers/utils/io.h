@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iomanip>
 #include <istream>
 #include <map>
 #include <ostream>
@@ -7,6 +8,8 @@
 #include <vector>
 
 #include <mapbox/variant.hpp>
+
+#include <config.h>
 
 #include "../algo/processes/types.h"
 #include "tasks.h"
@@ -55,13 +58,11 @@ inline MemoryTask loadMemoryTask(const nlohmann::json &obj) {
   std::vector<Request> requests;
   for (auto req : obj["requests"]) {
     if (req["type"] == "CREATE_PROCESS") {
-      requests.push_back(
-          CreateProcessReq(req["pid"], req["bytes"], req["pages"]));
+      requests.push_back(CreateProcessReq(req["pid"], req["bytes"]));
     } else if (req["type"] == "TERMINATE_PROCESS") {
       requests.push_back(TerminateProcessReq(req["pid"]));
     } else if (req["type"] == "ALLOCATE_MEMORY") {
-      requests.push_back(
-          AllocateMemory(req["pid"], req["bytes"], req["pages"]));
+      requests.push_back(AllocateMemory(req["pid"], req["bytes"]));
     } else if (req["type"] == "FREE_MEMORY") {
       requests.push_back(FreeMemory(req["pid"], req["address"]));
     } else {
@@ -78,8 +79,22 @@ inline MemoryTask loadMemoryTask(const nlohmann::json &obj) {
         blockObj["pid"], blockObj["address"], blockObj["size"]);
   }
 
+  std::vector<std::string> actions(0);
+
+  /*
+   * Если размер массива actions не совпадает с количеством
+   * выполненных заданий (completed) или ни одно задание не выполнено,
+   * то информация из массива отбрасывается.
+   */
+  if (obj.contains("actions") && obj["actions"].is_array() &&
+      !(completed == 0 || completed != obj["actions"].size())) {
+    for (const std::string action : obj["actions"]) {
+      actions.push_back(action);
+    }
+  }
+
   return MemoryTask::create(
-      strategy, completed, fails, {blocks, freeBlocks}, requests);
+      strategy, completed, fails, {blocks, freeBlocks}, requests, actions);
 }
 
 /**
@@ -175,8 +190,22 @@ inline ProcessesTask loadProcessesTask(const nlohmann::json &obj) {
     }
   }
 
+  std::vector<std::string> actions(0);
+
+  /*
+   * Если размер массива actions не совпадает с количеством
+   * выполненных заданий (completed) или ни одно задание не выполнено,
+   * то информация из массива отбрасывается.
+   */
+  if (obj.contains("actions") && obj["actions"].is_array() &&
+      !(completed == 0 || completed != obj["actions"].size())) {
+    for (const std::string action : obj["actions"]) {
+      actions.push_back(action);
+    }
+  }
+
   return ProcessesTask::create(
-      strategy, completed, fails, {processes, queues}, requests);
+      strategy, completed, fails, {processes, queues}, requests, actions);
 }
 } // namespace Utils::details
 
@@ -226,6 +255,10 @@ inline void saveTasks(const std::vector<Task> &tasks, std::ostream &os) {
     obj.push_back(task_json);
   }
 
-  os << obj;
+  os
+#ifdef DISPATCHER_DEBUG
+      << std::setw(2)
+#endif
+      << obj;
 }
 } // namespace Utils

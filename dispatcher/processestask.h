@@ -2,10 +2,12 @@
 
 #include <cstddef>
 #include <string>
+#include <vector>
 
 #include <QLineEdit>
 #include <QPoint>
 #include <QSpinBox>
+#include <QString>
 #include <QWidget>
 
 #include <algo/processes/strategies.h>
@@ -37,17 +39,17 @@ private:
       decltype(ProcessesManagement::ProcessesState::processes);
   using QueuesLists = decltype(ProcessesManagement::ProcessesState::queues);
 
-  Ui::ProcessesTask *ui;
+  // Controller
 
   Models::ProcessesModel _model;
 
-  void connectAll();
+  std::size_t currentRequest;
 
-  void provideContextMenu(const QPoint &pos);
+  QString currentActions;
 
-  ProcessesManagement::ProcessesState collectState();
+  std::vector<QString> actions;
 
-  std::size_t mapRowToIndex(int row);
+  std::vector<ProcessesManagement::ProcessesState> states;
 
   void processActionCreate();
 
@@ -59,23 +61,56 @@ private:
 
   void processActionToActive(std::size_t index);
 
-  void refresh();
+  void pushToQueue(int pid, std::size_t queue);
+
+  int32_t popFromQueue(std::size_t queue);
+
+  void updateCurrentRequest(int index);
+
+  void updateQueuesLists(int);
 
   void nextRequest();
+
+  void refresh();
+
+  // View
+
+  Ui::ProcessesTask *ui;
+
+  void setupSignals();
+
+  void lockUi();
+
+  void unlockUi();
+
+  ProcessesManagement::ProcessesState collectState();
+
+  void provideContextMenu(const QPoint &pos);
+
+  void pushToQueueHandler(QLineEdit *lineEdit, QSpinBox *spinBox);
+
+  void popFromQueueHandler(QLineEdit *lineEdit, QSpinBox *spinBox);
+
+  std::size_t mapRowToIndex(int row);
+
+  void updateMainView(ProcessesManagement::ProcessesState state,
+                      ProcessesManagement::Request request);
+
+  void updateStatsView(std::size_t count, std::size_t total, uint32_t fails);
+
+  void updateStrategyView(ProcessesManagement::StrategyType type);
+
+  void updateHistoryView(Utils::ProcessesTask task,
+                         const std::vector<QString> &actions);
+
+  void updateCurrentActionsView(Utils::ProcessesTask task,
+                                const QString actions);
 
   void setProcessesList(const ProcessesList &processes);
 
   void setQueuesLists(const QueuesLists &queues);
 
   void setRequest(const ProcessesManagement::Request &request);
-
-  void setStrategy(ProcessesManagement::StrategyType type);
-
-  void setStatsInfo(std::size_t count, std::size_t total, uint32_t fails);
-
-  void pushToQueue(QLineEdit *lineEdit, QSpinBox *spinBox);
-
-  void popFromQueue(std::size_t queue, QLineEdit *lineEdit);
 
   void warning(const std::string &message);
 };

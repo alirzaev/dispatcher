@@ -1,6 +1,6 @@
 # Файл задания
 
-Формат файла - JSON. Задания хранятся в виде массива объектов.
+Формат файла - JSON. Файлы, сохраняемые в программной модели, шифруются с помощью ключа из Ф. И. О. студента и кодируются в base64. Файлы, сохраняемые в конструкторе заданий, не шифруются. Задания хранятся в виде массива объектов.
 
 # Структура файла
 
@@ -17,9 +17,10 @@
 | type | String | Тип задания. Значение: `MEMORY_TASK` |
 | strategy | String | Название стратегии. Допустимые значения: `FIRST_APPROPRIATE`, `MOST_APPROPRIATE`, `LEAST_APPROPRIATE` |
 | completed | Number | Количество обработанных заявок |
-| fails | Количество допущенных пользователем ошибок |
+| fails | Number | Количество допущенных пользователем ошибок |
 | state | [MemoryState](#memorystate) | Объект, описывающий состояние памяти |
 | requests | [[CreateProcess](#createprocess) \| [TerminateProcess](#terminateprocess) \| [AllocateMemory](#allocatememory) \| [FreeMemory](#freememory)] | Массив заявок, которые диспетчер должен обработать |
+| actions | \[String\] | Массив строк, содержащих информацию о действиях пользователя для каждой заявки |
 
 ## MemoryState
 
@@ -68,14 +69,11 @@
 | type | String | Тип заявки. Значение: `CREATE_PROCESS` |
 | pid | Number | PID процесса |
 | bytes | Number | Запрашиваемый объем памяти в байтах |
-| pages | Number | Запрашиваемый объем памяти в страницах (1 страница - 4096 байт) |
 
 Ограничения, накладываемые на поля:
 
 - `0 <= pid <= 255`
 - `1 <= bytes <= 256 * 4096`
-- `1 <= pages <= 256`
-- `4096 * (pages - 1) < bytes <= 4096 * pages`
 
 ## TerminateProcess
 
@@ -99,14 +97,11 @@
 | type | String | Тип заявки. Значение: `ALLOCATE_MEMORY` |
 | pid | Number | PID процесса |
 | bytes | Number | Запрашиваемый объем памяти в байтах |
-| pages | Number | Запрашиваемый объем памяти в страницах (1 страница - 4096 байт) |
 
 Ограничения, накладываемые на поля:
 
 - `0 <= pid <= 255`
 - `1 <= bytes <= 256 * 4096`
-- `1 <= pages <= 256`
-- `4096 * (pages - 1) < bytes <= 4096 * pages`
 
 ## FreeMemory
 
@@ -132,7 +127,7 @@
 | type | String | Тип задания. Значение: `PROCESSES_TASK` |
 | strategy | String | Название стратегии. Допустимые значения: `ROUNDROBIN`, `FCFS`, `SJN`, `SRT`, `WINNT` |
 | completed | Number | Количество обработанных заявок |
-| fails | Количество допущенных пользователем ошибок |
+| fails | Number | Количество допущенных пользователем ошибок |
 | state | [ProcessesState](#processesstate) | Объект, описывающий состояние процессов |
 | requests | [[CreateProcessReq](#createprocessreq) \| [TerminateProcessReq](#terminateprocessreq) \| [InitIO](#initio) \| [TerminateIO](#terminateio)] \| [TransferControl](#transfercontrol) \| [TimeQuantumExpired](#timequantumexpired) | Массив заявок, которые диспетчер должен обработать |
 

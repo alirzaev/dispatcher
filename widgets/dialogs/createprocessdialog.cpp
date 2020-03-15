@@ -18,8 +18,10 @@
 CreateProcessDialog::CreateProcessDialog(
     const ProcessesList &processes,
     const QFlags<EditableField> &editableFields,
+    bool basicValidation,
     QWidget *parent)
-    : QDialog(parent), processes(processes), ui(new Ui::CreateProcessDialog) {
+    : QDialog(parent), processes(processes), basicValidation(basicValidation),
+      ui(new Ui::CreateProcessDialog) {
   ui->setupUi(this);
   ui->lineEditPID->setValidator(new QIntValidator(0, 255));
   ui->lineEditPPID->setValidator(new QIntValidator(-1, 255));
@@ -50,8 +52,10 @@ CreateProcessDialog::CreateProcessDialog(
 tl::optional<ProcessesManagement::Process> CreateProcessDialog::getProcess(
     QWidget *parent,
     const CreateProcessDialog::ProcessesList &processes,
-    const QFlags<CreateProcessDialog::EditableField> &editableFields) {
-  auto dialog = CreateProcessDialog(processes, editableFields, parent);
+    const QFlags<CreateProcessDialog::EditableField> &editableFields,
+    bool basicValidation) {
+  auto dialog =
+      CreateProcessDialog(processes, editableFields, basicValidation, parent);
   if (dialog.exec() == QDialog::Accepted) {
     return dialog.data;
   } else {
@@ -80,15 +84,19 @@ void CreateProcessDialog::tryAccept() {
   int32_t basePriority = ui->lineEditBasePriority->text().toInt();
   int32_t workTime = ui->lineEditWorkTime->text().toInt();
 
-  if (getIndexByPid(processes, pid)) {
-    QMessageBox::warning(this, "Ошибка", "Процесс с таким PID уже существует");
-    return;
+  if (!basicValidation) {
+    if (getIndexByPid(processes, pid)) {
+      QMessageBox::warning(
+          this, "Ошибка", "Процесс с таким PID уже существует");
+      return;
+    }
+    if (ppid != -1 && !getIndexByPid(processes, ppid)) {
+      QMessageBox::warning(
+          this, "Ошибка", "Родительский процесс с таким PID не существует");
+      return;
+    }
   }
-  if (ppid != -1 && !getIndexByPid(processes, ppid)) {
-    QMessageBox::warning(
-        this, "Ошибка", "Родительский процесс с таким PID не существует");
-    return;
-  }
+
   if (priority < basePriority) {
     QMessageBox::warning(
         this, "Ошибка", "Текущий приоритет не может быть меньше базового");
@@ -98,8 +106,8 @@ void CreateProcessDialog::tryAccept() {
   this->data = ProcessesManagement::Process{}
                    .pid(pid)
                    .ppid(ppid)
-                   .priority(priority)
-                   .basePriority(basePriority)
+                   .priority(static_cast<std::size_t>(priority))
+                   .basePriority(static_cast<std::size_t>(basePriority))
                    .workTime(workTime);
   this->accept();
 }

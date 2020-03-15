@@ -63,9 +63,7 @@ public:
   MemoryState processRequest(const CreateProcessReq &request,
                              const MemoryState &state) const {
     return sortFreeBlocks(allocateMemoryGeneral(
-        AllocateMemory(request.pid(), request.bytes(), request.pages()),
-        state,
-        true));
+        AllocateMemory(request.pid(), request.bytes()), state, true));
   }
 
   /**

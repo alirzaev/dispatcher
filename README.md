@@ -1,8 +1,5 @@
 # Модель диспетчера задач операционной системы
 
-[![Linux Build Status](https://img.shields.io/travis/alirzaev/dispatcher?label=Linux%20Build%20Status)](https://travis-ci.org/alirzaev/dispatcher)
-[![Windows Build Status](https://img.shields.io/appveyor/ci/alirzaev/dispatcher?label=Windows%20Build%20Status)](https://ci.appveyor.com/project/alirzaev/dispatcher)
-
 Программная модель диспетчера задач для лабораторной работы по дисциплине "Операционные системы"
 
 Руководство пользователя: [HTML](https://alirzaev.github.io/dispatcher/user-manual), [PDF](https://alirzaev.github.io/dispatcher/user-manual.pdf)
@@ -11,17 +8,19 @@
 
 # Структура проекта
 
-- dispatcher.pro - Файл основного проекта
+- qtutils - Библиотека со вспомогательными функциями
 
-  - schedulers/schedulers.pro - Библиотека с алгоритмами работы диспетчера задач
+- schedulers - Библиотека с алгоритмами работы диспетчера задач
 
-  - tests/tests.pro - Тесты
+- tests - Тесты
 
-  - generator/generator.pro - Библиотека для генерации заданий
+- generator - Библиотека для генерации заданий
 
-  - dispatcher/dispatcher.pro - Программная модель с графическим интерфейсом
+- dispatcher - Программная модель с графическим интерфейсом
 
-  - widgets/widgets.pro - Библиотека с UI-компонентами
+- taskbuilder - Конструктор заданий
+
+- widgets - Библиотека с UI-компонентами
 
 # Файл задания
 
@@ -33,7 +32,11 @@
 
 ### Windows
 
+- CMake 3.10 или новее
+
 - Qt 5.11 или новее
+
+- Botan (криптографическая библиотека) 2.4 или новее
 
 - Visual Studio 2017 или новее со следующими компонентами:
 
@@ -43,9 +46,13 @@
 
 ### Ubuntu
 
-- Минимальная версия Ubuntu - 16.04
+- Минимальная версия Ubuntu - 18.04
+
+- CMake 3.10 или новее
 
 - Qt 5.11 или новее
+
+- Botan (криптографическая библиотека) 2.4 или новее
 
 - g++ 7 или новее
 
@@ -56,33 +63,23 @@
 - [Mapbox Variant 1.1.6](https://github.com/mapbox/variant)
 - [TartanLlama optional 1.0.0](https://github.com/TartanLlama/optional)
 
+## Используемые сторонние шрифты
+
+- [Microsoft Cascadia Code 1911.21](https://github.com/microsoft/cascadia-code)
+
 ## Сборка
 
-Проект собирается штатными средствами Qt: либо открываем `dispatcher.pro` через QtCreator, либо
-собираем с помощью qmake:
+Проект собирается штатными средствами Qt: либо открываем `CMkaeLists.txt` через QtCreator, либо
+собираем с помощью CMake:
 
 ```
 mkdir build
 cd build
-qmake ../dispatcher.pro
+cmake -DCMAKE_PREFIX_PATH="<Qt root dir>/lib/cmake" -DDISPATCHER_DEBUG=1 ..
 make
 ```
 
-<details>
-<summary>
-Режим ограниченной функциональности
-</summary>
-
-Программную модель можно собрать с режимом ограниченной функциональности, в
-котором пользователь не может сохранять файлы с заданиями.
-Для сборки модели с данным режимом необходимо передать в `qmake` параметр
-`"CONFIG+=restricted"`:
-
-```
-qmake "CONFIG+=restricted" ../dispatcher.pro
-```
-
-</details>
+`DISPATCHER_DEBUG=1` - включение дополнительной отладочной информации.
 
 # В случае возникновения проблем
 

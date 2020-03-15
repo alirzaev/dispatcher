@@ -67,7 +67,7 @@ inline Utils::ProcessesTask generate(uint32_t requestCount = 40,
        ++i) {
     bool validRequired = requests.empty() ? true : randRange(0, 256) % 16 > 0;
     optional<Request> last =
-        requests.empty() ? nullopt : optional(requests.back());
+        requests.empty() ? nullopt : optional<Request>(requests.back());
     vector<Request> validRequests =
                         generator->generate(state, {last, isLastValid}, true),
                     invalidRequests =

@@ -14,7 +14,9 @@ using namespace ProcessesManagement;
 
 extern void initResources();
 
-ProcessMenu::ProcessMenu(tl::optional<Process> process, QWidget *parent)
+ProcessMenu::ProcessMenu(tl::optional<Process> process,
+                         bool showItemDecrease,
+                         QWidget *parent)
     : QMenu(parent) {
   initResources();
 
@@ -27,6 +29,11 @@ ProcessMenu::ProcessMenu(tl::optional<Process> process, QWidget *parent)
       ->setEnabled(process.has_value());
   addAction(QIcon(":/g/images/yellow_circle.png"), TO_ACTIVE)
       ->setEnabled(process.has_value());
+
+  if (showItemDecrease) {
+    addAction(DECREASE)->setEnabled(process.has_value() &&
+                                    process->state() == ProcState::EXECUTING);
+  }
 }
 
 QString ProcessMenu::CREATE = "Создать"_qs;
@@ -38,3 +45,5 @@ QString ProcessMenu::TO_EXECUTING = "Переключиться"_qs;
 QString ProcessMenu::TO_WAITING = "Переключить в состояние ожидания"_qs;
 
 QString ProcessMenu::TO_ACTIVE = "Переключить в состояние готовности"_qs;
+
+QString ProcessMenu::DECREASE = "Понизить приоритет"_qs;

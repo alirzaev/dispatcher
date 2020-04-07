@@ -43,8 +43,8 @@ public:
    *
    *  @return Новое состояние процессов.
    */
-  ProcessesState processRequest(const Request &request,
-                                const ProcessesState &state) const {
+  virtual ProcessesState processRequest(const Request &request,
+                                        const ProcessesState &state) const {
     return request.match([this, state](const auto &req) {
       return updateTimer(this->processRequest(req, state));
     });

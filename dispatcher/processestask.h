@@ -61,6 +61,8 @@ private:
 
   void processActionToActive(std::size_t index);
 
+  void processActionDecrease(std::size_t index);
+
   void pushToQueue(int pid, std::size_t queue);
 
   int32_t popFromQueue(std::size_t queue);

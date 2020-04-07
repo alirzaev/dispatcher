@@ -17,7 +17,7 @@
 
 namespace ProcessesManagement {
 /**
- *  @brief Стратегия "WinNT".
+ *  @brief Стратегия "UNIX".
  */
 class UnixStrategy final : public AbstractStrategy {
 public:
@@ -45,6 +45,24 @@ public:
     }
   }
 
+  ProcessesState processRequest(const Request &request,
+                                const ProcessesState &state) const override {
+    auto newState = state;
+    /*
+     * Каждые 2 такта уменьшать приоритет на 1 (только для приоритетов от 0 до
+     * 7)
+     */
+    auto index = getIndexByState(newState.processes, ProcState::EXECUTING);
+    if (index) {
+      auto &current = newState.processes.at(*index);
+      if (current.timer() % 2 == 0 && current.timer() > 0 &&
+          current.priority() > 0 && current.priority() < 8) {
+        current = current.priority(current.priority() - 1);
+      }
+    }
+    return AbstractStrategy::processRequest(request, newState);
+  }
+
 protected:
   tl::optional<std::pair<int32_t, size_t>>
   schedule(const ProcessesState &state) const override {
@@ -61,6 +79,17 @@ protected:
 
 private:
   UnixStrategy() : AbstractStrategy() {}
+
+  ProcessesState resetTimer(const ProcessesState &state, int32_t pid) const {
+    auto newState = state;
+    auto index = getIndexByPid(newState, pid);
+    if (index) {
+      auto &process = newState.processes.at(*index);
+      process = process.timer(0);
+    }
+
+    return newState;
+  }
 
 protected:
   ProcessesState processRequest(const CreateProcessReq &request,
@@ -87,24 +116,11 @@ protected:
 
     auto current = getCurrent(newState);
     auto next = schedule(newState);
-
-    if (next) {
+    if (!current && next) {
       auto [pid, queue] = next.value();
-      auto processIndex = getIndexByPid(newState, pid);
-      auto process = newState.processes.at(*processIndex);
-
-      if (!current) {
-        newState = popFromQueue(newState, queue);
-        newState = switchTo(newState, pid);
-      } else if (current && process.priority() > current->priority()) {
-        newState = pushToQueue(newState, current->priority(), current->pid());
-        newState = popFromQueue(newState, queue);
-        newState = switchTo(newState, pid);
-      }
-    } else {
-      return newState;
+      newState = popFromQueue(newState, queue);
+      newState = switchTo(newState, pid);
     }
-
     return newState;
   }
 
@@ -142,6 +158,7 @@ protected:
     }
 
     newState = changeProcessState(newState, request.pid(), ProcState::WAITING);
+    newState = resetTimer(newState, request.pid());
 
     auto next = schedule(newState);
     if (next) {
@@ -165,29 +182,18 @@ protected:
       return newState;
     }
 
-    newState = pushToQueue(newState, process.priority(), request.pid());
+    auto newPriority =
+        process.priority() < 7 ? process.priority() + 1 : process.priority();
+    newState = pushToQueue(newState, newPriority, request.pid());
     newState = changeProcessState(newState, request.pid(), ProcState::ACTIVE);
 
     auto current = getCurrent(newState);
     auto next = schedule(newState);
-
-    if (next) {
+    if (!current && next) {
       auto [pid, queue] = next.value();
-      auto processIndex = getIndexByPid(newState, pid);
-      auto process = newState.processes.at(*processIndex);
-
-      if (!current) {
-        newState = popFromQueue(newState, queue);
-        newState = switchTo(newState, pid);
-      } else if (current && process.priority() > current->priority()) {
-        newState = pushToQueue(newState, current->priority(), current->pid());
-        newState = popFromQueue(newState, queue);
-        newState = switchTo(newState, pid);
-      }
-    } else {
-      return newState;
+      newState = popFromQueue(newState, queue);
+      newState = switchTo(newState, pid);
     }
-
     return newState;
   }
 

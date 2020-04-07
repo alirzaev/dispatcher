@@ -168,6 +168,10 @@ void ProcessesTask::processActionToWaiting(std::size_t index) {
     _model.state = collectState();
     auto pid = _model.state.processes.at(index).pid();
     _model.state = changeProcessState(_model.state, pid, ProcState::WAITING);
+    if (_model.task.strategy()->type() == StrategyType::UNIX) {
+      auto &process = _model.state.processes.at(index);
+      process = process.timer(0);
+    }
     currentActions +=
         "\nПереключение процесса PID=%1 в состояние ожидания"_qs.arg(pid);
     refresh();
@@ -182,6 +186,21 @@ void ProcessesTask::processActionToActive(std::size_t index) {
     auto pid = _model.state.processes.at(index).pid();
     _model.state = changeProcessState(_model.state, pid, ProcState::ACTIVE);
     currentActions += "\nPID=%1 готов к выполнению"_qs.arg(pid);
+    refresh();
+  } catch (const std::exception &ex) {
+    warning("Неизвестная ошибка: "s + ex.what());
+  }
+}
+
+void ProcessesTask::processActionDecrease(std::size_t index) {
+  try {
+    _model.state = collectState();
+    auto &process = _model.state.processes.at(index);
+    auto pid = process.pid();
+    if (process.priority() > 0) {
+      process = process.priority(process.priority() - 1);
+    }
+    currentActions += "\nУменьшение приоритета PID=%1 на 1"_qs.arg(pid);
     refresh();
   } catch (const std::exception &ex) {
     warning("Неизвестная ошибка: "s + ex.what());
@@ -414,7 +433,8 @@ void ProcessesTask::provideContextMenu(const QPoint &pos) {
 
   qDebug() << "ContextMenu: row " << row;
 
-  ProcessMenu menu(process);
+  ProcessMenu menu(process,
+                   _model.task.strategy()->type() == StrategyType::UNIX);
 
   auto action = menu.exec(globalPos);
   if (!action) {
@@ -436,6 +456,9 @@ void ProcessesTask::provideContextMenu(const QPoint &pos) {
   } else if (action->text() == ProcessMenu::TO_ACTIVE && row != -1) {
     qDebug() << "ContextMenu: to active";
     processActionToActive(mapRowToIndex(row));
+  } else if (action->text() == ProcessMenu::DECREASE && row != -1) {
+    qDebug() << "ContextMenu: decrease";
+    processActionDecrease(mapRowToIndex(row));
   }
 }
 

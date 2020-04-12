@@ -115,13 +115,13 @@ void MainWindow::openTasks() {
     loadTasks(tasks);
     ui->actionSaveTask->setDisabled(false);
   } catch (const Botan::Exception &ex) {
-    qDebug() << ex.what();
+    qCritical() << ex.what();
     QMessageBox::warning(
         this,
         "Ошибка",
         "Невозможно загрузить задания: файл принадлежит другому студенту");
   } catch (const std::exception &ex) {
-    qDebug() << ex.what();
+    qCritical() << ex.what();
     QMessageBox::warning(
         this, "Ошибка", "Невозможно загрузить задания: файл поврежден");
   }
@@ -157,7 +157,7 @@ void MainWindow::saveTasks() {
     file << encrypted;
     file.flush();
   } catch (const std::exception &ex) {
-    qDebug() << ex.what();
+    qCritical() << ex.what();
     QMessageBox::warning(this, "Ошибка", "Невозможно сохранить задания");
   }
 }
@@ -198,8 +198,6 @@ void MainWindow::dumpTasks(const std::vector<Utils::Task> &tasks) {
   try {
     auto tempFilePath =
         QDir::toNativeSeparators(QDir::tempPath() + "/dispatcher.json");
-
-    qDebug() << tempFilePath;
 
     std::ofstream file = QtUtils::FileIO::openStdOfstream(tempFilePath);
     Utils::saveTasks(tasks, file);

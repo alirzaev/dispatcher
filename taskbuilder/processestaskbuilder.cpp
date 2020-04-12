@@ -1,7 +1,6 @@
 #include <map>
 
 #include <QApplication>
-#include <QDebug>
 
 #include <utils/tasks.h>
 
@@ -238,12 +237,8 @@ void ProcessesTaskBuilder::clearTaskView() {
 }
 
 void ProcessesTaskBuilder::provideContextMenu(const QPoint &pos) {
-  qDebug() << "ContextMenu";
-
   auto globalPos = ui->requestsList->mapToGlobal(pos);
   auto row = ui->requestsList->indexAt(pos).row();
-
-  qDebug() << "ContextMenu:" << row;
 
   ProcessTaskAddRequestMenu menu(row != -1);
 

@@ -4,7 +4,6 @@
 #include <QApplication>
 #include <QFont>
 #include <QFontDatabase>
-#include <QDebug>
 
 #include <tl/optional.hpp>
 
@@ -197,12 +196,8 @@ void MemoryTaskBuilder::clearTaskView() {
 }
 
 void MemoryTaskBuilder::provideContextMenu(const QPoint &pos) {
-  qDebug() << "ContextMenu";
-
   auto globalPos = ui->requestsList->mapToGlobal(pos);
   auto row = ui->requestsList->indexAt(pos).row();
-
-  qDebug() << "ContextMenu:" << row;
 
   MemoryTaskAddRequestMenu menu(row != -1);
 

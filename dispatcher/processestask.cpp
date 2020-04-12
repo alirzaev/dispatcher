@@ -275,8 +275,6 @@ void ProcessesTask::updateCurrentRequest(int index) {
     lockUi();
   }
   refresh();
-
-  qDebug() << "currentRequest: " << currentRequest;
 }
 
 void ProcessesTask::updateQueuesLists(int) { refresh(); }
@@ -320,8 +318,6 @@ void ProcessesTask::nextRequest() {
   }
 
   refresh();
-
-  qDebug() << "currentRequest: " << currentRequest;
 }
 
 void ProcessesTask::setupSignals() {
@@ -418,8 +414,6 @@ ProcessesState ProcessesTask::collectState() {
 }
 
 void ProcessesTask::provideContextMenu(const QPoint &pos) {
-  qDebug() << "ContextMenu";
-
   auto *processes = ui->processesTable;
 
   auto globalPos = processes->mapToGlobal(pos);
@@ -431,8 +425,6 @@ void ProcessesTask::provideContextMenu(const QPoint &pos) {
           ? tl::optional<Process>{_model.state.processes.at(mapRowToIndex(row))}
           : tl::nullopt;
 
-  qDebug() << "ContextMenu: row " << row;
-
   ProcessMenu menu(process,
                    _model.task.strategy()->type() == StrategyType::UNIX);
 
@@ -442,22 +434,16 @@ void ProcessesTask::provideContextMenu(const QPoint &pos) {
   }
 
   if (action->text() == ProcessMenu::CREATE) {
-    qDebug() << "ContextMenu: create";
     processActionCreate();
   } else if (action->text() == ProcessMenu::TERMINATE && row != -1) {
-    qDebug() << "ContextMenu: terminate";
     processActionTerminate(mapRowToIndex(row));
   } else if (action->text() == ProcessMenu::TO_EXECUTING && row != -1) {
-    qDebug() << "ContextMenu: to executing";
     processActionToExecuting(mapRowToIndex(row));
   } else if (action->text() == ProcessMenu::TO_WAITING && row != -1) {
-    qDebug() << "ContextMenu: to waiting";
     processActionToWaiting(mapRowToIndex(row));
   } else if (action->text() == ProcessMenu::TO_ACTIVE && row != -1) {
-    qDebug() << "ContextMenu: to active";
     processActionToActive(mapRowToIndex(row));
   } else if (action->text() == ProcessMenu::DECREASE && row != -1) {
-    qDebug() << "ContextMenu: decrease";
     processActionDecrease(mapRowToIndex(row));
   }
 }

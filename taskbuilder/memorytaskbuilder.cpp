@@ -2,9 +2,9 @@
 #include <map>
 
 #include <QApplication>
+#include <QDesktopWidget>
 #include <QFont>
 #include <QFontDatabase>
-#include <QDebug>
 
 #include <tl/optional.hpp>
 
@@ -42,7 +42,8 @@ MemoryTaskBuilder::MemoryTaskBuilder(const Utils::Task &task, QWidget *parent)
   ui->labelRequestDescr->setFont(font);
 
   auto fixedFont = QFont("Cascadia Mono");
-  fixedFont.setPointSize(10);
+  double logicalDpi = QApplication::desktop()->logicalDpiX();
+  fixedFont.setPointSizeF(10 * STANDARD_DPI / logicalDpi);
   ui->listMemBlocks->setFont(fixedFont);
   ui->listFreeBlocks->setFont(fixedFont);
 
@@ -197,12 +198,8 @@ void MemoryTaskBuilder::clearTaskView() {
 }
 
 void MemoryTaskBuilder::provideContextMenu(const QPoint &pos) {
-  qDebug() << "ContextMenu";
-
   auto globalPos = ui->requestsList->mapToGlobal(pos);
   auto row = ui->requestsList->indexAt(pos).row();
-
-  qDebug() << "ContextMenu:" << row;
 
   MemoryTaskAddRequestMenu menu(row != -1);
 

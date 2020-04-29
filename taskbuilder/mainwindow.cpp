@@ -78,7 +78,7 @@ void MainWindow::openTasks() {
     auto tasks = Utils::loadTasks(file);
     loadTasks(tasks);
   } catch (const std::exception &ex) {
-    qDebug() << ex.what();
+    qCritical() << ex.what();
     QMessageBox::warning(
         this, "Ошибка", "Невозможно загрузить задания: файл поврежден");
   }
@@ -109,7 +109,7 @@ void MainWindow::saveTasks() {
 
     Utils::saveTasks(tasks, file);
   } catch (const std::exception &ex) {
-    qDebug() << ex.what();
+    qCritical() << ex.what();
     QMessageBox::warning(this, "Ошибка", "Невозможно сохранить задания");
   }
 }
@@ -340,12 +340,8 @@ void MainWindow::processContextMenuAction(const QString &action,
 }
 
 void MainWindow::provideContextMenu(const QPoint &pos) {
-  qDebug() << "ContextMenu";
-
   auto globalPos = ui->tasksList->mapToGlobal(pos);
   auto row = ui->tasksList->indexAt(pos).row();
-
-  qDebug() << "ContextMenu:" << row;
 
   TaskItemMenu menu(row != -1);
 

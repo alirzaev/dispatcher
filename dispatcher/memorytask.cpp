@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QDesktopWidget>
 #include <QDebug>
 #include <QFont>
 #include <QFontDatabase>
@@ -54,7 +55,8 @@ MemoryTask::MemoryTask(Models::MemoryModel model, QWidget *parent)
   ui->labelRequestDescr->setFont(font);
 
   auto fixedFont = QFont("Cascadia Mono");
-  fixedFont.setPointSize(10);
+  double logicalDpi = QApplication::desktop()->logicalDpiX();
+  fixedFont.setPointSizeF(10 * STANDARD_DPI / logicalDpi);
   ui->listMemBlocks->setFont(fixedFont);
   ui->listFreeBlocks->setFont(fixedFont);
 
@@ -199,8 +201,6 @@ void MemoryTask::updateCurrentRequest(int index) {
     lockUi();
   }
   refresh();
-
-  qDebug() << "currentRequest: " << currentRequest;
 }
 
 void MemoryTask::nextRequest() {
@@ -226,8 +226,6 @@ void MemoryTask::nextRequest() {
   }
 
   refresh();
-
-  qDebug() << "currentRequest: " << currentRequest;
 }
 
 void MemoryTask::refresh() {
@@ -278,8 +276,6 @@ MemoryState MemoryTask::collectState() {
 }
 
 void MemoryTask::provideContextMenu(const QPoint &pos) {
-  qDebug() << "ContextMenu";
-
   auto globalPos = ui->listMemBlocks->mapToGlobal(pos);
   auto listItem = ui->listMemBlocks->itemAt(pos);
   auto selectedBlock = dynamic_cast<MemoryBlockItem *>(listItem);
@@ -289,7 +285,6 @@ void MemoryTask::provideContextMenu(const QPoint &pos) {
   if (row == -1 || !selectedBlock) {
     return;
   }
-  qDebug() << "ContextMenu:" << selectedBlock->text() << row;
 
   MemoryBlockMenu menu(selectedBlock->block());
 
@@ -301,16 +296,12 @@ void MemoryTask::provideContextMenu(const QPoint &pos) {
   auto block = selectedBlock->block();
 
   if (action->text() == MemoryBlockMenu::ACTION_ALLOCATE) {
-    qDebug() << "ContextMenu: allocate";
     processActionAllocate(block, blockIndex);
   } else if (action->text() == MemoryBlockMenu::ACTION_FREE) {
-    qDebug() << "ContextMenu: free";
     processActionFree(block, blockIndex);
   } else if (action->text() == MemoryBlockMenu::ACTION_COMPRESS) {
-    qDebug() << "ContextMenu: compress";
     processActionCompress(blockIndex);
   } else if (action->text() == MemoryBlockMenu::ACTION_DEFRAGMENT) {
-    qDebug() << "ContextMenu: defragment";
     processActionDefragment();
   }
 }

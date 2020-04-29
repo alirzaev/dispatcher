@@ -9,3 +9,6 @@
 #else
 #define FONT_SCALE_FACTOR 1.0
 #endif
+
+#define STANDARD_DPI 92
+

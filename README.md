@@ -26,7 +26,7 @@
 
 Структуру файла задания можно найти [здесь](docs/TASK.md)
 
-# Сборка
+# Сборка приложений
 
 ## Необходимые компоненты
 
@@ -72,7 +72,7 @@
 Проект собирается штатными средствами Qt: либо открываем `CMkaeLists.txt` через QtCreator, либо
 собираем с помощью CMake:
 
-```
+```sh
 mkdir build
 cd build
 cmake -DCMAKE_PREFIX_PATH="<Qt root dir>/lib/cmake" -DDISPATCHER_DEBUG=1 ..
@@ -80,6 +80,35 @@ make
 ```
 
 `DISPATCHER_DEBUG=1` - включение дополнительной отладочной информации.
+
+# Сборка руководства пользователя
+
+## Необходимые компоненты
+
+- Asciidoctor 2.0 или новее
+
+- Asciidoctor PDF 1.5 или новее (для сборки руководства в PDF)
+
+- Pandoc 2.9 или новее (для сборки руководства в другие форматы)
+
+## Сборка
+
+```sh
+cd docs/user-manual
+
+# HTML
+
+asciidoctor -o index.html index.adoc
+
+# PDF
+
+asciidoctor-pdf -a pdf-theme=theme.yml -o user-manual.pdf index.adoc
+
+# Другие форматы (fb2, epub, docx и пр.)
+
+asciidoctor -b docbook5 -o user-manual.docbook index.adoc
+pandoc -f docbook -t <output format> -o <output file> index.docbook
+```
 
 # В случае возникновения проблем
 

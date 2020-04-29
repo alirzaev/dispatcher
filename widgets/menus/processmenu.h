@@ -20,6 +20,9 @@ public:
 
   static QString TO_ACTIVE;
 
+  static QString DECREASE;
+
   ProcessMenu(tl::optional<ProcessesManagement::Process> process,
+              bool showItemDecrease = false,
               QWidget *parent = nullptr);
 };

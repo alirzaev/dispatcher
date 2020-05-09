@@ -15,11 +15,14 @@ set(RESOURCES
         )
 
 if (WIN32)
-    set(RESOURCES ${RESOURCES} resources.rc)
+    set(ICON_NAME "taskbuilder.ico")
+    set(ICON_PATH "${PROJECT_SOURCE_DIR}/icon/ico/${ICON_NAME}")
+    configure_file(resources.rc.in resources.rc @ONLY)
+    set(RESOURCES ${RESOURCES} "${CMAKE_CURRENT_BINARY_DIR}/resources.rc")
 endif ()
 
 if (APPLE)
-    set(ICON_NAME "taskbuilder.icns" )
+    set(ICON_NAME "taskbuilder.icns")
     set(ICON_PATH "${PROJECT_SOURCE_DIR}/icon/icns/${ICON_NAME}")
     set(RESOURCES ${RESOURCES} ${ICON_PATH})
     set_source_files_properties(${ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)

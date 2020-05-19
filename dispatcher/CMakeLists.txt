@@ -6,7 +6,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 find_package(Botan REQUIRED)
 
 file(GLOB_RECURSE HEADERS "*.h")
@@ -44,5 +44,5 @@ target_include_directories(dispatcher PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../3r
 target_include_directories(dispatcher PRIVATE "${Botan_INCLUDE_DIRS}")
 
 target_link_libraries(dispatcher schedulers generator qtutils widgets)
-target_link_libraries(dispatcher Qt5::Core Qt5::Widgets)
+target_link_libraries(dispatcher Qt5::Core Qt5::Gui Qt5::Widgets)
 target_link_libraries(dispatcher "${Botan_LIBRARIES}")

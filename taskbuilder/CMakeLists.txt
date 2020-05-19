@@ -4,7 +4,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 
 file(GLOB_RECURSE HEADERS "*.h")
 file(GLOB_RECURSE SOURCES "*.cpp")
@@ -40,4 +40,4 @@ add_executable(taskbuilder WIN32 MACOSX_BUNDLE ${HEADERS} ${SOURCES} ${FORMS} ${
 target_include_directories(taskbuilder PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty")
 
 target_link_libraries(taskbuilder schedulers generator qtutils widgets)
-target_link_libraries(taskbuilder Qt5::Core Qt5::Widgets)
+target_link_libraries(taskbuilder Qt5::Core Qt5::Gui Qt5::Widgets)

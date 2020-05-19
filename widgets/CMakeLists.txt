@@ -4,7 +4,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 
 file(GLOB_RECURSE HEADERS "*.h")
 file(GLOB_RECURSE SOURCES "*.cpp")
@@ -18,4 +18,4 @@ target_include_directories(widgets PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../3rdpa
 
 target_link_libraries(widgets schedulers)
 target_link_libraries(widgets qtutils)
-target_link_libraries(widgets Qt5::Core Qt5::Widgets)
+target_link_libraries(widgets Qt5::Core Qt5::Gui Qt5::Widgets)

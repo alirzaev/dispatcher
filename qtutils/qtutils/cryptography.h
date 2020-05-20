@@ -37,7 +37,14 @@ inline std::string encrypt(const std::string &tasks,
   enc->start(iv);
   enc->finish(ciphertext);
 
-  return Botan::hex_encode(iv) + Botan::hex_encode(ciphertext);
+  std::string output;
+  output.reserve(iv.size() + ciphertext.size());
+  output.insert(output.end(), (char *)iv.data(), (char *)iv.data() + iv.size());
+  output.insert(output.end(),
+                (char *)ciphertext.data(),
+                (char *)ciphertext.data() + ciphertext.size());
+
+  return output;
 }
 
 inline std::string decrypt(const std::string &ciphertext,
@@ -46,10 +53,9 @@ inline std::string decrypt(const std::string &ciphertext,
       Botan::get_cipher_mode("AES-256/CBC/PKCS7", Botan::DECRYPTION));
   enc->set_key(hash(passphrase.toStdString()));
 
-  auto decoded = Botan::hex_decode(ciphertext);
-
   Botan::secure_vector<uint8_t> plaintext(
-      (uint8_t *)decoded.data(), (uint8_t *)(decoded.data() + decoded.size()));
+      (uint8_t *)ciphertext.data(),
+      (uint8_t *)(ciphertext.data() + ciphertext.size()));
 
   enc->start(plaintext.data(), enc->default_nonce_length());
   enc->finish(plaintext);

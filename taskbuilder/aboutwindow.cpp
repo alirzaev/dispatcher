@@ -15,10 +15,6 @@ AboutWindow::AboutWindow(QWidget *parent)
                                 .arg(DISPATCHER_MINOR)
                                 .arg(DISPATCHER_PATCH));
   ui->labelGitRevision->setText("Ревизия: %1"_qs.arg(GIT_REV));
-#ifdef RESTRICTED_MODE
-  ui->labelRestrictedMode->setText(
-      "Действует режим ограниченной функциональности");
-#endif
 }
 
 AboutWindow::~AboutWindow() { delete ui; }

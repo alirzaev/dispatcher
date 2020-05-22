@@ -38,6 +38,11 @@ endif ()
 add_executable(taskbuilder WIN32 MACOSX_BUNDLE ${HEADERS} ${SOURCES} ${FORMS} ${RESOURCES})
 
 target_include_directories(taskbuilder PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty")
+target_include_directories(taskbuilder PRIVATE
+        "${Qt5Core_INCLUDE_DIRS}"
+        "${Qt5Gui_INCLUDE_DIRS}"
+        "${Qt5Widgets_INCLUDE_DIRS}"
+        )
 
 target_link_libraries(taskbuilder schedulers generator qtutils widgets)
 target_link_libraries(taskbuilder Qt5::Core Qt5::Gui Qt5::Widgets)

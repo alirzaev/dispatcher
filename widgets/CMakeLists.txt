@@ -15,6 +15,11 @@ add_library(widgets STATIC ${HEADERS} ${SOURCES} ${FORMS} ${RESOURCES})
 
 target_include_directories(widgets PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_include_directories(widgets PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty")
+target_include_directories(widgets PRIVATE
+        "${Qt5Core_INCLUDE_DIRS}"
+        "${Qt5Gui_INCLUDE_DIRS}"
+        "${Qt5Widgets_INCLUDE_DIRS}"
+        )
 
 target_link_libraries(widgets schedulers)
 target_link_libraries(widgets qtutils)

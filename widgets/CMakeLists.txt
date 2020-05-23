@@ -6,9 +6,29 @@ set(CMAKE_AUTOUIC ON)
 
 find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 
-file(GLOB_RECURSE HEADERS "*.h")
-file(GLOB_RECURSE SOURCES "*.cpp")
-file(GLOB_RECURSE FORMS "*.ui")
+set(HEADERS
+        dialogs/allocatememorydialog.h
+        dialogs/createprocessdialog.h
+        listitems/memoryblockitem.h
+        menus/memoryblockmenu.h
+        menus/processmenu.h
+        processestablewidget.h
+        reorderablelistwidget.h
+        )
+set(SOURCES
+        dialogs/allocatememorydialog.cpp
+        dialogs/createprocessdialog.cpp
+        listitems/memoryblockitem.cpp
+        menus/memoryblockmenu.cpp
+        menus/processmenu.cpp
+        processestablewidget.cpp
+        reorderablelistwidget.cpp
+        resourceshelper.cpp
+        )
+set(FORMS
+        dialogs/allocatememorydialog.ui
+        dialogs/createprocessdialog.ui
+        )
 set(RESOURCES resources.qrc)
 
 add_library(widgets STATIC ${HEADERS} ${SOURCES} ${FORMS} ${RESOURCES})

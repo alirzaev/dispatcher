@@ -7,10 +7,17 @@ find_package(Botan REQUIRED)
 
 add_library(qtutils INTERFACE)
 
-file (GLOB_RECURSE SOURCES "*.h")
+set(HEADERS
+        qtutils/cryptography.h
+        qtutils/fileio.h
+        qtutils/fontscale.h
+        qtutils/literals.h
+        )
+foreach(header IN LISTS HEADERS)
+    list(APPEND TARGET_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/${header}")
+endforeach()
 target_include_directories(qtutils INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}")
 
 target_include_directories(qtutils INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty")
-target_include_directories(qtutils INTERFACE "${Qt5Core_INCLUDE_DIRS}")
 target_include_directories(qtutils INTERFACE "${Botan_INCLUDE_DIRS}")
-target_sources(qtutils INTERFACE ${SOURCES})
+target_sources(qtutils INTERFACE ${TARGET_SOURCES})

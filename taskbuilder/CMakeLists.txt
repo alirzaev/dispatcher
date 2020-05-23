@@ -6,9 +6,44 @@ set(CMAKE_AUTOUIC ON)
 
 find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 
-file(GLOB_RECURSE HEADERS "*.h")
-file(GLOB_RECURSE SOURCES "*.cpp")
-file(GLOB_RECURSE FORMS "*.ui")
+set(HEADERS
+        dialogs/freememorydialog.h
+        dialogs/pidinputdialog.h
+        dialogs/terminateiodialog.h
+        menus/memorytaskaddrequestmenu.h
+        menus/processtaskaddrequestmenu.h
+        menus/requestitemmenu.h
+        menus/taskitemmenu.h
+        aboutwindow.h
+        abstracttaskbuilder.h
+        historynavigator.h
+        mainwindow.h
+        memorytaskbuilder.h
+        processestaskbuilder.h
+        )
+set(SOURCES
+        dialogs/freememorydialog.cpp
+        dialogs/pidinputdialog.cpp
+        dialogs/terminateiodialog.cpp
+        menus/memorytaskaddrequestmenu.cpp
+        menus/processtaskaddrequestmenu.cpp
+        menus/requestitemmenu.cpp
+        menus/taskitemmenu.cpp
+        aboutwindow.cpp
+        mainwindow.cpp
+        memorytaskbuilder.cpp
+        processestaskbuilder.cpp
+        main.cpp
+        )
+set(FORMS
+        dialogs/freememorydialog.ui
+        dialogs/pidinputdialog.ui
+        dialogs/terminateiodialog.ui
+        aboutwindow.ui
+        mainwindow.ui
+        memorytaskbuilder.ui
+        processestaskbuilder.ui
+        )
 set(RESOURCES
         "${PROJECT_SOURCE_DIR}/fonts/fonts.qrc"
         "${PROJECT_SOURCE_DIR}/translations/translations.qrc"

@@ -9,9 +9,27 @@ set(CMAKE_AUTOUIC ON)
 find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 find_package(Botan REQUIRED)
 
-file(GLOB_RECURSE HEADERS "*.h")
-file(GLOB_RECURSE SOURCES "*.cpp")
-file(GLOB_RECURSE FORMS "*.ui")
+set(HEADERS
+        aboutwindow.h
+        mainwindow.h
+        memorytask.h
+        processestask.h
+        models.h
+        taskgetter.h
+        )
+set(SOURCES
+        aboutwindow.cpp
+        mainwindow.cpp
+        memorytask.cpp
+        processestask.cpp
+        main.cpp
+        )
+set(FORMS
+        aboutwindow.ui
+        mainwindow.ui
+        memorytask.ui
+        processestask.ui
+        )
 set(RESOURCES
         "${PROJECT_SOURCE_DIR}/fonts/fonts.qrc"
         "${PROJECT_SOURCE_DIR}/translations/translations.qrc"

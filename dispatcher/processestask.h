@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -27,7 +28,7 @@ class ProcessesTask : public QWidget, public TaskGetter {
   Q_OBJECT
 
 public:
-  explicit ProcessesTask(Models::ProcessesModel task,
+  explicit ProcessesTask(const Models::ProcessesModel &task,
                          QWidget *parent = nullptr);
 
   Utils::Task task() const override;
@@ -39,11 +40,11 @@ private:
       decltype(ProcessesManagement::ProcessesState::processes);
   using QueuesLists = decltype(ProcessesManagement::ProcessesState::queues);
 
-  // Controller
+  /* Controller */
 
   Models::ProcessesModel _model;
 
-  std::size_t currentRequest;
+  size_t currentRequest;
 
   QString currentActions;
 
@@ -53,19 +54,19 @@ private:
 
   void processActionCreate();
 
-  void processActionTerminate(std::size_t index);
+  void processActionTerminate(size_t index);
 
-  void processActionToExecuting(std::size_t index);
+  void processActionToExecuting(size_t index);
 
-  void processActionToWaiting(std::size_t index);
+  void processActionToWaiting(size_t index);
 
-  void processActionToActive(std::size_t index);
+  void processActionToActive(size_t index);
 
-  void processActionDecrease(std::size_t index);
+  void processActionDecrease(size_t index);
 
-  void pushToQueue(int pid, std::size_t queue);
+  void pushToQueue(int pid, size_t queue);
 
-  int32_t popFromQueue(std::size_t queue);
+  int32_t popFromQueue(size_t queue);
 
   void updateCurrentRequest(int index);
 
@@ -75,7 +76,7 @@ private:
 
   void refresh();
 
-  // View
+  /* View */
 
   Ui::ProcessesTask *ui;
 
@@ -93,20 +94,20 @@ private:
 
   void popFromQueueHandler(QLineEdit *lineEdit, QSpinBox *spinBox);
 
-  std::size_t mapRowToIndex(int row);
+  size_t mapRowToIndex(int row);
 
-  void updateMainView(ProcessesManagement::ProcessesState state,
-                      ProcessesManagement::Request request);
+  void updateMainView(const ProcessesManagement::ProcessesState &state,
+                      const ProcessesManagement::Request &request);
 
-  void updateStatsView(std::size_t count, std::size_t total, uint32_t fails);
+  void updateStatsView(size_t count, size_t total, uint32_t fails);
 
   void updateStrategyView(ProcessesManagement::StrategyType type);
 
-  void updateHistoryView(Utils::ProcessesTask task,
+  void updateHistoryView(const Utils::ProcessesTask &task,
                          const std::vector<QString> &actions);
 
-  void updateCurrentActionsView(Utils::ProcessesTask task,
-                                const QString actions);
+  void updateCurrentActionsView(const Utils::ProcessesTask &task,
+                                const QString &actions);
 
   void setProcessesList(const ProcessesList &processes);
 

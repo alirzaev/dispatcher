@@ -40,7 +40,7 @@ static const QString ACTIONS_UNAVAILABLE("\n<нет информации>");
 
 static const QString NO_ACTIONS("\n<нет>");
 
-MemoryTask::MemoryTask(Models::MemoryModel model, QWidget *parent)
+MemoryTask::MemoryTask(const Models::MemoryModel &model, QWidget *parent)
     : QWidget(parent), _model(model), currentRequest(model.task.completed()),
       currentActions(""), actions(model.task.completed(), ""),
       states(model.task.requests().size()), ui(new Ui::MemoryTask) {
@@ -302,7 +302,7 @@ void MemoryTask::provideContextMenu(const QPoint &pos) {
   }
 }
 
-void MemoryTask::updateMainView(MemoryState state, Request request) {
+void MemoryTask::updateMainView(const MemoryState &state, const Request &request) {
   auto [blocks, freeBlocks] = state;
   setMemoryBlocks(blocks);
   setFreeMemoryBlocks(freeBlocks);
@@ -336,7 +336,7 @@ void MemoryTask::updateStrategyView(StrategyType type) {
   }
 }
 
-void MemoryTask::updateHistoryView(Utils::MemoryTask task,
+void MemoryTask::updateHistoryView(const Utils::MemoryTask &task,
                                    const std::vector<QString> &actions) {
   ui->historyList->clear();
   auto templ = QString("Заявка #%1");
@@ -353,8 +353,8 @@ void MemoryTask::updateHistoryView(Utils::MemoryTask task,
   ui->historyList->setCurrentRow(ui->historyList->count() - 1);
 }
 
-void MemoryTask::updateCurrentActionsView(Utils::MemoryTask task,
-                                          const QString actions) {
+void MemoryTask::updateCurrentActionsView(const Utils::MemoryTask &task,
+                                          const QString &actions) {
   if (auto *item = ui->historyList->item(ui->historyList->count() - 1);
       item && !task.done()) {
     item->setToolTip(

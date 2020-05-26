@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QPoint>
-#include <QVector>
 #include <QWidget>
 
 #include <tl/optional.hpp>
@@ -31,9 +30,10 @@ private:
   using QueuesLists = decltype(ProcessesManagement::ProcessesState::queues);
 
   /* Controller */
+
   Utils::ProcessesTask _task;
 
-  QVector<ProcessesManagement::ProcessesState> states;
+  std::vector<ProcessesManagement::ProcessesState> states;
 
   int currentRequest;
 
@@ -51,6 +51,7 @@ private:
   void selectCurrentRequest(int requestIndex);
 
   /* View */
+
   Ui::ProcessesTaskBuilder *ui;
 
   void updateTaskView(const ProcessesManagement::ProcessesState &state,
@@ -61,8 +62,6 @@ private:
   void provideContextMenu(const QPoint &pos);
 
   void setProcessesList(const ProcessesList &processes);
-
-  void setQueuesLists();
 
   void setQueuesLists(const QueuesLists &queues);
 
@@ -75,13 +74,13 @@ private:
 
 protected:
   /* HistoryNavigator interface */
-  void loadTaskFromHistory(Utils::Task task) override;
+  void loadTaskFromHistory(const Utils::Task &task) override;
 
-  // AbstractTaskBuilder interface
+  /* AbstractTaskBuilder interface */
 public:
   QString strategy() override;
 
-  // AbstractTaskBuilder interface
+  /* AbstractTaskBuilder interface */
 public:
   Utils::Task task() override;
 };

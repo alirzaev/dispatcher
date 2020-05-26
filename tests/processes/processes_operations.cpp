@@ -8,7 +8,6 @@
 #include <algo/processes/types.h>
 
 namespace pm = ProcessesManagement;
-using std::vector;
 using Queues = std::array<std::deque<int32_t>, 16>;
 
 TEST_CASE("ProcessesManagement::changeProcessState") {

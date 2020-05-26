@@ -14,7 +14,7 @@ using namespace ProcessesManagement;
 
 extern void initResources();
 
-ProcessMenu::ProcessMenu(tl::optional<Process> process,
+ProcessMenu::ProcessMenu(const tl::optional<Process> &process,
                          bool showItemDecrease,
                          QWidget *parent)
     : QMenu(parent) {

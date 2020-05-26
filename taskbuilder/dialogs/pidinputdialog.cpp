@@ -1,5 +1,3 @@
-#include <utility>
-
 #include <QDialogButtonBox>
 #include <QIntValidator>
 #include <QMessageBox>

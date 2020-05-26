@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -24,18 +25,18 @@ class MemoryTask : public QWidget, public TaskGetter {
   Q_OBJECT
 
 public:
-  explicit MemoryTask(Models::MemoryModel task, QWidget *parent = nullptr);
+  explicit MemoryTask(const Models::MemoryModel &task, QWidget *parent = nullptr);
 
   Utils::Task task() const override;
 
   ~MemoryTask() override;
 
 private:
-  // Controller
+  /* Controller */
 
   Models::MemoryModel _model;
 
-  std::size_t currentRequest;
+  size_t currentRequest;
 
   QString currentActions;
 
@@ -59,7 +60,7 @@ private:
 
   void refresh();
 
-  // View
+  /* View */
 
   Ui::MemoryTask *ui;
 
@@ -71,17 +72,17 @@ private:
 
   void provideContextMenu(const QPoint &pos);
 
-  void updateMainView(MemoryManagement::MemoryState state,
-                      MemoryManagement::Request request);
+  void updateMainView(const MemoryManagement::MemoryState &state,
+                      const MemoryManagement::Request &request);
 
-  void updateStatsView(std::size_t count, std::size_t total, uint32_t fails);
+  void updateStatsView(size_t count, size_t total, uint32_t fails);
 
   void updateStrategyView(MemoryManagement::StrategyType type);
 
-  void updateHistoryView(Utils::MemoryTask task,
+  void updateHistoryView(const Utils::MemoryTask &task,
                          const std::vector<QString> &actions);
 
-  void updateCurrentActionsView(Utils::MemoryTask task, const QString actions);
+  void updateCurrentActionsView(const Utils::MemoryTask &task, const QString &actions);
 
   void
   setMemoryBlocks(const std::vector<MemoryManagement::MemoryBlock> &blocks);

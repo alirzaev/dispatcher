@@ -1,5 +1,3 @@
-#include <utility>
-
 #include <QDebug>
 #include <QFileDialog>
 #include <QListWidgetItem>

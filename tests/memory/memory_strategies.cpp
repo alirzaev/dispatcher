@@ -1,5 +1,3 @@
-#include <vector>
-
 #include <catch2/catch.hpp>
 
 #include <algo/memory/requests.h>

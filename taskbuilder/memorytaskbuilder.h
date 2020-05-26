@@ -3,7 +3,6 @@
 #include <vector>
 
 #include <QPoint>
-#include <QVector>
 #include <QWidget>
 
 #include <algo/memory/requests.h>
@@ -26,9 +25,10 @@ public:
 
 private:
   /* Controller */
+
   Utils::MemoryTask _task;
 
-  QVector<MemoryManagement::MemoryState> states;
+  std::vector<MemoryManagement::MemoryState> states;
 
   void loadTask(const Utils::MemoryTask &task);
 
@@ -42,6 +42,7 @@ private:
   void selectCurrentRequest(int requestIndex);
 
   /* View */
+
   Ui::MemoryTaskBuilder *ui;
 
   void updateTaskView(const MemoryManagement::MemoryState &state,
@@ -61,13 +62,13 @@ private:
 
 protected:
   /* HistoryNavigator interface */
-  void loadTaskFromHistory(Utils::Task task) override;
+  void loadTaskFromHistory(const Utils::Task &task) override;
 
-  // AbstractTaskBuilder interface
+  /* AbstractTaskBuilder interface */
 public:
   QString strategy() override;
 
-  // AbstractTaskBuilder interface
+  /* AbstractTaskBuilder interface */
 public:
   Utils::Task task() override;
 };

@@ -1,5 +1,5 @@
+#include <cstddef>
 #include <cstdint>
-#include <limits>
 
 #include <QDialogButtonBox>
 #include <QFlags>
@@ -105,8 +105,8 @@ void CreateProcessDialog::tryAccept() {
   this->data = ProcessesManagement::Process{}
                    .pid(pid)
                    .ppid(ppid)
-                   .priority(static_cast<std::size_t>(priority))
-                   .basePriority(static_cast<std::size_t>(basePriority))
+                   .priority(static_cast<size_t>(priority))
+                   .basePriority(static_cast<size_t>(basePriority))
                    .workTime(workTime);
   this->accept();
 }

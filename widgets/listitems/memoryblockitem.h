@@ -10,7 +10,7 @@ private:
   MemoryManagement::MemoryBlock _block;
 
 public:
-  MemoryBlockItem(const MemoryManagement::MemoryBlock &block,
+  explicit MemoryBlockItem(const MemoryManagement::MemoryBlock &block,
                   bool highlightFree = false,
                   QListWidget *parent = nullptr);
 

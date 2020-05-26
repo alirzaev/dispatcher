@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <map>
 
 #include <QApplication>
@@ -73,7 +74,7 @@ void MemoryTaskBuilder::loadTask(const Utils::MemoryTask &task) {
 }
 
 void MemoryTaskBuilder::currentRequestChanged(int index) {
-  auto indexu = static_cast<std::size_t>(index);
+  auto indexu = static_cast<size_t>(index);
   if (index < 0 || indexu > _task.requests().size()) {
     return;
   }
@@ -89,7 +90,7 @@ void MemoryTaskBuilder::processContextMenuAction(const QString &action,
   bool changed = false;
 
   if (requestIndex != -1) {
-    auto requestIndexu = static_cast<std::size_t>(requestIndex);
+    auto requestIndexu = static_cast<size_t>(requestIndex);
     auto request = requests.at(requestIndexu);
 
     if (action == RequestItemMenu::TO_TOP) {
@@ -270,7 +271,7 @@ void MemoryTaskBuilder::setStrategy(StrategyType type) {
   ui->strategyLabel->setText("Стратегия: %1"_qs.arg(strategyMap.at(type)));
 }
 
-void MemoryTaskBuilder::loadTaskFromHistory(Utils::Task task) {
+void MemoryTaskBuilder::loadTaskFromHistory(const Utils::Task &task) {
   _task = task.get<Utils::MemoryTask>();
   loadTask(_task);
   clearTaskView();

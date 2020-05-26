@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <deque>
+#include <vector>
 #include <map>
 #include <set>
 #include <string>

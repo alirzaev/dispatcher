@@ -1,6 +1,5 @@
 #include <map>
 #include <utility>
-#include <vector>
 
 #include <QAbstractItemView>
 #include <QHeaderView>

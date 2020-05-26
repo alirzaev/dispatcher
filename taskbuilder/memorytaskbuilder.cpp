@@ -1,10 +1,8 @@
-#include <algorithm>
 #include <map>
 
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QFont>
-#include <QFontDatabase>
 
 #include <tl/optional.hpp>
 

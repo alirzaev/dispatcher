@@ -1,8 +1,9 @@
 #pragma once
 
 #include <algorithm>
+#include <deque>
+#include <map>
 #include <cstdint>
-#include <exception>
 #include <memory>
 #include <sstream>
 #include <string>

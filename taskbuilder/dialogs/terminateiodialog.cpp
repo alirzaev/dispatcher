@@ -6,8 +6,6 @@
 
 #include <tl/optional.hpp>
 
-#include <qtutils/literals.h>
-
 #include "terminateiodialog.h"
 #include "ui_terminateiodialog.h"
 

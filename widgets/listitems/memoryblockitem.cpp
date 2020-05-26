@@ -1,5 +1,4 @@
 #include <QIcon>
-#include <QString>
 
 #include <qtutils/literals.h>
 

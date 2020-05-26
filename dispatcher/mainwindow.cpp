@@ -1,7 +1,6 @@
 #ifdef _WIN32
 #include <filesystem>
 #endif
-#include <fstream>
 #include <utility>
 #include <vector>
 
@@ -14,8 +13,6 @@
 #include <QMessageBox>
 #include <QString>
 #include <QUrl>
-
-#include <mapbox/variant.hpp>
 
 #include <botan/exceptn.h>
 

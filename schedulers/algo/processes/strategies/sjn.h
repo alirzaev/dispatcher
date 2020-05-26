@@ -1,9 +1,10 @@
 #pragma once
 
 #include <algorithm>
+#include <deque>
+#include <map>
 #include <cstddef>
 #include <cstdint>
-#include <exception>
 #include <memory>
 #include <sstream>
 #include <string>

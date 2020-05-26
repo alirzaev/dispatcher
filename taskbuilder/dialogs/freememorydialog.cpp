@@ -6,8 +6,6 @@
 
 #include <tl/optional.hpp>
 
-#include <qtutils/literals.h>
-
 #include "freememorydialog.h"
 #include "ui_freememorydialog.h"
 

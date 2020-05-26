@@ -8,7 +8,6 @@
 
 #include <botan/cipher_mode.h>
 #include <botan/hash.h>
-#include <botan/hex.h>
 #include <botan/rng.h>
 #include <botan/auto_rng.h>
 

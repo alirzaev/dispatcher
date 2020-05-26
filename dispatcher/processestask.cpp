@@ -15,7 +15,6 @@
 #include <QSpinBox>
 #include <QString>
 
-#include <mapbox/variant.hpp>
 #include <tl/optional.hpp>
 
 #include <algo/processes/exceptions.h>
@@ -23,7 +22,6 @@
 #include <algo/processes/operations.h>
 #include <algo/processes/requests.h>
 #include <algo/processes/strategies.h>
-#include <algo/processes/types.h>
 
 #include <qtutils/literals.h>
 #include <qtutils/fontscale.h>

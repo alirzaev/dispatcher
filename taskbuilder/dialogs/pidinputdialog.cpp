@@ -6,12 +6,8 @@
 
 #include <tl/optional.hpp>
 
-#include <qtutils/literals.h>
-
 #include "pidinputdialog.h"
 #include "ui_pidinputdialog.h"
-
-using namespace QtUtils::Literals;
 
 PidInputDialog::PidInputDialog(QWidget *parent)
     : QDialog(parent), ui(new Ui::PidInputDialog) {

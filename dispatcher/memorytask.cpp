@@ -2,14 +2,10 @@
 #include <QDesktopWidget>
 #include <QDebug>
 #include <QFont>
-#include <QFontDatabase>
 #include <QListWidget>
-#include <QListWidgetItem>
-#include <QMenu>
 #include <QMessageBox>
 #include <QPoint>
 #include <QPushButton>
-#include <QRegExp>
 #include <QString>
 
 #include <cstdint>

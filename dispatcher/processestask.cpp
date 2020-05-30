@@ -46,7 +46,8 @@ static const QString ACTIONS_UNAVAILABLE("\n<нет информации>");
 
 static const QString NO_ACTIONS("\n<нет>");
 
-ProcessesTask::ProcessesTask(const Models::ProcessesModel &model, QWidget *parent)
+ProcessesTask::ProcessesTask(const Models::ProcessesModel &model,
+                             QWidget *parent)
     : QWidget(parent), _model(model), currentRequest(model.task.completed()),
 
       currentActions(""), actions(model.task.completed(), ""),
@@ -473,7 +474,8 @@ std::size_t ProcessesTask::mapRowToIndex(int row) {
   return *getIndexByPid(_model.state.processes, pid);
 }
 
-void ProcessesTask::updateMainView(const ProcessesState &state, const Request &request) {
+void ProcessesTask::updateMainView(const ProcessesState &state,
+                                   const Request &request) {
   auto [processes, queues] = state;
   setProcessesList(processes);
   setQueuesLists(queues);

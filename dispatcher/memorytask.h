@@ -25,7 +25,8 @@ class MemoryTask : public QWidget, public TaskGetter {
   Q_OBJECT
 
 public:
-  explicit MemoryTask(const Models::MemoryModel &task, QWidget *parent = nullptr);
+  explicit MemoryTask(const Models::MemoryModel &task,
+                      QWidget *parent = nullptr);
 
   Utils::Task task() const override;
 
@@ -82,7 +83,8 @@ private:
   void updateHistoryView(const Utils::MemoryTask &task,
                          const std::vector<QString> &actions);
 
-  void updateCurrentActionsView(const Utils::MemoryTask &task, const QString &actions);
+  void updateCurrentActionsView(const Utils::MemoryTask &task,
+                                const QString &actions);
 
   void
   setMemoryBlocks(const std::vector<MemoryManagement::MemoryBlock> &blocks);

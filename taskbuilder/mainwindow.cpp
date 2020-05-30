@@ -224,12 +224,10 @@ void MainWindow::attachTask(AbstractTaskBuilder *taskWidget) {
           &AbstractTaskBuilder::historyStateChanged,
           this,
           &MainWindow::updateMenuEditState);
-  connect(taskWidget,
-          &AbstractTaskBuilder::historyStateChanged,
-          this,
-          [this]() {
-            this->updateTaskPreview(ui->currentTaskWidget->currentIndex());
-          });
+  connect(
+      taskWidget, &AbstractTaskBuilder::historyStateChanged, this, [this]() {
+        this->updateTaskPreview(ui->currentTaskWidget->currentIndex());
+      });
 
   ui->currentTaskWidget->addWidget(taskWidget);
   ui->tasksList->addItem(new QListWidgetItem());

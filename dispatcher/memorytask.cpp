@@ -302,7 +302,8 @@ void MemoryTask::provideContextMenu(const QPoint &pos) {
   }
 }
 
-void MemoryTask::updateMainView(const MemoryState &state, const Request &request) {
+void MemoryTask::updateMainView(const MemoryState &state,
+                                const Request &request) {
   auto [blocks, freeBlocks] = state;
   setMemoryBlocks(blocks);
   setFreeMemoryBlocks(freeBlocks);

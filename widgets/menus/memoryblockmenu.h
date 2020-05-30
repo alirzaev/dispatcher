@@ -17,5 +17,5 @@ public:
   static QString ACTION_DEFRAGMENT;
 
   explicit MemoryBlockMenu(const MemoryManagement::MemoryBlock &block,
-                  QWidget *parent = nullptr);
+                           QWidget *parent = nullptr);
 };

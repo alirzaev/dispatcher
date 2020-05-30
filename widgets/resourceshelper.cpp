@@ -1,5 +1,3 @@
 #include <QtCore>
 
-void initResources() {
-  Q_INIT_RESOURCE(resources);
-}
+void initResources() { Q_INIT_RESOURCE(resources); }

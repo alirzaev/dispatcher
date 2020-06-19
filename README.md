@@ -44,6 +44,12 @@
 
   - Debugging Tools for Windows
 
+vcpkg:
+
+```
+vcpkg install qt5-base botan
+```
+
 ### macOS
 
 - Минимальная версия macOS - 10.13
@@ -55,6 +61,12 @@
 - Botan (криптографическая библиотека) 2.4 или новее
 
 - Xcode 10 (Command Line Tools)
+
+Homebrew:
+
+```sh
+brew install cmake qt botan
+```
 
 ### Ubuntu
 

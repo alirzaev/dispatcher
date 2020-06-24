@@ -16,6 +16,7 @@ public:
   virtual QString strategy() = 0;
 
   virtual Utils::Task task() = 0;
+
 signals:
   void historyStateChanged();
 };

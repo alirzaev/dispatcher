@@ -1,16 +1,13 @@
 #include <array>
 #include <deque>
-#include <vector>
 
 #include <catch2/catch.hpp>
-#include <nlohmann/json.hpp>
 
 #include <algo/processes/exceptions.h>
 #include <algo/processes/operations.h>
 #include <algo/processes/types.h>
 
 namespace pm = ProcessesManagement;
-using std::vector;
 using Queues = std::array<std::deque<int32_t>, 16>;
 
 TEST_CASE("ProcessesManagement::changeProcessState") {

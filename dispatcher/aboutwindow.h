@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QDialog>
+#include <QWidget>
 
 namespace Ui {
 class AboutWindow;
@@ -11,7 +12,7 @@ class AboutWindow : public QDialog {
 
 public:
   explicit AboutWindow(QWidget *parent = nullptr);
-  ~AboutWindow();
+  ~AboutWindow() override;
 
 private:
   Ui::AboutWindow *ui;

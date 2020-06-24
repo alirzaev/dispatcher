@@ -289,7 +289,6 @@ public:
 
   virtual optional<Request> TerminateProcessReq(const ProcessesState &state,
                                                 bool valid = true) const {
-    auto [processes, queues] = state;
     auto usedPids = getUsedPids(state);
     auto availablePids = getAvailablePids(state);
 

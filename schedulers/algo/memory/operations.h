@@ -2,8 +2,6 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <exception>
-#include <tuple>
 #include <vector>
 
 #include "exceptions.h"

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=taskbuilder
+Exec=taskbuilder
+Icon=taskbuilder
+Comment=Конструктор заданий для программной модели диспетчера задач ОС
+Categories=Education;

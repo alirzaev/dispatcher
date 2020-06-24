@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include <QObject>
 #include <QTableWidget>
 #include <QWidget>
@@ -19,5 +17,5 @@ public:
 
   void setProcesses(const ProcessesList &processes);
 
-  ~ProcessesTableWidget() override;
+  ~ProcessesTableWidget() override = default;
 };

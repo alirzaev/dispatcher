@@ -34,7 +34,7 @@
 
 - CMake 3.10 или новее
 
-- Qt 5.11 или новее
+- Qt 5.12 или новее
 
 - Botan (криптографическая библиотека) 2.4 или новее
 
@@ -44,13 +44,37 @@
 
   - Debugging Tools for Windows
 
+vcpkg:
+
+```
+vcpkg install qt5-base botan
+```
+
+### macOS
+
+- Минимальная версия macOS - 10.13
+
+- CMake 3.10 или новее
+
+- Qt 5.14 или новее
+
+- Botan (криптографическая библиотека) 2.4 или новее
+
+- Xcode 10 (Command Line Tools)
+
+Homebrew:
+
+```sh
+brew install cmake qt botan
+```
+
 ### Ubuntu
 
 - Минимальная версия Ubuntu - 18.04
 
 - CMake 3.10 или новее
 
-- Qt 5.11 или новее
+- Qt 5.12 или новее ([ссылка на ppa-репозиторий](https://launchpad.net/~beineri))
 
 - Botan (криптографическая библиотека) 2.4 или новее
 
@@ -58,8 +82,8 @@
 
 ## Используемые сторонние библиотеки
 
-- [Catch2 2.4.1](https://github.com/catchorg/Catch2)
-- [nlohmann::json 3.6.1](https://github.com/nlohmann/json)
+- [Catch2 2.12.2](https://github.com/catchorg/Catch2)
+- [nlohmann::json 3.7.3](https://github.com/nlohmann/json)
 - [Mapbox Variant 1.1.6](https://github.com/mapbox/variant)
 - [TartanLlama optional 1.0.0](https://github.com/TartanLlama/optional)
 

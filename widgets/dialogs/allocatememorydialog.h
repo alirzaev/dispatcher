@@ -4,6 +4,7 @@
 #include <utility>
 
 #include <QDialog>
+#include <QWidget>
 
 #include <tl/optional.hpp>
 

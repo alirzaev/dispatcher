@@ -1,12 +1,8 @@
-#include <utility>
-
 #include <QDialogButtonBox>
 #include <QIntValidator>
 #include <QMessageBox>
 
 #include <tl/optional.hpp>
-
-#include <qtutils/literals.h>
 
 #include "terminateiodialog.h"
 #include "ui_terminateiodialog.h"
@@ -43,7 +39,7 @@ void TerminateIoDialog::tryAccept() {
   int32_t pid = ui->PIDEdit->text().toInt();
   int32_t augment = ui->augmentEdit->text().toInt();
 
-  this->info = {pid, static_cast<std::size_t>(augment)};
+  this->info = {pid, static_cast<size_t>(augment)};
   this->accept();
 }
 

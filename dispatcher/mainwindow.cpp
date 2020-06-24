@@ -1,7 +1,6 @@
 #ifdef _WIN32
 #include <filesystem>
 #endif
-#include <fstream>
 #include <utility>
 #include <vector>
 
@@ -14,8 +13,6 @@
 #include <QMessageBox>
 #include <QString>
 #include <QUrl>
-
-#include <mapbox/variant.hpp>
 
 #include <botan/exceptn.h>
 
@@ -139,7 +136,7 @@ void MainWindow::saveTasks() {
   }
 
   try {
-    std::ofstream file = QtUtils::FileIO::openStdOfstream(fileName);
+    std::ofstream file = QtUtils::FileIO::openStdOfstream(fileName, true);
 
     std::vector<Utils::Task> tasks;
 
@@ -154,7 +151,7 @@ void MainWindow::saveTasks() {
     Utils::saveTasks(tasks, ss);
 
     auto encrypted = QtUtils::Cryptography::encrypt(ss.str(), student);
-    file << encrypted;
+    file.write(encrypted.data(), encrypted.size());
     file.flush();
   } catch (const std::exception &ex) {
     qCritical() << ex.what();

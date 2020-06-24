@@ -15,7 +15,6 @@
 #include <QSpinBox>
 #include <QString>
 
-#include <mapbox/variant.hpp>
 #include <tl/optional.hpp>
 
 #include <algo/processes/exceptions.h>
@@ -23,7 +22,6 @@
 #include <algo/processes/operations.h>
 #include <algo/processes/requests.h>
 #include <algo/processes/strategies.h>
-#include <algo/processes/types.h>
 
 #include <qtutils/literals.h>
 #include <qtutils/fontscale.h>
@@ -48,7 +46,8 @@ static const QString ACTIONS_UNAVAILABLE("\n<нет информации>");
 
 static const QString NO_ACTIONS("\n<нет>");
 
-ProcessesTask::ProcessesTask(Models::ProcessesModel model, QWidget *parent)
+ProcessesTask::ProcessesTask(const Models::ProcessesModel &model,
+                             QWidget *parent)
     : QWidget(parent), _model(model), currentRequest(model.task.completed()),
 
       currentActions(""), actions(model.task.completed(), ""),
@@ -475,7 +474,8 @@ std::size_t ProcessesTask::mapRowToIndex(int row) {
   return *getIndexByPid(_model.state.processes, pid);
 }
 
-void ProcessesTask::updateMainView(ProcessesState state, Request request) {
+void ProcessesTask::updateMainView(const ProcessesState &state,
+                                   const Request &request) {
   auto [processes, queues] = state;
   setProcessesList(processes);
   setQueuesLists(queues);
@@ -504,7 +504,7 @@ void ProcessesTask::updateStrategyView(StrategyType type) {
   label->setText(strategyMap[type]);
 }
 
-void ProcessesTask::updateHistoryView(Utils::ProcessesTask task,
+void ProcessesTask::updateHistoryView(const Utils::ProcessesTask &task,
                                       const std::vector<QString> &actions) {
   ui->historyList->clear();
   auto templ = QString("Заявка #%1");
@@ -521,8 +521,8 @@ void ProcessesTask::updateHistoryView(Utils::ProcessesTask task,
   ui->historyList->setCurrentRow(ui->historyList->count() - 1);
 }
 
-void ProcessesTask::updateCurrentActionsView(Utils::ProcessesTask task,
-                                             const QString actions) {
+void ProcessesTask::updateCurrentActionsView(const Utils::ProcessesTask &task,
+                                             const QString &actions) {
   if (auto *item = ui->historyList->item(ui->historyList->count() - 1);
       item && !task.done()) {
     item->setToolTip(

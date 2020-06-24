@@ -1,11 +1,15 @@
 #pragma once
 
+#include <cstdint>
+#include <array>
+#include <deque>
 #include <iomanip>
 #include <istream>
 #include <map>
 #include <ostream>
 #include <string>
 #include <vector>
+#include <utility>
 
 #include <mapbox/variant.hpp>
 

@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <map>
 
 #include <QApplication>
@@ -83,7 +84,7 @@ void ProcessesTaskBuilder::queuesListsChanged(int) {
 
 void ProcessesTaskBuilder::currentRequestChanged(int index) {
   this->currentRequest = index;
-  auto indexu = static_cast<std::size_t>(index);
+  auto indexu = static_cast<size_t>(index);
   if (index < 0 || indexu > _task.requests().size()) {
     return;
   }
@@ -99,7 +100,7 @@ void ProcessesTaskBuilder::processContextMenuAction(const QString &action,
   bool changed = false;
 
   if (requestIndex != -1) {
-    auto requestIndexu = static_cast<std::size_t>(requestIndex);
+    auto requestIndexu = static_cast<size_t>(requestIndex);
     auto request = requests.at(requestIndexu);
 
     if (action == RequestItemMenu::TO_TOP) {
@@ -256,8 +257,8 @@ void ProcessesTaskBuilder::setProcessesList(const ProcessesList &processes) {
 
 void ProcessesTaskBuilder::setQueuesLists(
     const ProcessesTaskBuilder::QueuesLists &queues) {
-  auto queue1 = static_cast<std::size_t>(ui->spinBoxQueue1->value());
-  auto queue2 = static_cast<std::size_t>(ui->spinBoxQueue2->value());
+  auto queue1 = static_cast<size_t>(ui->spinBoxQueue1->value());
+  auto queue2 = static_cast<size_t>(ui->spinBoxQueue2->value());
 
   ui->listQueue1->clear();
   for (auto pid : queues[queue1]) {
@@ -294,7 +295,7 @@ void ProcessesTaskBuilder::setStrategy(StrategyType type) {
   ui->strategyLabel->setText("Стратегия: %1"_qs.arg(strategyMap.at(type)));
 }
 
-void ProcessesTaskBuilder::loadTaskFromHistory(Utils::Task task) {
+void ProcessesTaskBuilder::loadTaskFromHistory(const Utils::Task &task) {
   _task = task.get<Utils::ProcessesTask>();
   loadTask(_task);
   clearTaskView();

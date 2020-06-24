@@ -10,9 +10,9 @@ private:
   MemoryManagement::MemoryBlock _block;
 
 public:
-  MemoryBlockItem(const MemoryManagement::MemoryBlock &block,
-                  bool highlightFree = false,
-                  QListWidget *parent = nullptr);
+  explicit MemoryBlockItem(const MemoryManagement::MemoryBlock &block,
+                           bool highlightFree = false,
+                           QListWidget *parent = nullptr);
 
   const MemoryManagement::MemoryBlock &block() const;
 };

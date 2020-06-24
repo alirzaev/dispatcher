@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>320</width>
-    <height>240</height>
+    <width>340</width>
+    <height>295</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,6 +18,12 @@
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>340</width>
+    <height>295</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>О программе</string>
@@ -82,16 +88,6 @@
      </item>
      <item>
       <widget class="QLabel" name="labelGitRevision">
-       <property name="text">
-        <string/>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="labelRestrictedMode">
        <property name="text">
         <string/>
        </property>

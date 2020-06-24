@@ -11,6 +11,7 @@ public:
 
 protected:
   void dropEvent(QDropEvent *event) override;
+
 signals:
   void itemsOrderChanged();
 };

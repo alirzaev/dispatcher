@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <vector>
 
 #include <utils/tasks.h>
@@ -37,7 +38,7 @@ public:
   virtual ~HistoryNavigator() {}
 
 protected:
-  virtual void loadTaskFromHistory(Utils::Task task) = 0;
+  virtual void loadTaskFromHistory(const Utils::Task &task) = 0;
 
   void push(Utils::Task task) {
     _history.resize(_pos + 2, _history[0]);
@@ -48,5 +49,5 @@ protected:
 private:
   std::vector<Utils::Task> _history;
 
-  std::size_t _pos;
+  size_t _pos;
 };

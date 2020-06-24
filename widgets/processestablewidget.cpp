@@ -1,6 +1,7 @@
+#include <cstddef>
+#include <cstdint>
 #include <map>
 #include <utility>
-#include <vector>
 
 #include <QAbstractItemView>
 #include <QHeaderView>
@@ -25,9 +26,9 @@ class NumberItem : public QTableWidgetItem {
 public:
   NumberItem() : NumberItem(0) {}
 
-  NumberItem(int32_t number) : QTableWidgetItem("%1"_qs.arg(number)) {}
+  explicit NumberItem(int32_t number) : QTableWidgetItem("%1"_qs.arg(number)) {}
 
-  virtual bool operator<(const QTableWidgetItem &rhs) const {
+  bool operator<(const QTableWidgetItem &rhs) const override {
     bool okLeft, okRight;
     int32_t left, right;
     left = text().toInt(&okLeft);
@@ -89,5 +90,3 @@ void ProcessesTableWidget::setProcesses(const ProcessesList &processes) {
 
   setSortingEnabled(true);
 }
-
-ProcessesTableWidget::~ProcessesTableWidget() {}

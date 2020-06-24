@@ -1,8 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <memory>
-#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -55,8 +53,8 @@ private:
              uint32_t completed,
              uint32_t fails,
              const Memory::MemoryState &state,
-             const std::vector<Memory::Request> requests,
-             const std::vector<std::string> actions)
+             const std::vector<Memory::Request> &requests,
+             const std::vector<std::string> &actions)
       : _strategy(strategy), _completed(completed), _state(state),
         _requests(requests), _fails(fails), _actions(actions) {}
 
@@ -70,8 +68,8 @@ public:
                            uint32_t completed,
                            uint32_t fails,
                            const Memory::MemoryState &state,
-                           const std::vector<Memory::Request> requests,
-                           const std::vector<std::string> actions) {
+                           const std::vector<Memory::Request> &requests,
+                           const std::vector<std::string> &actions) {
     validate(strategy, completed, state, requests);
     return {strategy, completed, fails, state, requests, actions};
   }
@@ -87,7 +85,7 @@ public:
   static MemoryTask create(Memory::StrategyPtr strategy,
                            uint32_t completed,
                            const Memory::MemoryState &state,
-                           const std::vector<Memory::Request> requests) {
+                           const std::vector<Memory::Request> &requests) {
     validate(strategy, completed, state, requests);
     return {strategy, completed, 0, state, requests, {}};
   }
@@ -106,7 +104,7 @@ public:
   static void validate(Memory::StrategyPtr strategy,
                        uint32_t completed,
                        const Memory::MemoryState &state,
-                       const std::vector<Memory::Request> requests) {
+                       const std::vector<Memory::Request> &requests) {
     try {
       Memory::MemoryState::validate(state.blocks, state.freeBlocks);
     } catch (Memory::BaseException &ex) {
@@ -255,8 +253,8 @@ private:
                 uint32_t completed,
                 uint32_t fails,
                 const Processes::ProcessesState &state,
-                const std::vector<Processes::Request> requests,
-                const std::vector<std::string> actions)
+                const std::vector<Processes::Request> &requests,
+                const std::vector<std::string> &actions)
       : _strategy(strategy), _completed(completed), _state(state),
         _requests(requests), _fails(fails), _actions(actions) {}
 
@@ -270,8 +268,8 @@ public:
                               uint32_t completed,
                               uint32_t fails,
                               const Processes::ProcessesState &state,
-                              const std::vector<Processes::Request> requests,
-                              const std::vector<std::string> actions) {
+                              const std::vector<Processes::Request> &requests,
+                              const std::vector<std::string> &actions) {
     validate(strategy, completed, state, requests);
     return {strategy, completed, fails, state, requests, actions};
   }
@@ -287,7 +285,7 @@ public:
   static ProcessesTask create(Processes::StrategyPtr strategy,
                               uint32_t completed,
                               const Processes::ProcessesState &state,
-                              const std::vector<Processes::Request> requests) {
+                              const std::vector<Processes::Request> &requests) {
     validate(strategy, completed, state, requests);
     return {strategy, completed, 0, state, requests, {}};
   }
@@ -306,7 +304,7 @@ public:
   static void validate(Processes::StrategyPtr strategy,
                        uint32_t completed,
                        const Processes::ProcessesState &state,
-                       const std::vector<Processes::Request> requests) {
+                       const std::vector<Processes::Request> &requests) {
     try {
       Processes::ProcessesState::validate(state.processes, state.queues);
     } catch (Processes::BaseException &ex) {

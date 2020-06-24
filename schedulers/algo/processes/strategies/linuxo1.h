@@ -1,9 +1,7 @@
 #pragma once
 
-#include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <exception>
 #include <memory>
 #include <string>
 #include <utility>
@@ -44,7 +42,7 @@ protected:
 private:
   LinuxO1Strategy() : AbstractStrategy() {}
 
-  ProcessesState exhangeQueues(const ProcessesState &state) const {
+  ProcessesState exchangeQueues(const ProcessesState &state) const {
     if (state.queues[1].empty() || !state.queues[0].empty()) {
       return state;
     }
@@ -105,7 +103,7 @@ protected:
 
     auto current = getCurrent(newState);
     if (!current.has_value()) {
-      newState = exhangeQueues(newState);
+      newState = exchangeQueues(newState);
       auto next = schedule(newState);
       if (next.has_value()) {
         auto [pid, queue] = next.value();
@@ -131,7 +129,7 @@ protected:
 
     newState = changeProcessState(newState, request.pid(), ProcState::WAITING);
 
-    newState = exhangeQueues(newState);
+    newState = exchangeQueues(newState);
     auto next = schedule(newState);
     if (next.has_value()) {
       auto [pid, queue] = next.value();
@@ -159,7 +157,7 @@ protected:
 
     auto current = getCurrent(newState);
     if (!current.has_value()) {
-      newState = exhangeQueues(newState);
+      newState = exchangeQueues(newState);
       auto next = schedule(newState);
       if (next.has_value()) {
         auto [pid, queue] = next.value();
@@ -202,7 +200,7 @@ protected:
       newState = pushToQueue(newState, 1, current->pid());
     }
 
-    newState = exhangeQueues(newState);
+    newState = exchangeQueues(newState);
     auto next = schedule(newState);
     if (next.has_value()) {
       auto [pid, queue] = next.value();

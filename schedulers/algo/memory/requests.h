@@ -1,8 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <memory>
-#include <string>
 
 #include <mapbox/variant.hpp>
 #include <nlohmann/json.hpp>

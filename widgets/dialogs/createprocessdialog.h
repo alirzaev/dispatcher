@@ -1,9 +1,9 @@
 #pragma once
 
 #include <cstdint>
-#include <vector>
 
 #include <QDialog>
+#include <QWidget>
 #include <QFlags>
 
 #include <tl/optional.hpp>

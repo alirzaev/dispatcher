@@ -22,7 +22,8 @@ public:
 
   static QString DECREASE;
 
-  ProcessMenu(tl::optional<ProcessesManagement::Process> process,
-              bool showItemDecrease = false,
-              QWidget *parent = nullptr);
+  explicit ProcessMenu(
+      const tl::optional<ProcessesManagement::Process> &process,
+      bool showItemDecrease = false,
+      QWidget *parent = nullptr);
 };

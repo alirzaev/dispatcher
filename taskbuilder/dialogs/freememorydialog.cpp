@@ -1,12 +1,8 @@
-#include <utility>
-
 #include <QDialogButtonBox>
 #include <QIntValidator>
 #include <QMessageBox>
 
 #include <tl/optional.hpp>
-
-#include <qtutils/literals.h>
 
 #include "freememorydialog.h"
 #include "ui_freememorydialog.h"
